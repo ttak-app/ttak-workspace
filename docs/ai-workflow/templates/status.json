@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "issue": null,
+  "branch": null,
+  "specPath": null,
+  "specRevision": null,
+  "phase": "design",
+  "updatedAt": null,
+  "nextActions": [],
+  "blockers": [],
+  "acceptance": [],
+  "checks": [],
+  "reviewHistory": [],
+  "review": {
+    "result": "not-run",
+    "freshness": "unknown",
+    "reviewedAt": null,
+    "subject": null,
+    "scope": [],
+    "focusPoints": [],
+    "findings": [],
+    "unverified": []
+  }
+}

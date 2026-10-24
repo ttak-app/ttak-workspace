@@ -22,13 +22,13 @@
 ```sh
 git switch develop
 git pull --ff-only origin develop
-git switch -c feat/macos-기능명
+git switch -c 'feat/macos-기능명/#이슈번호'
 # 작업 후 커밋
-git push -u origin feat/macos-기능명
+git push -u origin 'feat/macos-기능명/#이슈번호'
 ```
 
 1. 공통 이슈 템플릿으로 작업 목적과 완료 기준을 기록합니다.
-2. `develop`의 최신 커밋에서 `feat/*`를 생성합니다. 웹 작업은 `feat/web-기능명`처럼 구분합니다.
+2. `develop`의 최신 커밋에서 `feat/작업명/#이슈번호`를 생성합니다. 웹 작업은 `feat/web-기능명/#이슈번호`처럼 구분합니다.
 3. 작업 브랜치에서 커밋·푸시하고 `develop`을 대상으로 PR을 엽니다. PR에 관련 이슈를 연결하고 검증 결과를 기록합니다.
 4. 변경 내용과 검증 결과를 확인한 후 Merge commit으로 병합합니다.
 5. 배포할 때 `develop` → `main` PR을 열고 Merge commit으로 병합합니다.
@@ -61,3 +61,9 @@ PR의 출발 브랜치와 대상 브랜치 조합은 위 협업 규칙으로 준
 - 이슈 생성은 팀의 작업 기록 규칙이며, GitHub 브랜치 보호 자체가 이슈를 요구하는 것은 아닙니다.
 - 템플릿이 기본 브랜치 `develop`에 병합되어야 GitHub 작성 화면에 기본으로 표시됩니다.
 - 템플릿 구성 참고: https://github.com/team-kareer/kareer-client/tree/HEAD/.github
+
+### Codex 작업 하네스
+
+[AGENTS.md](../AGENTS.md)와 [작업 흐름](rules/ai-workflow.md)을 사용합니다.
+사용자가 기존 브랜치를 직접 지정하면 그 브랜치를 유지합니다.
+현재 #4의 `chore/agent-harness-setting/#4`도 이 경우이며 새 브랜치 규칙을 일괄 변경하지 않습니다.
