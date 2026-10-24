@@ -13,6 +13,16 @@
     "dev:web": "npm run dev --workspace=@ttak/web",
     "build:web": "npm run build --workspace=@ttak/web",
     "lint:web": "npm run lint --workspace=@ttak/web",
-    "preview:web": "npm run preview --workspace=@ttak/web"
+    "preview:web": "npm run preview --workspace=@ttak/web",
+    "check-types:web": "npm exec --workspace=@ttak/web -- tsc -b --noEmit",
+    "macos:build": "node tools/macos/check.mjs build",
+    "macos:test": "node tools/macos/check.mjs test",
+    "review:scope": "node tools/ai-workflow/collect.mjs",
+    "workflow:resume": "node tools/ai-workflow/resume.mjs",
+    "workflow:check": "node tools/ai-workflow/record.mjs check",
+    "workflow:review": "node tools/ai-workflow/record.mjs review",
+    "workflow:pr-check": "node tools/ai-workflow/pr-check.mjs",
+    "workflow:harness-check": "node tools/ai-workflow/harness-check.mjs",
+    "workflow:test": "node --test tools/ai-workflow/*.test.mjs tools/macos/*.test.mjs"
   }
 }

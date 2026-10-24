@@ -50,3 +50,17 @@ Swift 6 언어 모드와 macOS 26 이상을 기준으로 합니다.
 병합 방식은 Merge commit을 사용합니다.
 
 [개발 기준과 Git Flow](docs/development.md)
+
+## Codex 하네스
+
+Codex의 작업 진입점은 [AGENTS.md](AGENTS.md)입니다.
+macOS Swift·SwiftUI 작업의 설계·명세·검증·리뷰·재개를 지원합니다.
+
+```sh
+npm run workflow:harness-check
+npm run workflow:test
+npm run workflow:resume -- --issue 4
+```
+
+[사용 안내](docs/ai-workflow/user-guide.md)와 [기록 형식](docs/ai-workflow/README.md)을 참고하세요.
+실행 로그는 Git에서 제외한 `.tmp`에 보관합니다. Xcode 부재와 테스트 미실행은 성공으로 처리하지 않습니다.
