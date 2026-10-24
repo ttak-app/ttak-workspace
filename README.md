@@ -42,4 +42,11 @@ Swift 6 언어 모드와 macOS 26 이상을 기준으로 합니다.
 - 초기 세팅 환경에 Xcode가 없어 macOS 앱 컴파일·실행은 미검증입니다.
 - 각 폴더의 `.gitkeep`을 유지합니다.
 
-[개발 기준](docs/development.md)
+## 협업
+
+기본 브랜치는 `develop`입니다. 작업은 `develop`에서 `feat/*`로 분기하고,
+`feat/*` → `develop` → `main` 순서로 PR을 통해 병합합니다.
+`main`과 `develop` 직접 푸시는 차단되어 있으며, 필수 승인 인원은 0명입니다.
+병합 방식은 Merge commit을 사용합니다.
+
+[개발 기준과 Git Flow](docs/development.md)

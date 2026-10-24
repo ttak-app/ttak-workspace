@@ -7,9 +7,46 @@
 - 미리 알림: EventKit (권한 및 저장 연동은 후속 작업)
 - 별도 서버 및 Turborepo 없음
 
-## Git 협업 초안
+## Git Flow
 
-초기 세팅 이후에는 `main`에서 `feat/macos-기능명`, `feat/web-기능명`, `fix/수정명` 브랜치를 만듭니다.
-이슈 → 작업 브랜치 → PR → 검증·리뷰 → Squash Merge 순서로 진행합니다.
+`main`, `develop`, `feat/*` 브랜치로 협업합니다.
+
+| 브랜치 | 역할 | 병합 경로 |
+| --- | --- | --- |
+| `main` | 배포 기준 | `develop`에서 PR |
+| `develop` | 개발 통합·기본 브랜치 | `feat/*`에서 PR |
+| `feat/*` | 기능·수정·문서 등 개별 작업 | `develop`에서 분기 |
+
+### 작업 순서
+
+```sh
+git switch develop
+git pull --ff-only origin develop
+git switch -c feat/macos-기능명
+# 작업 후 커밋
+git push -u origin feat/macos-기능명
+```
+
+1. `develop`의 최신 커밋에서 `feat/*`를 생성합니다. 웹 작업은 `feat/web-기능명`처럼 구분합니다.
+2. 작업 브랜치에서 커밋·푸시하고 `develop`을 대상으로 PR을 엽니다.
+3. 변경 내용과 검증 결과를 확인한 후 Merge commit으로 병합합니다.
+4. 배포할 때 `develop` → `main` PR을 열고 Merge commit으로 병합합니다.
+5. 다음 개발 주기 전에 `main`의 병합 커밋을 `develop`으로 동기화해야 할 때는 `main` → `develop` PR을 사용합니다.
+
+수정·문서 작업도 `feat/*`에서 진행하고 커밋 접두사로 구분합니다.
 커밋 접두사는 `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`를 사용합니다.
-브랜치 보호 설정과 CI는 아직 적용하지 않았습니다.
+
+### GitHub 적용 설정
+
+- 기본 브랜치: `develop`
+- `main`, `develop`: 활성 보호 규칙 적용
+- 직접 푸시 금지, 모든 변경은 PR로 병합
+- 필수 승인 인원: 0명 (별도 승인 없이 PR 작성자가 병합 가능)
+- 관리자·팀·앱의 우회 목록 없음
+- 브랜치 삭제와 force push 차단
+- Merge commit만 허용, Squash/Rebase merge 비활성화
+- 자동 브랜치 삭제 비활성화 (`develop`을 보존하고 완료한 `feat/*`만 수동 삭제)
+- 필수 CI 검사는 아직 없음
+
+PR의 출발 브랜치와 대상 브랜치 조합은 위 협업 규칙으로 준수합니다.
+현재 GitHub 보호 규칙은 PR 필수 여부를 검사하며 `feat/*` → `develop` 등의 출발 브랜치 이름까지 강제하지 않습니다.
