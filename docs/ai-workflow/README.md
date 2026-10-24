@@ -77,7 +77,7 @@ High/Medium 미해결은 게시 준비를 막는다. Low도 처리 이유를 남
   모든 변경은 workflow:harness-check, 문서는 docs-review를 요구한다.
 - 구조 검사는 파일·링크·스킬 front matter·npm 명령의 유효한 연결만 본다.
   코딩 규칙의 의미, 자연어 설계의 적절성, 모델 품질·사용자 권한·실기기 동작을 자동 검증하지 않는다.
-- CI, Git 훅, 자동 라벨링, 코딩 컨벤션 설치·강제는 포함하지 않는다. 이 하네스는 로컬 도구다.
+- CI, Git 훅, 자동 라벨링, 코딩 컨벤션 도구 설치·자동 강제는 포함하지 않는다. 이 하네스는 로컬 도구다.
 - 로컬 기록은 위조 방지 증명이나 GitHub 리뷰 승인이 아니다. Codex가 기록을 검토하고 실제 한계를 보고한다.
 
 ## 참고 원본
@@ -87,4 +87,7 @@ Keeply의 체크리스트·5개 스킬·명세/로컬 증적/리뷰/재개/PR �
 
 [Keeply 999cb6e](https://github.com/Project-Keeply/Keeply-Client/tree/999cb6e930a4a1289a4025a03b7c615bba0afc8b)
 
-React 전용 설계·pnpm·Claude 연결·원본 CI 검사·별도 코딩 컨벤션은 이식하지 않았다.
+React 전용 설계·pnpm·Claude 연결·원본 CI 검사는 이식하지 않았다.
+코딩·Git 컨벤션은 사용자 후속 요청에 따라 [공통 기준](../rules/coding-convention.md),
+언어별 문서와 [Git 기준](../rules/git-convention.md)으로 나눠 Ttak에 맞췄다.
+문서 규칙은 에이전트의 설계·구현·리뷰 기준이며, 자동 포맷·린트 도구의 설치와는 구분한다.

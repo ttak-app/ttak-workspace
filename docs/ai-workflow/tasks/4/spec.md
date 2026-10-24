@@ -4,7 +4,7 @@
 
 - 이슈: #4 / https://github.com/ttak-app/ttak-workspace/issues/4
 - 브랜치: chore/agent-harness-setting/#4
-- specRevision: 1
+- specRevision: 2
 
 ## 목적
 
@@ -20,10 +20,11 @@ Keeply 하네스를 바탕으로 Codex가 Ttak macOS 앱의 합의 범위를 설
 - 기존 증적 엔진의 npm 변환과 macOS 검증·환경 지문 추가
 - 현재 Xcode/테스트 타깃 부재를 성공으로 처리하지 않는 빌드·테스트 명령
 - 로컬 도구 정상·실패·오래된 증적 회귀 검사와 사용 안내
+- 사용자 후속 요청에 따른 공통·Swift·웹 코딩 컨벤션과 Git·커밋·PR 컨벤션 및 에이전트 연결
 
 ### 제외
 
-- Claude, iOS 타깃, 앱 기능 구현, 새 코딩·명명·커밋 컨벤션
+- Claude, iOS 타깃, 앱 기능 구현, 컨벤션 도구 신규 설치와 기존 코드 일괄 재포맷
 - CI #3 구현·GitHub 보호 규칙 변경·새 이슈 생성
 - 요청하지 않은 커밋·push·PR·merge
 
@@ -40,7 +41,8 @@ Keeply 하네스를 바탕으로 Codex가 Ttak macOS 앱의 합의 범위를 설
 - AC-2: 실제 검사 실패와 로그가 기록되고 변경·명세·환경이 바뀌면 이전 증적을 재확인 대상으로 구분한다.
 - AC-3: macOS 전용 빌드·테스트 명령이 Xcode/테스트 타깃 부재를 non-zero로 보고하고 웹 검사로 대체하지 않는다.
 - AC-4: 이슈 #4에서 재개·리뷰 범위 수집·PR 준비 도구를 실행할 수 있고 미커밋 상태를 ready로 표시하지 않는다.
-- AC-5: CI·제품 코드·컨벤션·외부 저장소 설정은 이번 작업으로 변경하지 않는다.
+- AC-5: CI·제품 코드·외부 저장소 설정은 이번 작업으로 변경하지 않는다.
+- AC-6: 공통·Swift·웹·Git 컨벤션이 분리되고 Codex 진입점·스킬·구조 검사에 연결된다.
 
 ## 검증 방법
 
@@ -50,7 +52,8 @@ Keeply 하네스를 바탕으로 Codex가 Ttak macOS 앱의 합의 범위를 설
 | AC-2 | workflow:test의 임시 저장소 회귀 테스트 | 성공·실패·변경 무효화 구분 |
 | AC-3 | mock Xcode 테스트와 현 환경 macos:build/test | 현재 Xcode 부재는 실패, mock은 실제 명령/타깃 분기 검사 |
 | AC-4 | resume/check/review 시작/pr-check와 로컬 로그 | 대상 #4 복원, 실제 로그, 미커밋 blocked |
-| AC-5 | 전체 Git diff와 새 파일 범위 검토 | 하네스·설명·npm 명령·ignore만 변경 |
+| AC-5 | 전체 Git diff와 새 파일 범위 검토 | 하네스·컨벤션·설명·명령만 변경 |
+| AC-6 | 구조 검사·스킬 검증·문서 수동 검토 | 플랫폼 간 규칙 혼용과 중복 정책 없음 |
 
 ## 미결정 사항
 
@@ -61,3 +64,4 @@ Keeply 하네스를 바탕으로 Codex가 Ttak macOS 앱의 합의 범위를 설
 | specRevision | 변경한 결정 | 이유 |
 | --- | --- | --- |
 | 1 | Keeply 기반 Codex·macOS 전용 하네스 | 사용자 요청과 플랫폼 확인 |
+| 2 | 코딩·커밋 컨벤션을 포함하고 에이전트 라우팅에 연결 | 하네스 초기 커밋 후 사용자 명시 요청. 기존 AC·검사·리뷰는 새 명세 기준으로 재확인 |

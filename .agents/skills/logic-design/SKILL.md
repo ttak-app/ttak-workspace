@@ -13,3 +13,8 @@ macOS 작업은 [macOS 경계](../../../docs/rules/macos-development.md)를 읽�
 연결 이슈가 있으면 [템플릿](../../../docs/ai-workflow/templates/spec.md)으로 실제 명세를 작성한다.
 읽기 전용이면 대화에만 정리하고, 미연결 설계에서는 임의의 이슈 폴더를 만들지 않는다.
 합의 변경은 specRevision·AC·검증 영향을 갱신한다. 새 아키텍처·컨벤션을 자동 확정하지 않는다.
+
+## 컨벤션 적용
+
+[공통 코딩 컨벤션](../../../docs/rules/coding-convention.md)에서 대상 경로의 언어 규칙을 읽는다.
+Swift 변경에는 Swift 규칙, 랜딩 페이지에는 웹 규칙만 적용하고 컨벤션을 스킬에 중복 정의하지 않는다.

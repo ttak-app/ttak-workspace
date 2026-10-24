@@ -2,7 +2,8 @@
 
 기존 기획의 Swift·SwiftUI, macOS 26+, Foundation Models, EventKit 방향을 기준으로 한다.
 Foundation Models 한국어 품질과 실제 미리 알림 저장은 아직 검증 전이다.
-이 문서는 코딩 스타일이나 새로운 아키텍처를 확정하지 않는다.
+코딩 스타일은 [Swift 코딩 컨벤션](swift-coding-convention.md)을 따른다.
+이 문서는 제품 경계·실행 검증을 다루며 특정 아키텍처를 강제하지 않는다.
 
 ## 검토할 경계
 

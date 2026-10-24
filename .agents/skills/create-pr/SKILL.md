@@ -14,3 +14,8 @@ description: Ttak 작업 브랜치의 실제 검증·리뷰와 게시 권한을 
 권한이 없는 push/게시를 대신 수행하지 않는다. 권한이 있으면 반복 승인 없이 요청 범위에서 진행한다.
 본문 파일과 `gh pr create/edit --body-file`을 사용하며 기존 설명을 의미 없이 덮어쓰지 않는다.
 생성 PR은 사용 가능한 Codex artifact 연결 도구로 연결하고 실제 URL을 보고한다. PR 요청만으로 merge하지 않는다.
+
+## Git 기준
+
+[Git 컨벤션](../../../docs/rules/git-convention.md)의 제목·이슈 연결·라벨 규칙을 적용한다.
+이미 사용자가 지정한 제목과 범위를 의미 없이 바꾸지 않는다.

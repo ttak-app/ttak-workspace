@@ -4,7 +4,9 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 export const REQUIRED_FILES = [
-  'AGENTS.md', 'apps/macos/AGENTS.md', 'docs/development.md',
+  'AGENTS.md', 'apps/macos/AGENTS.md', 'apps/web/AGENTS.md', 'docs/development.md',
+  'docs/rules/coding-convention.md', 'docs/rules/swift-coding-convention.md',
+  'docs/rules/web-coding-convention.md', 'docs/rules/git-convention.md',
   'docs/rules/ai-workflow.md', 'docs/rules/macos-development.md',
   'docs/ai-workflow/README.md', 'docs/ai-workflow/user-guide.md',
   'docs/ai-workflow/templates/spec.md', 'docs/ai-workflow/templates/status.json',

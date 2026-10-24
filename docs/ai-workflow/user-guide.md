@@ -20,3 +20,7 @@ macOS 빌드: `npm run macos:build`. Xcode가 없으면 설치 필요 메시지�
 웹 검사를 실행해 macOS 검증을 대체하지 않는다.
 하네스 자체 검사는 `npm run workflow:harness-check`, `npm run workflow:test`다.
 모든 명령·로컬 기록 형식과 한계는 [작업 기록](README.md)을 참고한다.
+
+코드 작업에서는 [공통 컨벤션](../rules/coding-convention.md)을 통해 대상 언어의 규칙을 읽습니다.
+브랜치·커밋·PR 작성은 [Git 컨벤션](../rules/git-convention.md)을 기준으로 합니다.
+규칙을 별도로 매번 붙여넣지 않아도 에이전트 진입점과 스킬에서 연결된 문서를 읽도록 구성했습니다.
