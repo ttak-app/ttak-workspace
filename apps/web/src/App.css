@@ -1,0 +1,10 @@
+.landing {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: clamp(48px, 12vh, 120px) 24px;
+}
+
+.wordmark { margin: 0 0 64px; font-size: 24px; font-weight: 700; }
+h1 { margin: 0; font-size: clamp(40px, 7vw, 72px); line-height: 1.2; letter-spacing: -0.04em; }
+.description { margin-top: 28px; color: #555; font-size: 18px; line-height: 1.8; word-break: keep-all; }
+.status { margin-top: 48px; color: #666; font-size: 14px; }
