@@ -18,11 +18,42 @@ defaults:
     shell: bash
 
 jobs:
-  harness:
-    name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'Harness (metadata edit)' || 'Harness' }}
+  changes:
+    name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'Changes (metadata edit)' || 'Changes' }}
     if: github.event.action != 'edited' || github.event.changes.base != null
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.detect.outputs.version }}
+      complete: ${{ steps.detect.outputs.complete }}
+      macos: ${{ steps.detect.outputs.macos }}
+      web: ${{ steps.detect.outputs.web }}
+      harness_structure: ${{ steps.detect.outputs.harness_structure }}
+      harness_tests: ${{ steps.detect.outputs.harness_tests }}
+    steps:
+      - name: Check out PR merge commit and history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Detect changed consumers across the full PR
+        id: detect
+        run: node tools/ci/changes.mjs
+
+  harness:
+    name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'Harness (metadata edit)' || 'Harness' }}
+    needs: changes
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && (needs.changes.outputs.harness_structure == 'true' || needs.changes.outputs.harness_tests == 'true')
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
+    outputs:
+      structure: ${{ steps.structure.outcome }}
+      tests: ${{ steps.tests.outcome }}
     steps:
       - name: Check out PR merge commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -40,13 +71,20 @@ jobs:
           node --version
           npm --version
       - name: Check harness structure
+        id: structure
+        if: needs.changes.outputs.harness_structure == 'true'
         run: npm run workflow:harness-check
-      - name: Test harness tools
-        run: npm run workflow:test
+      - name: Test harness and CI tools
+        id: tests
+        if: needs.changes.outputs.harness_tests == 'true'
+        run: |
+          npm run workflow:test
+          node --test tools/ci/*.test.mjs
 
   web:
     name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'Web (metadata edit)' || 'Web' }}
-    if: github.event.action != 'edited' || github.event.changes.base != null
+    needs: changes
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && needs.changes.outputs.web == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -77,7 +115,8 @@ jobs:
 
   macos-build:
     name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'macOS Build (metadata edit)' || 'macOS Build' }}
-    if: github.event.action != 'edited' || github.event.changes.base != null
+    needs: changes
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && needs.changes.outputs.macos == 'true'
     runs-on: macos-26
     timeout-minutes: 20
     env:
@@ -102,3 +141,24 @@ jobs:
           xcrun swift --version
       - name: Build unsigned macOS app
         run: npm run macos:build
+
+  ci-result:
+    name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'CI Result (metadata edit)' || 'CI Result' }}
+    needs: [changes, harness, web, macos-build]
+    if: always() && (github.event.action != 'edited' || github.event.changes.base != null)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out PR merge commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Check all required results
+        env:
+          CI_NEEDS_JSON: ${{ toJSON(needs) }}
+        run: node tools/ci/result.mjs

@@ -7,29 +7,83 @@ CI는 코드 검사와 빌드를 담당한다. 웹 호스팅, PR 프리뷰 배�
 
 `main`, `develop` 대상 PR을 생성하거나 다시 열고, 커밋을 추가하거나 리뷰 준비 상태로 바꾸면 실행한다.
 PR 대상 브랜치를 변경한 `edited` 이벤트도 `changes.base`가 있으면 새 대상의 임시 merge commit을 검사한다.
-제목이나 본문만 수정한 `edited` 이벤트는 세 작업을 모두 생략하므로 runner 할당, 설치와 빌드를 시작하지 않는다.
+제목이나 본문만 수정한 `edited` 이벤트는 Changes와 최종 결과를 포함한 모든 job을 생략하므로 runner 할당, 설치와 빌드를 시작하지 않는다.
 생략 작업 이름에는 `(metadata edit)`를 붙여 실제 검증 check와 구분한다. GitHub가 skipped 작업을 성공으로 취급하더라도 기존 검증 결과를 같은 이름으로 대체하지 않도록 한다.
 이때 concurrency 그룹을 실행별 `noop` 그룹으로 분리해 진행 중이거나 대기 중인 PR 검증을 취소하거나 교체하지 않는다.
-초안 PR도 검사한다. 경로 필터 없이 아래 세 작업을 독립적으로 실행하고,
-같은 PR에 새 검증 실행이 시작되면 이전 검증 실행을 취소한다. 별도 push 트리거는 두지 않는다.
-기본 checkout 동작으로 PR 브랜치와 대상 브랜치의 임시 merge commit을 검사한다.
+초안 PR도 검사한다. 같은 PR의 새 검증은 이전 검증을 취소하며 별도 push 트리거는 두지 않는다.
+검사 작업은 기본 checkout 동작으로 PR 브랜치와 대상 브랜치의 임시 merge commit을 검사한다.
 
-| 검사 이름 | 환경 | 실행 명령 | 제한 시간 |
+| 검사 이름 | 환경 | 실행 내용 | 제한 시간 |
 | --- | --- | --- | --- |
-| `Harness` | Ubuntu 24.04, Node 24, npm 11.3.0 | `workflow:harness-check`, `workflow:test` | 10분 |
+| `Changes` | Ubuntu 24.04, Node 24 | PR 전체 변경 감지와 대상 선택 | 5분 |
+| `Harness` | Ubuntu 24.04, Node 24, npm 11.3.0 | 선택된 구조 검사 또는 도구 테스트 | 10분 |
 | `Web` | Ubuntu 24.04, Node 24, npm 11.3.0 | `npm ci` 후 `lint:web`, `check-types:web`, `build:web` | 10분 |
 | `macOS Build` | macOS 26 ARM64, Xcode 26.6, Node 24, npm 11.3.0 | `macos:build` | 20분 |
+| `CI Result` | Ubuntu 24.04, Node 24 | 감지 출력과 선택된 검사 결과 취합 | 5분 |
 
-표의 검사 명령은 저장소 루트에서 `npm run 명령`으로 실행한다.
-작업 간 `needs` 의존성은 없으며 한 작업이 실패해도 다른 작업에서 검증 결과를 받을 수 있다.
-명령 실패는 그대로 작업 실패로 처리한다. 모든 작업은 저장소 내용 읽기 권한만 사용한다.
-배포 토큰이나 인증서, 개인 일정 데이터는 필요하지 않다.
+표의 npm 검사 명령은 저장소 루트에서 `npm run 명령`으로 실행한다.
+Changes 성공 뒤 선택된 세 검사 작업을 병렬로 실행하고, CI Result는 감지 실패나 선행 작업의 실패와 생략에도 실행한다.
+선택되지 않은 앱 job에는 runner를 할당하지 않으며 웹 설치나 Xcode 실행도 생략한다.
+모든 작업은 저장소 내용 읽기 권한만 사용한다. 배포 토큰이나 인증서, 개인 일정 데이터는 필요하지 않다.
+
+## 변경 감지와 영향 범위
+
+[changes.mjs](../tools/ci/changes.mjs)에 분류를 모아 관리한다. Changes만 전체 Git 이력을 checkout하고,
+이벤트의 base SHA와 head SHA의 merge-base부터 head까지 비교한다. 마지막 커밋만 보지 않고 PR 전체의 변경을 확인한다.
+Git 인자를 배열로 전달하고 NUL 구분 경로를 읽는다. rename 감지를 꺼 삭제와 추가 경로를 모두 분류하므로 앱 사이 이동의 양쪽 영향이 유지된다.
+파일 개수가 많은 PR도 REST 목록 제한 없이 처리한다. Git 실패, 누락된 이력과 불완전한 출력은 감지 실패다.
+알 수 없는 코드나 실행 설정은 자동 생략하지 않고 분류 오류로 알려 영향표를 갱신하게 한다.
+
+| 변경 대상 | 실행할 검사 |
+| --- | --- |
+| `apps/macos` 코드, Xcode 설정과 앱 리소스 | macOS Build |
+| `apps/web` 코드, 설정과 앱 리소스 | Web |
+| 루트 `package-lock.json` | Web |
+| `tools/macos` | macOS Build, Harness 구조와 도구 테스트 |
+| `tools/ai-workflow`, `tools/branch-review` | Harness 구조와 도구 테스트 |
+| `AGENTS.md`, 앱별 루트 `AGENTS.md`, `.agents`, `docs/rules`, `docs/ai-workflow`, `docs/branch-review` | Harness 구조 |
+| `docs/ai-workflow/templates/status.json` | Harness 구조와 도구 테스트 |
+| 루트 `.gitignore`, `.editorconfig`, 연결된 개발과 CI 문서, GitHub 템플릿 | Harness 구조 |
+| 루트 `package.json`, `.nvmrc`, `ci.yml`, `tools/ci` | 전체 |
+| 일반 설명 문서와 `.gitkeep` | 앱 빌드와 도구 테스트 생략 |
+
+여러 대상 변경은 합집합을 실행한다. 하네스 문서와 `.gitkeep`은 앱 코드 패턴보다 먼저 구분한다.
+`Harness`는 구조만 선택되면 `workflow:harness-check`만 실행한다. 도구 테스트가 선택되면
+기존 `workflow:test`와 `node --test tools/ci/*.test.mjs`를 실행하며 두 단계의 실제 outcome을 별도로 출력한다.
+
+보조 경로도 실제 소비 관계를 기준으로 분류한다.
+루트 `.editorconfig`, `docs/development.md`, `docs/ci.md`와 GitHub 이슈 및 PR 템플릿은
+기존 하네스가 필수 파일이나 문서 링크로 확인하므로 구조 검사만 실행한다.
+이 파일들을 삭제해 링크가 깨진 경우도 잡으며 앱 빌드와 도구 회귀 테스트는 생략한다.
+루트 README, 앱 루트 README와 현재 `TtakTests/README.md`는 설명 문서로 생략한다.
+반면 앱 source, public, Resources 안의 README나 Markdown은 앱 리소스일 수 있어 앱 검사에 포함한다.
+`docs`의 일반 Markdown은 생략하지만 하네스 연결 문서는 구조 검사를 실행한다.
+하네스 상태 JSON 템플릿은 기존 회귀 테스트가 실제 읽는 입력이므로 구조와 도구 테스트를 함께 실행한다.
+루트 잠금 파일은 현재 웹 의존성만 관리한다. 루트 package와 Node 버전은 공통 실행 환경이라 전체를 검사한다.
+`.gitignore`는 기존 구조 검사가 `.tmp/` 제외를 확인하는 입력이므로 단독 변경에도 구조 검사를 실행한다.
+
+각 대상의 선택과 생략 이유는 Actions step summary에 남긴다.
+
+## 최종 결과와 병합 판정
+
+[result.mjs](../tools/ci/result.mjs)는 `toJSON(needs)`를 환경 변수 JSON으로 읽는다.
+감지 성공, 버전과 완료 표식, 정확한 `true`/`false` 플래그를 먼저 확인한 뒤 각 job 상태를 대조한다.
+
+- 선택된 작업은 `success`여야 한다. 실패, 취소, 예상 밖 생략과 결과 누락은 실패다.
+- 선택되지 않은 작업은 `skipped`여야 한다. 의도된 생략은 통과한다.
+- Harness가 실행되면 선택된 내부 단계는 `success`, 선택되지 않은 단계는 `skipped`여야 한다.
+- 일반 설명 문서만 변경해 모든 검사 job을 생략해도 감지 성공과 의도된 생략을 확인한 후 통과한다.
+- 감지 실패, 누락된 출력이나 잘못된 플래그는 실패한다. 실패를 변경 없음으로 바꾸지 않는다.
+
+워크플로 전체에 경로 필터를 두지 않고 job을 조건부 실행해 필수 검사 대기를 방지한다.
+게시 후 필수 검사 이름은 `CI Result` 하나로 연결한다. metadata edit 이름은 연결하지 않는다.
+결과 취합은 설치나 빌드를 반복하지 않고 종료 상태만 검사한다.
 
 ## 버전과 캐시
 
 - Node는 [.nvmrc](../.nvmrc)의 24 계열을 사용한다. 패치 버전까지 고정하지는 않는다.
 - npm은 [package.json](../package.json)의 `packageManager`에 맞춰 11.3.0을 설치한다.
-  향후 이 값을 바꾸면 워크플로의 세 npm 설치 단계도 함께 갱신한다.
+  향후 이 값을 바꾸면 워크플로의 Harness, Web, macOS Build npm 설치 단계도 함께 갱신한다.
 - Web만 루트 `package-lock.json`을 키로 npm 다운로드 캐시를 사용한다.
   `node_modules`는 캐시하지 않고 매번 `npm ci`로 잠금 파일 기준 설치를 한다.
 - Harness와 macOS Build는 Node 기본 모듈만 사용하므로 앱 의존성을 설치하지 않고 npm 자동 캐시를 끈다.
@@ -60,6 +114,7 @@ GitHub macOS runner의 빌드 성공과 구분해 보고한다.
 npm ci
 npm run workflow:harness-check
 npm run workflow:test
+node --test tools/ci/*.test.mjs
 npm run lint:web
 npm run check-types:web
 npm run build:web
@@ -82,19 +137,19 @@ CI에서는 로컬 status나 수동 리뷰에 의존하는 `workflow:pr-check`�
 
 ## 최초 실행과 필수 검사 연결
 
-현재는 로컬 구현 단계다. 실제 GitHub 실행과 `main`, `develop`의 필수 검사 연결은 아직 완료하지 않았다.
-이 두 단계까지 확인하기 전 [#3](https://github.com/ttak-app/ttak-workspace/issues/3)을 전체 완료로 처리하지 않는다.
+기본 CI는 커밋 `cff7165`의 Draft PR #6에서 Harness, Web, macOS Build가 성공했다.
+새 변경 감지, 선택 실행과 CI Result는 현재 로컬 구현과 검증 단계이며 그 원격 성공을 재사용하지 않는다.
+실제 선택 실행과 `main`, `develop`의 필수 검사 연결까지 확인하기 전 [#3](https://github.com/ttak-app/ttak-workspace/issues/3)을 전체 완료로 처리하지 않는다.
 
-1. 별도 게시 요청을 받으면 작업 브랜치를 push하고 `develop` 대상 PR을 만든다.
-2. GitHub에서 `Harness`, `Web`, `macOS Build`가 모두 생성되고 성공하는지 확인한다.
-   로컬 Xcode 부재나 정적 검사 통과로 원격 macOS 빌드를 대체하지 않는다.
+1. 별도 게시 요청을 받으면 기존 작업 브랜치를 push하고 Draft PR #6 설명을 최신 구현으로 갱신한다.
+2. GitHub에서 변경 영향에 맞는 job만 실행되고 CI Result가 성공하는지 확인한다.
+   웹 전용, Swift 전용, 문서 전용 및 동시 변경의 선택과 생략을 확인한다.
+   감지나 선택된 검사 실패가 최종 실패로 이어지는지도 확인한다.
 3. 실제 check run 이름을 확인한 뒤 기존 `ttak-develop`, `ttak-main` ruleset에
-   표의 세 검사를 필수 상태 검사로 연결한다. `(metadata edit)` 이름은 필수 검사에 연결하지 않는다. 이름을 바꾸면 연결된 필수 검사 이름도 함께 갱신한다.
+   `CI Result` 하나를 필수 상태 검사로 연결한다. metadata edit 이름은 연결하지 않는다.
 4. PR 필수, 승인 0명, 직접 push 차단과 Merge commit 정책이 유지되는지 확인한다.
-5. `develop`에 워크플로가 병합되면 이후 `develop` 대상 PR에서 검사가 계속 실행되는지 확인한다.
-   `main` 대상 첫 PR에도 워크플로를 포함해 세 검사가 생성되는지 확인한다.
+5. `develop` 병합 후 후속 PR과 `main` 대상 PR에도 최종 검사가 생성되는지 확인한다.
 
-첫 구성에서는 모든 PR에서 세 검사를 실행한다. 경로별 생략이나 검사 이름 변경은
-필수 검사가 계속 대기하거나 누락되지 않는지 함께 설계한 후 도입한다.
-변경 감지와 `CI Result`는 [#3 명세](ai-workflow/tasks/3/spec.md)의 후속 구현 설계이며 아직 이 워크플로에 적용하지 않았다.
-명세의 `.gitignore` 변경은 하네스 구조 검사만 선택하도록 분류한다. 현재 실제 구현은 대상 브랜치 변경을 포함한 검증 이벤트에서 세 검사를 모두 실행한다.
+[명세](ai-workflow/tasks/3/spec.md)의 AC-6은 실제 원격 확인과 필수 검사 연결 전까지 대기한다.
+후속 CD는 main에 실제 반영된 변경으로 배포 대상을 다시 판별한다.
+PR의 임시 플래그를 그대로 재사용하지 않으며 Swift만 변경하면 웹을 배포하지 않는다.
