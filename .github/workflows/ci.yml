@@ -3,13 +3,14 @@ name: CI
 on:
   pull_request:
     branches: [main, develop]
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, edited]
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number }}
+  # Metadata-only edits must not replace running or pending PR validation.
+  group: ${{ github.workflow }}-${{ github.event.action == 'edited' && github.event.changes.base == null && format('noop-{0}', github.run_id) || format('pr-{0}', github.event.pull_request.number) }}
   cancel-in-progress: true
 
 defaults:
@@ -18,7 +19,8 @@ defaults:
 
 jobs:
   harness:
-    name: Harness
+    name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'Harness (metadata edit)' || 'Harness' }}
+    if: github.event.action != 'edited' || github.event.changes.base != null
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -43,7 +45,8 @@ jobs:
         run: npm run workflow:test
 
   web:
-    name: Web
+    name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'Web (metadata edit)' || 'Web' }}
+    if: github.event.action != 'edited' || github.event.changes.base != null
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -73,7 +76,8 @@ jobs:
         run: npm run build:web
 
   macos-build:
-    name: macOS Build
+    name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'macOS Build (metadata edit)' || 'macOS Build' }}
+    if: github.event.action != 'edited' || github.event.changes.base != null
     runs-on: macos-26
     timeout-minutes: 20
     env:
