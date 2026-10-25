@@ -5,12 +5,13 @@ CI는 코드 검사와 빌드를 담당한다. 웹 호스팅, PR 프리뷰 배�
 
 ## 실행 조건과 검사
 
-`main`, `develop` 대상 PR을 생성하거나 다시 열고, 커밋을 추가하거나 리뷰 준비 상태로 바꾸면 실행한다.
-PR 대상 브랜치를 변경한 `edited` 이벤트도 `changes.base`가 있으면 새 대상의 임시 merge commit을 검사한다.
-제목이나 본문만 수정한 `edited` 이벤트는 Changes와 최종 결과를 포함한 모든 job을 생략하므로 runner 할당, 설치와 빌드를 시작하지 않는다.
-생략 작업 이름에는 `(metadata edit)`를 붙여 실제 검증 check와 구분한다. GitHub가 skipped 작업을 성공으로 취급하더라도 기존 검증 결과를 같은 이름으로 대체하지 않도록 한다.
-이때 concurrency 그룹을 실행별 `noop` 그룹으로 분리해 진행 중이거나 대기 중인 PR 검증을 취소하거나 교체하지 않는다.
+[Kareer PR #15의 설정](https://github.com/team-kareer/kareer-client/blob/0714c0e72a407552b03b72135fbd3b375d8bccdf/.github/workflows/ci.yml)처럼
+`pull_request`에 `types`를 지정하지 않는다. `main`, `develop` 대상 PR 생성, 추가 커밋과 다시 열기에서 실행한다.
+제목이나 본문 수정과 Draft 해제는 워크플로를 호출하지 않으므로 별도 스킵 기록도 만들지 않는다.
+PR 대상 브랜치만 변경해도 자동 재검사하지 않는다. 새 대상 검증이 필요하면 PR을 닫았다 다시 열거나
+새 커밋을 push해 현재 대상 기준으로 검사한다. 과거 실행을 단순 재실행하는 방식은 새 대상 검증으로 간주하지 않는다.
 초안 PR도 검사한다. 같은 PR의 새 검증은 이전 검증을 취소하며 별도 push 트리거는 두지 않는다.
+작업 이름은 고정하고 concurrency 그룹은 PR 번호를 사용한다.
 검사 작업은 기본 checkout 동작으로 PR 브랜치와 대상 브랜치의 임시 merge commit을 검사한다.
 
 | 검사 이름 | 환경 | 실행 내용 | 제한 시간 |
@@ -76,7 +77,7 @@ Git 인자를 배열로 전달하고 NUL 구분 경로를 읽는다. rename 감�
 - 감지 실패, 누락된 출력이나 잘못된 플래그는 실패한다. 실패를 변경 없음으로 바꾸지 않는다.
 
 워크플로 전체에 경로 필터를 두지 않고 job을 조건부 실행해 필수 검사 대기를 방지한다.
-게시 후 필수 검사 이름은 `CI Result` 하나로 연결한다. metadata edit 이름은 연결하지 않는다.
+게시 후 필수 검사 이름은 `CI Result` 하나로 연결한다.
 결과 취합은 설치나 빌드를 반복하지 않고 종료 상태만 검사한다.
 
 ## 버전과 캐시
@@ -137,16 +138,16 @@ CI에서는 로컬 status나 수동 리뷰에 의존하는 `workflow:pr-check`�
 
 ## 최초 실행과 필수 검사 연결
 
-기본 CI는 커밋 `cff7165`의 Draft PR #6에서 Harness, Web, macOS Build가 성공했다.
-새 변경 감지, 선택 실행과 CI Result는 현재 로컬 구현과 검증 단계이며 그 원격 성공을 재사용하지 않는다.
+커밋 `7dcae86`은 GitHub 실행 `40174466161`에서 Changes, Harness, Web, macOS Build와 CI Result가 모두 성공했다.
+현재 기본 PR 이벤트로 단순화하는 수정은 로컬 검증 단계다. 앞선 성공을 수정 후 원격 검증으로 재사용하지 않는다.
 실제 선택 실행과 `main`, `develop`의 필수 검사 연결까지 확인하기 전 [#3](https://github.com/ttak-app/ttak-workspace/issues/3)을 전체 완료로 처리하지 않는다.
 
-1. 별도 게시 요청을 받으면 기존 작업 브랜치를 push하고 Draft PR #6 설명을 최신 구현으로 갱신한다.
+1. 별도 게시 요청을 받으면 기존 작업 브랜치를 push하고 PR #6 설명을 최신 구현으로 갱신한다.
 2. GitHub에서 변경 영향에 맞는 job만 실행되고 CI Result가 성공하는지 확인한다.
    웹 전용, Swift 전용, 문서 전용 및 동시 변경의 선택과 생략을 확인한다.
    감지나 선택된 검사 실패가 최종 실패로 이어지는지도 확인한다.
 3. 실제 check run 이름을 확인한 뒤 기존 `ttak-develop`, `ttak-main` ruleset에
-   `CI Result` 하나를 필수 상태 검사로 연결한다. metadata edit 이름은 연결하지 않는다.
+   `CI Result` 하나를 필수 상태 검사로 연결한다.
 4. PR 필수, 승인 0명, 직접 push 차단과 Merge commit 정책이 유지되는지 확인한다.
 5. `develop` 병합 후 후속 PR과 `main` 대상 PR에도 최종 검사가 생성되는지 확인한다.
 

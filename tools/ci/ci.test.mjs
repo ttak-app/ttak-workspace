@@ -175,32 +175,39 @@ test('summary filenames cannot inject rows, HTML or newlines', () => {
   assert.ok(!summary.includes('<script>'));
 });
 
-test('workflow wiring preserves event isolation, selected jobs and always-running gate', () => {
+test('workflow uses default PR events, selected jobs and an always-running gate', () => {
   const source = readFileSync(new URL('../../.github/workflows/ci.yml', import.meta.url), 'utf8');
+  const trigger = source.split('on:\n')[1].split('\npermissions:')[0];
+  // Match the reference PR: omitted types means opened, synchronize and reopened.
+  assert.equal(trigger.trim(), 'pull_request:\n    branches: [main, develop]');
+  assert.ok(!source.includes('github.event.action'));
+  assert.ok(!source.includes('github.event.changes.base'));
+  assert.ok(!source.includes('metadata edit'));
+  assert.ok(!source.includes('noop-'));
+  assert.match(source, /group: \$\{\{ github.workflow \}\}-pr-\$\{\{ github.event.pull_request.number \}\}/);
   const blocks = Object.fromEntries([...source.split('jobs:\n')[1].matchAll(/^  ([a-z-]+):\n([\s\S]*?)(?=^  [a-z-]+:\n|$(?![\s\S]))/gm)].map((match) => [match[1], match[2]]));
   assert.deepEqual(Object.keys(blocks), ['changes', 'harness', 'web', 'macos-build', 'ci-result']);
+  for (const [id, name] of [['changes', 'Changes'], ['harness', 'Harness'], ['web', 'Web'], ['macos-build', 'macOS Build'], ['ci-result', 'CI Result']]) {
+    assert.match(blocks[id], new RegExp(`^    name: ${name}$`, 'm'));
+  }
+  assert.ok(!/^    if:/m.test(blocks.changes));
   assert.match(blocks.changes, /fetch-depth: 0/);
   assert.match(blocks['ci-result'], /needs: \[changes, harness, web, macos-build\]/);
-  assert.match(blocks['ci-result'], /if: always\(\) &&/);
+  assert.match(blocks['ci-result'], /^    if: always\(\)$/m);
   assert.match(blocks['ci-result'], /CI_NEEDS_JSON: \$\{\{ toJSON\(needs\) \}\}/);
   assert.match(blocks.harness, /structure: \$\{\{ steps.structure.outcome \}\}/);
   assert.match(blocks.harness, /tests: \$\{\{ steps.tests.outcome \}\}/);
   assert.match(blocks.harness, /npm run workflow:test\n\s+node --test tools\/ci\/\*\.test\.mjs/);
-  assert.match(source, /format\('noop-\{0\}', github.run_id\)/);
   assert.ok(!source.includes('continue-on-error'));
-  for (const name of ['changes', 'harness', 'web', 'macos-build', 'ci-result']) {
+  for (const name of ['web', 'harness', 'macos-build']) {
     const condition = blocks[name].match(/^    if: (.+)$/m)[1];
-    const expression = condition.replaceAll('always()', 'true').replaceAll('github.event.changes.base != null', 'baseChanged').replaceAll("github.event.action != 'edited'", 'action !== "edited"').replaceAll(/needs.changes.outputs.([a-z_]+)/g, 'flags.$1');
-    const evaluate = new Function('action', 'baseChanged', 'flags', `return (${expression});`);
-    for (const action of ['opened', 'synchronize', 'reopened', 'ready_for_review', 'edited']) {
-      for (const baseChanged of [false, true]) {
-        const expected = action !== 'edited' || baseChanged;
-        assert.equal(evaluate(action, baseChanged, Object.fromEntries(flagNames.map((flag) => [flag, 'true']))), expected, `${name}:${action}:${baseChanged}`);
-      }
-    }
-    assert.match(blocks[name], /metadata edit/);
-    if (['web', 'harness', 'macos-build'].includes(name)) {
-      assert.equal(evaluate('opened', false, Object.fromEntries(flagNames.map((flag) => [flag, 'false']))), false);
+    const expression = condition.replaceAll(/needs.changes.outputs.([a-z_]+)/g, 'flags.$1');
+    const evaluate = new Function('flags', `return (${expression});`);
+    for (let bits = 0; bits < 16; bits += 1) {
+      const flags = Object.fromEntries(flagNames.map((flag, i) => [flag, bits & (1 << i) ? 'true' : 'false']));
+      const expected = name === 'harness' ? flags.harness_structure === 'true' || flags.harness_tests === 'true'
+        : flags[name === 'web' ? 'web' : 'macos'] === 'true';
+      assert.equal(evaluate(flags), expected, `${name}:${bits}`);
     }
   }
 });

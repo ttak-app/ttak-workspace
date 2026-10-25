@@ -3,14 +3,12 @@ name: CI
 on:
   pull_request:
     branches: [main, develop]
-    types: [opened, synchronize, reopened, ready_for_review, edited]
 
 permissions:
   contents: read
 
 concurrency:
-  # Metadata-only edits must not replace running or pending PR validation.
-  group: ${{ github.workflow }}-${{ github.event.action == 'edited' && github.event.changes.base == null && format('noop-{0}', github.run_id) || format('pr-{0}', github.event.pull_request.number) }}
+  group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 defaults:
@@ -19,8 +17,7 @@ defaults:
 
 jobs:
   changes:
-    name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'Changes (metadata edit)' || 'Changes' }}
-    if: github.event.action != 'edited' || github.event.changes.base != null
+    name: Changes
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
@@ -46,9 +43,9 @@ jobs:
         run: node tools/ci/changes.mjs
 
   harness:
-    name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'Harness (metadata edit)' || 'Harness' }}
+    name: Harness
     needs: changes
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && (needs.changes.outputs.harness_structure == 'true' || needs.changes.outputs.harness_tests == 'true')
+    if: (needs.changes.outputs.harness_structure == 'true' || needs.changes.outputs.harness_tests == 'true')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
@@ -82,9 +79,9 @@ jobs:
           node --test tools/ci/*.test.mjs
 
   web:
-    name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'Web (metadata edit)' || 'Web' }}
+    name: Web
     needs: changes
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && needs.changes.outputs.web == 'true'
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -114,9 +111,9 @@ jobs:
         run: npm run build:web
 
   macos-build:
-    name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'macOS Build (metadata edit)' || 'macOS Build' }}
+    name: macOS Build
     needs: changes
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && needs.changes.outputs.macos == 'true'
+    if: needs.changes.outputs.macos == 'true'
     runs-on: macos-26
     timeout-minutes: 20
     env:
@@ -143,9 +140,9 @@ jobs:
         run: npm run macos:build
 
   ci-result:
-    name: ${{ github.event.action == 'edited' && github.event.changes.base == null && 'CI Result (metadata edit)' || 'CI Result' }}
+    name: CI Result
     needs: [changes, harness, web, macos-build]
-    if: always() && (github.event.action != 'edited' || github.event.changes.base != null)
+    if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
