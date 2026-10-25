@@ -11,7 +11,7 @@ apps/
   macos/   Swift·SwiftUI 네이티브 앱
   web/     React·TypeScript·Vite 랜딩 페이지
 docs/      개발 기준과 설계 기록
-.github/   PR 템플릿
+.github/   PR 템플릿과 CI 워크플로
 ```
 
 ## 웹 실행
@@ -37,9 +37,10 @@ Swift 6 언어 모드와 macOS 26 이상을 기준으로 합니다.
 
 - 웹: React·TypeScript·Vite 기본 화면, npm workspaces, Oxlint
 - macOS: 메뉴바 입력 화면과 공유 Xcode 스킴
-- 외부 Swift 패키지, AI 분석, EventKit 저장, 서버, CI는 아직 추가하지 않았습니다.
+- CI: 변경 감지로 앱, 웹과 하네스 검사를 선택하고 CI Result로 취합합니다. 새 선택 실행의 원격 확인과 필수 검사 연결은 남아 있습니다.
+- 외부 Swift 패키지, AI 분석, EventKit 저장과 서버는 아직 추가하지 않았습니다.
 - Swift Testing 테스트 타깃은 핵심 로직 구현 시 추가할 예정입니다.
-- 초기 세팅 환경에 Xcode가 없어 macOS 앱 컴파일·실행은 미검증입니다.
+- 기본 unsigned 앱 빌드는 GitHub에서 성공했습니다. 실제 앱 동작과 새 선택 CI의 원격 실행은 미검증입니다.
 - 각 폴더의 `.gitkeep`을 유지합니다.
 
 ## 협업
@@ -50,6 +51,8 @@ Swift 6 언어 모드와 macOS 26 이상을 기준으로 합니다.
 병합 방식은 Merge commit을 사용합니다.
 
 [개발 기준과 Git Flow](docs/development.md)
+
+[CI 운영](docs/ci.md)에서 검사 범위와 최초 실행 절차를 확인합니다.
 
 ## Codex 하네스
 

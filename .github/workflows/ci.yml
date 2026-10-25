@@ -1,0 +1,161 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  changes:
+    name: Changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.detect.outputs.version }}
+      complete: ${{ steps.detect.outputs.complete }}
+      macos: ${{ steps.detect.outputs.macos }}
+      web: ${{ steps.detect.outputs.web }}
+      harness_structure: ${{ steps.detect.outputs.harness_structure }}
+      harness_tests: ${{ steps.detect.outputs.harness_tests }}
+    steps:
+      - name: Check out PR merge commit and history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Detect changed consumers across the full PR
+        id: detect
+        run: node tools/ci/changes.mjs
+
+  harness:
+    name: Harness
+    needs: changes
+    if: (needs.changes.outputs.harness_structure == 'true' || needs.changes.outputs.harness_tests == 'true')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      structure: ${{ steps.structure.outcome }}
+      tests: ${{ steps.tests.outcome }}
+    steps:
+      - name: Check out PR merge commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Set up npm
+        run: npm install --global npm@11.3.0
+      - name: Show Node.js and npm versions
+        run: |
+          node --version
+          npm --version
+      - name: Check harness structure
+        id: structure
+        if: needs.changes.outputs.harness_structure == 'true'
+        run: npm run workflow:harness-check
+      - name: Test harness and CI tools
+        id: tests
+        if: needs.changes.outputs.harness_tests == 'true'
+        run: |
+          npm run workflow:test
+          node --test tools/ci/*.test.mjs
+
+  web:
+    name: Web
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out PR merge commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js and npm download cache
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Set up npm
+        run: npm install --global npm@11.3.0
+      - name: Show Node.js and npm versions
+        run: |
+          node --version
+          npm --version
+      - name: Install workspace dependencies
+        run: npm ci
+      - name: Lint web
+        run: npm run lint:web
+      - name: Check web types
+        run: npm run check-types:web
+      - name: Build web
+        run: npm run build:web
+
+  macos-build:
+    name: macOS Build
+    needs: changes
+    if: needs.changes.outputs.macos == 'true'
+    runs-on: macos-26
+    timeout-minutes: 20
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    steps:
+      - name: Check out PR merge commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Set up npm
+        run: npm install --global npm@11.3.0
+      - name: Show build environment
+        run: |
+          node --version
+          npm --version
+          xcodebuild -version
+          xcrun swift --version
+      - name: Build unsigned macOS app
+        run: npm run macos:build
+
+  ci-result:
+    name: CI Result
+    needs: [changes, harness, web, macos-build]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out PR merge commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Check all required results
+        env:
+          CI_NEEDS_JSON: ${{ toJSON(needs) }}
+        run: node tools/ci/result.mjs
