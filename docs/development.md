@@ -14,6 +14,7 @@
 - [React·TypeScript 컨벤션](rules/web-coding-convention.md): 랜딩 페이지
 - [Git·커밋·PR 컨벤션](rules/git-convention.md): 브랜치·커밋·라벨의 기준 문서
 - [Codex 작업 흐름](rules/ai-workflow.md): 이슈·명세·검증·리뷰·게시
+- [CI 운영](ci.md): 앱과 웹 검사, 원격 실행 확인 및 필수 검사 연결 절차
 
 ## 작업 시작 예시
 
