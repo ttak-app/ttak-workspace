@@ -80,7 +80,7 @@ Git 인자를 배열로 전달하고 NUL 구분 경로를 읽는다. rename 감�
 - 감지 실패, 누락된 출력이나 잘못된 플래그는 실패한다. 실패를 변경 없음으로 바꾸지 않는다.
 
 워크플로 전체에 경로 필터를 두지 않고 job을 조건부 실행해 필수 검사 대기를 방지한다.
-게시 후 필수 검사 이름은 `CI Result` 하나로 연결한다.
+main과 develop의 필수 상태 검사는 GitHub Actions가 제공하는 `CI Result` 하나다.
 결과 취합은 설치나 빌드를 반복하지 않고 종료 상태만 검사한다.
 
 ## 버전과 캐시
@@ -141,21 +141,31 @@ macOS 환경 실패는 선택한 Xcode의 실제 설치 경로와 버전을 확�
 CI에서는 로컬 status나 수동 리뷰에 의존하는 `workflow:pr-check`를 실행하지 않는다.
 하네스 구조 검사와 도구 회귀 테스트는 실제 npm 명령으로 실행한다.
 
-## 최초 실행과 필수 검사 연결
+## 원격 실행과 필수 검사 연결 현황
 
-커밋 `7dcae86`은 GitHub 실행 `40174466161`에서 Changes, Harness, Web, macOS Build와 CI Result가 모두 성공했다.
-현재 기본 PR 이벤트로 단순화하는 수정은 로컬 검증 단계다. 앞선 성공을 수정 후 원격 검증으로 재사용하지 않는다.
-실제 선택 실행과 `main`, `develop`의 필수 검사 연결까지 확인하기 전 [#3](https://github.com/ttak-app/ttak-workspace/issues/3)을 전체 완료로 처리하지 않는다.
+커밋 `6cfe93c`의 [GitHub 실행 40261505763](https://github.com/ttak-app/ttak-workspace/actions/runs/40261505763)에서
+Changes, Harness, Web, macOS Build와 CI Result가 모두 성공했다. 웹과 Swift 포맷 검사도 해당 job에서 통과했다.
+이는 해당 실행의 성공 기록이며, 웹 전용, Swift 전용과 문서 전용 PR의 선택 실행을 모두 실증했다는 뜻은 아니다.
 
-1. 별도 게시 요청을 받으면 기존 작업 브랜치를 push하고 PR #6 설명을 최신 구현으로 갱신한다.
-2. GitHub에서 변경 영향에 맞는 job만 실행되고 CI Result가 성공하는지 확인한다.
-   웹 전용, Swift 전용, 문서 전용 및 동시 변경의 선택과 생략을 확인한다.
-   감지나 선택된 검사 실패가 최종 실패로 이어지는지도 확인한다.
-3. 실제 check run 이름을 확인한 뒤 기존 `ttak-develop`, `ttak-main` ruleset에
-   `CI Result` 하나를 필수 상태 검사로 연결한다.
-4. PR 필수, 승인 0명, 직접 push 차단과 Merge commit 정책이 유지되는지 확인한다.
-5. `develop` 병합 후 후속 PR과 `main` 대상 PR에도 최종 검사가 생성되는지 확인한다.
+[#11](https://github.com/ttak-app/ttak-workspace/issues/11)에서 기존 활성 ruleset에 다음 필수 검사를 연결하고,
+각 브랜치의 실제 적용 규칙을 GitHub API로 재조회했다.
 
-[명세](ai-workflow/tasks/3/spec.md)의 AC-6은 실제 원격 확인과 필수 검사 연결 전까지 대기한다.
+| 대상 | 기존 ruleset | 필수 검사와 제공자 |
+| --- | --- | --- |
+| main | [ttak-main / 25779102](https://github.com/ttak-app/ttak-workspace/rules/25779102) | `CI Result`, GitHub Actions (App ID `15368`) |
+| develop | [ttak-develop / 25779101](https://github.com/ttak-app/ttak-workspace/rules/25779101) | `CI Result`, GitHub Actions (App ID `15368`) |
+
+필수 검사 추가 외 대상 브랜치, 활성 상태, 우회 없음, PR 필수, 승인 0명, Merge commit,
+삭제 및 force push 차단 설정은 변경 전후 비교로 유지됨을 확인했다.
+최신 대상 브랜치 반영 강제(`strict_required_status_checks_policy`)는 추가하지 않았다.
+
+이 규칙은 `CI Result`가 실패하거나 결과를 기다리는 PR의 병합을 제한한다.
+확인 시점에 열린 PR이 없어 설정 변경 후 실패 또는 대기 상태의 실제 병합 차단과
+성공한 PR의 병합 가능 상태는 관찰하지 않았다. 후속 PR에서 확인하며 검증을 위한 PR 생성이나 실제 merge는 수행하지 않았다.
+규칙 의미와 API 항목은 [GitHub 필수 상태 검사 문서](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#require-status-checks-to-pass-before-merging)와
+[GitHub ruleset API](https://docs.github.com/en/rest/repos/rules#update-a-repository-ruleset)를 따른다.
+
+과거 [#3 명세](ai-workflow/tasks/3/spec.md)는 당시 작업 기록으로 유지한다.
+현재 누락 보완 범위와 검증 방법은 [#11 명세](ai-workflow/tasks/11/spec.md)에 기록한다.
 후속 CD는 main에 실제 반영된 변경으로 배포 대상을 다시 판별한다.
 PR의 임시 플래그를 그대로 재사용하지 않으며 Swift만 변경하면 웹을 배포하지 않는다.
