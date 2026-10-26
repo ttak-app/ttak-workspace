@@ -12,7 +12,8 @@
 - 폴더는 소문자·kebab-case를 기본으로 하되 복수형을 기계적으로 강제하지 않는다. 현재 src 구조를 의미 없이 이동하지 않는다.
 - 들여쓰기 2칸, 문자열은 single quote, 문장 끝 세미콜론은 현재 코드처럼 생략한다.
   JSX 속성은 double quote, 여러 줄 리터럴은 기존 trailing comma 스타일을 따른다.
-- 이 문서 때문에 기존 파일을 일괄 재포맷하지 않는다. 포맷터 도입 시 문서와 설정을 함께 맞춘다.
+- 포맷은 [웹 Prettier 설정](../../apps/web/.prettierrc.json)과 [실행 안내](../formatting.md)를 따른다.
+  웹 범위에만 적용하고 Markdown과 루트 Node 도구를 함께 재포맷하지 않는다.
 
 ## TypeScript·함수
 
@@ -37,7 +38,7 @@
 
 ## 검증
 
-`npm run lint:web`, `npm run check-types:web`, `npm run build:web`와 변경된 UI의 실제 동작을 확인한다.
+`npm run format:check:web`, `npm run lint:web`, `npm run check-types:web`, `npm run build:web`와 변경된 UI의 실제 동작을 확인한다.
 Oxlint가 이 문서의 모든 스타일 규칙을 자동 강제한다고 주장하지 않는다.
 Swift·SwiftUI 파일에는 이 문서의 var·const·JSX·Props 규칙을 적용하지 않는다.
 

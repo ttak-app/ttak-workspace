@@ -11,10 +11,13 @@ const selected = (...names) => Object.fromEntries(flagNames.map((name) => [name,
 const matrix = [
   ['apps/macos/Ttak/App/TtakApp.swift', ['macos']],
   ['apps/macos/Ttak.xcodeproj/project.pbxproj', ['macos']],
+  ['apps/macos/.swift-format', ['macos']],
   ['apps/macos/Ttak/Resources/README.md', ['macos']],
   ['apps/web/src/App.tsx', ['web']],
   ['apps/web/public/README.md', ['web']],
   ['apps/web/.oxlintrc.json', ['web']],
+  ['apps/web/.prettierrc.json', ['web']],
+  ['apps/web/.prettierignore', ['web']],
   ['package-lock.json', ['web']],
   ['tools/macos/check.test.mjs', ['macos', 'harness_structure', 'harness_tests']],
   ['tools/ai-workflow/record.mjs', ['harness_structure', 'harness_tests']],
@@ -201,6 +204,8 @@ test('workflow uses default PR events, selected jobs and an always-running gate'
   assert.match(blocks.harness, /structure: \$\{\{ steps.structure.outcome \}\}/);
   assert.match(blocks.harness, /tests: \$\{\{ steps.tests.outcome \}\}/);
   assert.match(blocks.harness, /npm run workflow:test\n\s+node --test tools\/ci\/\*\.test\.mjs/);
+  assert.match(blocks.web, /run: npm run format:check:web/);
+  assert.match(blocks['macos-build'], /run: npm run format:check:macos/);
   assert.ok(!source.includes('continue-on-error'));
   for (const name of ['web', 'harness', 'macos-build']) {
     const condition = blocks[name].match(/^    if: (.+)$/m)[1];

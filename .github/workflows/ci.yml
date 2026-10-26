@@ -103,6 +103,8 @@ jobs:
           npm --version
       - name: Install workspace dependencies
         run: npm ci
+      - name: Check web formatting
+        run: npm run format:check:web
       - name: Lint web
         run: npm run lint:web
       - name: Check web types
@@ -136,6 +138,9 @@ jobs:
           npm --version
           xcodebuild -version
           xcrun swift --version
+          xcrun swift format --version
+      - name: Check Swift formatting
+        run: npm run format:check:macos
       - name: Build unsigned macOS app
         run: npm run macos:build
 

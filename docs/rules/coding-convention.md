@@ -32,9 +32,10 @@ Swift의 var, React의 컴포넌트·훅과 SwiftUI의 View·상태는 구분한
 ## 형식과 자동화
 
 [.editorconfig](../../.editorconfig)의 Swift 4칸·그 외 기본 2칸, UTF-8·LF를 따른다.
-웹의 세부 구문은 현재 코드 스타일을 기준으로 한다. 이 규칙은 SwiftFormat/SwiftLint/Prettier 설치나
-CI 강제를 뜻하지 않는다. 실행 가능한 기존 검사와 수동 확인 범위는 [작업 흐름](ai-workflow.md)을 따른다.
-새 도구를 추가할 때는 그 도구가 문서와 충돌하지 않도록 별도로 구성한다.
+웹의 세부 구문은 현재 코드 스타일을 기준으로 한다.
+이슈 #9에서 합의한 [코드 포맷 자동화](../formatting.md)는 웹 Prettier와 Swift swift-format을 사용하며
+CI의 해당 앱 job에서 읽기 전용 검사를 실행한다. 추가 린터나 Git 훅은 도입하지 않는다.
+나머지 검사와 수동 확인 범위는 [작업 흐름](ai-workflow.md)을 따른다.
 
 ## 원본과 기준
 

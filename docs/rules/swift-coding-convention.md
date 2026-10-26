@@ -60,7 +60,8 @@ Swift 6 언어 모드·macOS 26+의 네이티브 메뉴바 앱이며 iOS 앱 규
 ## 형식·확인
 
 - 들여쓰기 4칸, 중괄호는 선언과 같은 줄, 타입·함수 사이의 구분은 기존 Swift 파일과 맞춘다.
-- 임의의 줄 길이 제한이나 새 포맷터 규칙을 추가하지 않는다. 도구를 선정하면 이 문서와 함께 맞춘다.
+- 포맷은 [swift-format 설정](../../apps/macos/.swift-format)과 [실행 안내](../formatting.md)를 따른다.
+  4칸 들여쓰기를 명시하고 나머지 줄바꿈은 도구 기본값을 사용한다. `npm run format:check:macos`로 검사한다.
 - 빌드·테스트·실기기 검증은 [macOS 개발 기준](macos-development.md)을 따른다.
 
 ## 공식 근거

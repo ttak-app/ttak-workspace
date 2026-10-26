@@ -9,7 +9,7 @@ const source = fileURLToPath(new URL('../../', import.meta.url));
 function fixture(t) {
   const root = mkdtempSync(path.join(os.tmpdir(),'ttak-harness-'));
   t.after(() => rmSync(root,{ recursive:true,force:true }));
-  for (const file of ['AGENTS.md','apps/macos/AGENTS.md','apps/web/AGENTS.md','docs','.agents','.github','tools','package.json','.gitignore','.editorconfig']) {
+  for (const file of ['AGENTS.md','apps/macos/AGENTS.md','apps/macos/.swift-format','apps/web/AGENTS.md','apps/web/.prettierrc.json','docs','.agents','.github','tools','package.json','.gitignore','.editorconfig']) {
     mkdirSync(path.dirname(path.join(root,file)),{recursive:true});
     cpSync(path.join(source,file),path.join(root,file),{recursive:true});
   }

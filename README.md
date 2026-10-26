@@ -54,6 +54,8 @@ Swift 6 언어 모드와 macOS 26 이상을 기준으로 합니다.
 
 [CI 운영](docs/ci.md)에서 검사 범위와 최초 실행 절차를 확인합니다.
 
+[코드 포맷 자동화](docs/formatting.md)에서 웹과 Swift의 포맷 수정 및 검사 명령을 확인합니다.
+
 ## Codex 하네스
 
 Codex의 작업 진입점은 [AGENTS.md](AGENTS.md)입니다.
