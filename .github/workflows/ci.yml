@@ -141,8 +141,8 @@ jobs:
           xcrun swift format --version
       - name: Check Swift formatting
         run: npm run format:check:macos
-      - name: Build unsigned macOS app
-        run: npm run macos:build
+      - name: Build and test unsigned macOS app
+        run: npm run macos:test
 
   ci-result:
     name: CI Result

@@ -19,7 +19,7 @@ PR 대상 브랜치만 변경해도 자동 재검사하지 않는다. 새 대상
 | `Changes` | Ubuntu 24.04, Node 24 | PR 전체 변경 감지와 대상 선택 | 5분 |
 | `Harness` | Ubuntu 24.04, Node 24, npm 11.3.0 | 선택된 구조 검사 또는 도구 테스트 | 10분 |
 | `Web` | Ubuntu 24.04, Node 24, npm 11.3.0 | `npm ci` 후 `format:check:web`, `lint:web`, `check-types:web`, `build:web` | 10분 |
-| `macOS Build` | macOS 26 ARM64, Xcode 26.6, Node 24, npm 11.3.0 | `format:check:macos` 후 `macos:build` | 20분 |
+| `macOS Build` | macOS 26 ARM64, Xcode 26.6, Node 24, npm 11.3.0 | `format:check:macos` 후 `macos:test`로 앱 빌드와 테스트 | 20분 |
 | `CI Result` | Ubuntu 24.04, Node 24 | 감지 출력과 선택된 검사 결과 취합 | 5분 |
 
 표의 npm 검사 명령은 저장소 루트에서 `npm run 명령`으로 실행한다.
@@ -103,9 +103,17 @@ Actions 입력은 [checkout](https://github.com/actions/checkout/blob/3d3c42e5aa
 
 ## macOS 검증 범위
 
-`macos:build`는 기존 Ttak 공유 스킴의 Debug 앱을 `CODE_SIGNING_ALLOWED=NO`로 빌드한다.
-배포용 앱이나 설치 파일을 만들지 않는다. 현재 공유 스킴에는 테스트 타깃과 테스트 플랜이 없어
-`macos:test`는 CI에 연결하지 않았다. 테스트 타깃을 도입하면 실제 테스트 실행을 추가한다.
+`macos:test`는 공유 Ttak 스킴의 Debug 앱과 `TtakTests`를 `CODE_SIGNING_ALLOWED=NO`로 빌드하고
+Swift Testing 테스트를 실행한다. 테스트 실패는 job 실패와 `CI Result` 실패로 전달된다.
+같은 job에서 별도 `macos:build`를 먼저 반복하지 않는다. 로컬에서 빌드만 확인할 때는 해당 명령을 사용할 수 있다.
+배포용 앱이나 설치 파일을 만들지 않는다.
+
+기본 테스트는 앱 모듈과 테스트 호스트 연결을 확인하며 실제 실행 수를 Swift Testing 요약에서 확인한다.
+XCTest의 `Executed 0 tests` 출력만으로 Swift Testing 테스트 실행 여부를 판단하지 않는다.
+앱이나 테스트 코드 변경 시 기존 macOS job을 선택하며, 웹 전용 변경에서는 이 job을 실행하지 않는다.
+공통 CI 정의 자체를 변경한 PR은 기존 영향표에 따라 전체 검사를 실행한다.
+
+테스트 타깃은 로컬 Xcode 27.1에서 실행을 확인했다. 이 변경의 GitHub Xcode 26.6 실행은 게시 후 확인한다.
 
 Swift 빌드 통과는 Foundation Models의 한국어 분석 품질, 메뉴바 UI 동작,
 미리 알림 권한이나 EventKit 저장 성공을 보증하지 않는다. 이 동작은 실제 Mac에서 별도로 검증한다.
@@ -126,6 +134,7 @@ npm run build:web
 # 전체 Xcode 26 이상이 설치된 Mac에서 실행
 npm run format:check:macos
 npm run macos:build
+npm run macos:test
 ```
 
 워크플로 파일은 `actionlint .github/workflows/ci.yml`로 정적 검사한다.

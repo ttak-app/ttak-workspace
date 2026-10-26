@@ -19,7 +19,21 @@ Bundle Identifier `app.ttak.Ttak`은 초기 개발용이며 배포 전에 확정
 ## 빌드
 
 ```sh
-xcodebuild -project apps/macos/Ttak.xcodeproj -scheme Ttak -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO build
+npm run macos:build
 ```
 
-위 명령은 저장소 루트에서 실행합니다. 현재 초기 세팅 환경에는 Xcode가 없어 앱 컴파일·실행은 미검증입니다.
+저장소 루트에서 실행합니다. 앱을 서명 없이 Debug로 빌드하며 산출물은 `.tmp/xcode-derived-data`에 저장합니다.
+Debug 심볼은 dSYM으로 생성해 테스트 실패 보고에서 사용할 수 있도록 합니다.
+
+## 단위 테스트
+
+```sh
+npm run macos:test
+```
+
+공유 `Ttak` 스킴의 `TtakTests`를 실행하며 앱과 테스트를 함께 빌드합니다.
+Xcode에서는 같은 스킴과 `My Mac`을 선택한 뒤 Test를 실행합니다.
+기본 테스트는 앱 모듈과 테스트 호스트 연결만 확인합니다. 테스트 작성 방법은 [테스트 안내](TtakTests/README.md)를 참고하세요.
+Swift Testing은 Xcode 도구 체인에 포함되어 있어 별도 패키지를 설치하지 않습니다.
+
+실제 UI 동작, Foundation Models와 EventKit 연동은 별도 기능 검증 대상입니다.

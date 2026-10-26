@@ -23,6 +23,10 @@ Foundation Models 한국어 품질과 실제 미리 알림 저장은 아직 검�
 `npm run macos:build`는 전체 Xcode 26 이상을 확인한 후 현재 Xcode 프로젝트를
 서명 없이 빌드한다. 산출물은 Git에서 제외하는 `.tmp/xcode-derived-data`에 둔다.
 `npm run macos:test`는 먼저 선택한 공유 Ttak 스킴에 실행할 테스트 타깃·플랜이 있는지 확인한다.
+현재 공유 스킴은 Swift Testing 기반 `TtakTests`를 앱 호스트에 연결해 실행한다.
+테스트 파일은 `apps/macos/TtakTests`에 두고 앱 모듈을 가져와 검증한다. 별도 패키지는 추가하지 않는다.
+테스트 실행은 앱 빌드를 포함한다. CI는 기존 macOS job 안에서 포맷 검사 후 이 명령을 실행한다.
+Debug 빌드는 dSYM을 생성해 테스트 실패 보고의 심볼 조회에 사용한다.
 타깃이 없거나 Xcode가 없으면 non-zero로 종료하며 실제 테스트 통과가 아니다.
 새 테스트 타깃을 하네스가 자동 생성하지 않는다.
 
