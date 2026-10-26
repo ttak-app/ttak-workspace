@@ -10,6 +10,8 @@ function impact(path) {
     throw new Error(`Invalid repository path: ${JSON.stringify(path)}`);
   }
   if (path.endsWith('/.gitkeep') || path === '.gitkeep') return [];
+  // The review app consumes this configuration; it is not an app or CI build input.
+  if (path === '.coderabbit.yaml') return [];
   if (path === '.github/workflows/ci.yml' || path.startsWith('tools/ci/') || ['package.json', '.nvmrc'].includes(path)) return flagNames;
   if (path === 'docs/ai-workflow/templates/status.json') return ['harness_structure', 'harness_tests'];
   if (['.gitignore', '.editorconfig', 'docs/development.md', 'docs/ci.md', '.github/pull_request_template.md'].includes(path)

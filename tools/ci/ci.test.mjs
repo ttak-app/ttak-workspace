@@ -28,6 +28,7 @@ const matrix = [
   ['docs/ai-workflow/tasks/3/spec.md', ['harness_structure']],
   ['docs/ai-workflow/templates/status.json', ['harness_structure', 'harness_tests']],
   ['README.md', []], ['apps/macos/TtakTests/README.md', []],
+  ['.coderabbit.yaml', []],
   ['apps/web/README.md', []], ['docs/notes.md', []],
   ...['docs/ci.md', 'docs/development.md', '.editorconfig', '.github/ISSUE_TEMPLATE/issue_template.md', '.github/pull_request_template.md'].map((file) => [file, ['harness_structure']]),
   ['apps/macos/Ttak/Resources/.gitkeep', []], ['.agents/.gitkeep', []],
@@ -37,6 +38,8 @@ const matrix = [
 test('consumer matrix selects exactly the affected targets', () => {
   for (const [file, names] of matrix) assert.deepEqual(classifyPaths([file]).selected, selected(...names), file);
   assert.deepEqual(classifyPaths(['apps/web/src/App.tsx', 'apps/macos/Ttak/App/TtakApp.swift']).selected, selected('web', 'macos'));
+  assert.deepEqual(classifyPaths(['.coderabbit.yaml', 'apps/web/src/App.tsx']).selected, selected('web'));
+  assert.deepEqual(classifyPaths(['.coderabbit.yaml', 'apps/macos/Ttak/App/TtakApp.swift']).selected, selected('macos'));
   assert.equal(classifyPaths(['.gitignore', '.gitignore']).fileCount, 1);
 });
 
