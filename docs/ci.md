@@ -18,13 +18,15 @@ PR 대상 브랜치만 변경해도 자동 재검사하지 않는다. 새 대상
 | --- | --- | --- | --- |
 | `Changes` | Ubuntu 24.04, Node 24 | PR 전체 변경 감지와 대상 선택 | 5분 |
 | `Harness` | Ubuntu 24.04, Node 24, npm 11.3.0 | 선택된 구조 검사 또는 도구 테스트 | 10분 |
-| `Web` | Ubuntu 24.04, Node 24, npm 11.3.0 | `npm ci` 후 `lint:web`, `check-types:web`, `build:web` | 10분 |
-| `macOS Build` | macOS 26 ARM64, Xcode 26.6, Node 24, npm 11.3.0 | `macos:build` | 20분 |
+| `Web` | Ubuntu 24.04, Node 24, npm 11.3.0 | `npm ci` 후 `format:check:web`, `lint:web`, `check-types:web`, `build:web` | 10분 |
+| `macOS Build` | macOS 26 ARM64, Xcode 26.6, Node 24, npm 11.3.0 | `format:check:macos` 후 `macos:build` | 20분 |
 | `CI Result` | Ubuntu 24.04, Node 24 | 감지 출력과 선택된 검사 결과 취합 | 5분 |
 
 표의 npm 검사 명령은 저장소 루트에서 `npm run 명령`으로 실행한다.
 Changes 성공 뒤 선택된 세 검사 작업을 병렬로 실행하고, CI Result는 감지 실패나 선행 작업의 실패와 생략에도 실행한다.
 선택되지 않은 앱 job에는 runner를 할당하지 않으며 웹 설치나 Xcode 실행도 생략한다.
+포맷 검사는 [코드 포맷 자동화](formatting.md)를 따른다. 앱별 포맷 설정 변경도 해당 앱만 선택하고,
+선택한 포맷 검사 실패는 기존 job 실패와 CI Result 판정으로 전파한다. CI는 파일을 수정하지 않는다.
 모든 작업은 저장소 내용 읽기 권한만 사용한다. 배포 토큰이나 인증서, 개인 일정 데이터는 필요하지 않다.
 
 ## 변경 감지와 영향 범위
@@ -117,10 +119,12 @@ npm ci
 npm run workflow:harness-check
 npm run workflow:test
 node --test tools/ci/*.test.mjs
+npm run format:check:web
 npm run lint:web
 npm run check-types:web
 npm run build:web
 # 전체 Xcode 26 이상이 설치된 Mac에서 실행
+npm run format:check:macos
 npm run macos:build
 ```
 
