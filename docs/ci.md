@@ -47,6 +47,7 @@ Git 인자를 배열로 전달하고 NUL 구분 경로를 읽는다. rename 감�
 | 루트 `.gitignore`, `.editorconfig`, 연결된 개발과 CI 문서, GitHub 템플릿 | Harness 구조 |
 | 루트 `package.json`, `.nvmrc`, `ci.yml`, `tools/ci` | 전체 |
 | 일반 설명 문서와 `.gitkeep` | 앱 빌드와 도구 테스트 생략 |
+| `.coderabbit.yaml` | 리뷰 앱 설정이므로 앱 빌드와 도구 테스트 생략 |
 
 여러 대상 변경은 합집합을 실행한다. 하네스 문서와 `.gitkeep`은 앱 코드 패턴보다 먼저 구분한다.
 `Harness`는 구조만 선택되면 `workflow:harness-check`만 실행한다. 도구 테스트가 선택되면
