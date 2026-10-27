@@ -13,14 +13,151 @@ private func guardContext() -> AnalysisContext {
 
 private func candidate(
     _ source: String, action: String, date: String? = nil, time: String? = nil, notes: String = "",
-    titleParts: [String] = []
+    titleParts: [String] = [], location: String? = nil
 ) -> GroundedSchedule {
     GroundedSchedule(
-        sourceText: source, actionText: action, titleParts: titleParts, dateText: date,
+        sourceText: source, actionText: action, titleParts: titleParts, locationText: location,
+        dateText: date,
         startTimeText: time, notes: notes, listID: nil)
 }
 
 struct ExtractionGuardTests {
+    @Test(arguments: [["런닝갈거야"], ["런닝", "갈거야"], ["런닝"]])
+    func conversationalEndingMayBeIncludedOrOmittedInTitleParts(parts: [String]) throws {
+        #expect(try ScheduleTitleNormalizer.normalize(action: "런닝갈거야", parts: parts) == "런닝")
+    }
+
+    @Test func normalizerPreservesSourceAdjacency() throws {
+        #expect(
+            try ScheduleTitleNormalizer.normalize(action: "가상동에서", parts: ["가상동", "에서"]) == "가상동에서")
+        #expect(
+            try ScheduleTitleNormalizer.normalize(action: "온라인 줌 미팅", parts: ["온라인", "줌", "미팅"])
+                == "온라인 줌 미팅")
+        #expect(
+            try ScheduleTitleNormalizer.normalize(action: "아리랑 공연", parts: ["아리", "랑", "공연"])
+                == "아리랑 공연")
+    }
+
+    @Test func modelWhitespaceDoesNotReplaceTheActualSourceBoundaries() {
+        let source = "가상동에서 온라인 미팅"
+        let result = ScheduleExtractionGuard.validate(
+            [
+                candidate(source, action: "가상동 에서 온 라인 미팅", titleParts: ["가상동", "에서", "온라인", "미팅"])
+            ], source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.first?.title == source)
+    }
+
+    @Test func spacedModelEvidenceCannotHideAnActionConnector() {
+        let source = "회의하고 점심"
+        let result = ScheduleExtractionGuard.validate(
+            [
+                candidate(source, action: "회의하 고 점심", titleParts: [source])
+            ], source: source, context: guardContext())
+        #expect(!result.issues.isEmpty)
+    }
+
+    @Test func conversationalEndingAndLocationAreNormalizedByAppCode() {
+        let source = "12시에 민수랑 점심 약속 있어 가상동에서"
+        let action = "민수랑 점심 약속 있어 가상동에서"
+        let result = ScheduleExtractionGuard.validate(
+            [
+                candidate(
+                    source, action: action, time: "12시",
+                    titleParts: ["민수", "점심 약속", "있어", "가상동", "에서"], location: "가상동")
+            ], source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.first?.title == "민수 점심 약속")
+        #expect(result.drafts.first?.timeText == "12:00")
+        #expect(result.drafts.first?.notes.contains("장소: 가상동") == true)
+        #expect(result.drafts.first?.notes.contains(source) == true)
+    }
+
+    @Test func omittedEndingAndLocationDoNotConflictWithEvidenceGuard() {
+        let source = "민수랑 점심 약속 있어 가상동에서"
+        let result = ScheduleExtractionGuard.validate(
+            [
+                candidate(source, action: source, titleParts: ["민수", "점심 약속"], location: "가상동")
+            ], source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.first?.title == "민수 점심 약속")
+    }
+
+    @Test func locationOutsideTheActionPhraseStillSurvivesInNotes() {
+        let source = "민수랑 점심 약속 있어 가상동에서"
+        let result = ScheduleExtractionGuard.validate(
+            [
+                candidate(
+                    source, action: "민수랑 점심 약속", titleParts: ["민수", "점심 약속"], location: "가상동")
+            ], source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.first?.title == "민수 점심 약속")
+        #expect(result.drafts.first?.notes.contains("장소: 가상동") == true)
+    }
+
+    @Test func repairRetainsLocationEvidenceUntilNotesAreBuilt() throws {
+        let source = "민수랑 점심 약속 있어 가상동에서"
+        let rows = try ScheduleExtractionGuard.groundActions(
+            [
+                GroundedAction(
+                    actionText: source, titleParts: ["민수", "점심 약속"], locationText: "가상동")
+            ], source: source)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.first?.title == "민수 점심 약속")
+        #expect(result.drafts.first?.notes.contains("장소: 가상동") == true)
+    }
+
+    @Test(arguments: ["민수 점심 약속 있어", "민수 점심 약속 있어요", "민수 점심 약속 있습니다", "민수 점심 약속 있어!"])
+    func commonConversationalEndingsAreRemoved(action: String) throws {
+        #expect(
+            try ScheduleTitleNormalizer.normalize(action: action, parts: [action]) == "민수 점심 약속")
+    }
+
+    @Test(arguments: [
+        "회의 안 있어", "회의안갈거야", "회의못갈거야", "집에 갈거야", "찾아갈거야", "노래 '갈거야' 듣기", "회의 취소하지 않기",
+    ])
+    func predicatesWithProtectedMeaningArePreserved(action: String) throws {
+        #expect(try ScheduleTitleNormalizer.normalize(action: action, parts: [action]) == action)
+    }
+
+    @Test func cancellationAndNegationCannotBeOmittedToCleanTheTitle() throws {
+        for (action, parts) in [
+            ("회의 취소 있어", ["회의"]), ("회의 안 있어", ["회의", "있어"]), ("온라인 줌 미팅 있어", ["온라인", "미팅"]),
+        ] {
+            #expect(throws: (any Error).self) {
+                try ScheduleTitleNormalizer.normalize(action: action, parts: parts)
+            }
+        }
+        #expect(
+            try ScheduleTitleNormalizer.normalize(action: "회의 취소 있어", parts: ["회의", "취소", "있어"])
+                == "회의 취소")
+    }
+
+    @Test(arguments: [
+        ("가상역에서 회의", "가상"), ("온라인 줌 미팅", "온라인"), ("다른동 회의", "가상동"), ("가상동 회의 가상동", "가상동"),
+    ])
+    func absentAmbiguousOrNonVenueLocationIsRejected(source: String, location: String) {
+        let result = ScheduleExtractionGuard.validate(
+            [
+                candidate(source, action: source, titleParts: [source], location: location)
+            ], source: source, context: guardContext())
+        #expect(!result.issues.isEmpty)
+    }
+
+    @Test func aVenueAndExistencePhraseCannotBecomeATitle() {
+        #expect(throws: (any Error).self) {
+            try ScheduleTitleNormalizer.normalize(
+                action: "가상동 있어", parts: ["가상동", "있어"], location: "가상동")
+        }
+    }
+
+    @Test func aLocationCannotBecomeAnActivityTitleByItself() {
+        #expect(throws: (any Error).self) {
+            try ScheduleTitleNormalizer.normalize(action: "가상동에서", parts: ["가상동"], location: "가상동")
+        }
+    }
+
     @Test func titleFragmentsRemoveOnlyTheLocatedParticle() {
         let source = "12시에 민수랑 점심"
         let result = ScheduleExtractionGuard.validate(
@@ -36,7 +173,7 @@ struct ExtractionGuardTests {
     @Test(arguments: ["온라인 줌 미팅", "아리랑 공연", "디자인 및 개발 회의", "친구와 저녁 식사"])
     func completeTitlePhraseKeepsAllItsWords(action: String) throws {
         #expect(
-            try ScheduleExtractionGuard.normalizedTitle(action: action, parts: [action]) == action)
+            try ScheduleTitleNormalizer.normalize(action: action, parts: [action]) == action)
     }
 
     @Test func titleCannotDropAPersonModeOrNegation() {
@@ -64,21 +201,21 @@ struct ExtractionGuardTests {
     @Test func titleFragmentsKeepCompoundConjunctions() {
         let action = "디자인 및 개발 회의"
         #expect(throws: (any Error).self) {
-            try ScheduleExtractionGuard.normalizedTitle(action: action, parts: ["디자인", "개발 회의"])
+            try ScheduleTitleNormalizer.normalize(action: action, parts: ["디자인", "개발 회의"])
         }
     }
 
     @Test func titleCannotInventOrReorderWords() {
         for parts in [["점심", "민수"], ["민수", "저녁"], ["민수", ""]] {
             #expect(throws: (any Error).self) {
-                try ScheduleExtractionGuard.normalizedTitle(action: "민수랑 점심", parts: parts)
+                try ScheduleTitleNormalizer.normalize(action: "민수랑 점심", parts: parts)
             }
         }
     }
 
     @Test func missingTitlePartsKeepSourcePhrase() throws {
         #expect(
-            try ScheduleExtractionGuard.normalizedTitle(action: "민수랑 점심", parts: []) == "민수랑 점심")
+            try ScheduleTitleNormalizer.normalize(action: "민수랑 점심", parts: []) == "민수랑 점심")
     }
 
     @Test func repairKeepsTitleFragmentsAndVagueTimeWithTheFollowingActivity() throws {

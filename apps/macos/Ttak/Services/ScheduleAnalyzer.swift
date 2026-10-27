@@ -50,9 +50,13 @@ struct GroundedSchedule: Sendable {
     var actionText: String
     @Guide(
         description:
-            "actionText의 인물, 장소, 진행 방식과 행동을 빠짐없이 원문 순서로 복사한 제목 조각. 조각 사이 조사만 생략 가능. 고유명사를 쪼개거나 의미 단어를 생략하지 않는다"
+            "actionText의 인물, 진행 방식과 행동을 보존한 원문 순서의 제목 조각. 조사와 불필요한 문장 표현은 제외 가능. 장소는 locationText로 보존. 부정 및 취소 의미와 고유명사는 유지"
     )
     var titleParts: [String] = []
+    @Guide(
+        description:
+            "해당 일정의 실제 장소 이름을 sourceText에서 그대로 복사. 조사는 제외. 온라인이나 도구 이름을 장소로 만들지 않는다. 없거나 불확실하면 nil")
+    var locationText: String? = nil
     @Guide(description: "그 행동에 적용되는 날짜 표현을 입력에서 그대로 복사. 앞선 공유 날짜도 가능. 날짜가 없으면 nil")
     var dateText: String?
     @Guide(
@@ -87,9 +91,14 @@ struct GroundedAction: Sendable {
     var actionText: String
     @Guide(
         description:
-            "Ordered verbatim title fragments covering every meaningful word in actionText. Only grammatical particles between fragments may be omitted. Keep proper names intact, including name endings that look like particles."
+            "Ordered verbatim title fragments preserving people, modes, objects, actions, negation and cancellation. Grammatical particles and conversational endings may be omitted. Keep physical venue information in locationText and keep proper names intact."
     )
     var titleParts: [String]
+    @Guide(
+        description:
+            "Actual physical venue name copied verbatim from the same activity context, excluding particles. Online modes and tools are not physical venues. nil if absent or uncertain."
+    )
+    var locationText: String? = nil
 }
 
 @Generable
@@ -135,8 +144,10 @@ struct FoundationScheduleModel: ScheduleModelServing {
                     Identify each event first, then copy its complete activity phrase as one continuous source substring.
                     Preserve people, venue or mode qualifiers, objects, and actions together; do not reduce the phrase to an action noun.
                     Keep internal grammatical particles in actionText for source matching; omit only surrounding date/time expressions and trailing sentence endings.
-                    Copy ordered titleParts from actionText covering all meaningful words; only particles between parts may be omitted.
-                    Keep proper names intact and preserve modifiers, negation, and compound title conjunctions; do not rearrange words.
+                    Copy titleParts in source order, preserving people, modes, objects and actions. Omit grammatical particles and unnecessary conversational endings.
+                    Keep the evidence actionText unchanged. Copy an actual physical venue into locationText so code can retain it in notes.
+                    Do not put conversational endings into titleParts merely to cover the evidence text. Do not split adjacent source words to invent spaces.
+                    Keep proper names intact and preserve modifiers, negation, cancellation, and compound title conjunctions; do not rearrange words.
                     Do not invent activities, synonyms, or missing details. Do not move qualifiers from another event.
                     Venue-only, supplies-only, and message timestamp lines are metadata, not activities.
                     A compound meeting title is one activity. Do not split coordinated subject nouns inside its name.
@@ -157,7 +168,9 @@ struct FoundationScheduleModel: ScheduleModelServing {
                 sourceText와 actionText는 원문에서 연속된 구절을 그대로 복사한다. 원문에 없는 행동을 만들지 않는다.
                 actionText는 행동 명사 하나로 축약하지 않는다. 같은 일정의 인물과 수식어 및 행동을 함께 보존한다.
                 actionText 내부의 조사와 단어 순서는 원문 근거 대조를 위해 유지하고, 앞뒤 날짜와 시각 및 문장 끝 서술만 구분한다.
-                titleParts에는 actionText의 의미 단어를 빠짐없이 원문 순서로 복사하고 조각 사이 조사만 생략한다.
+                titleParts에는 인물, 진행 방식과 행동을 원문 순서로 보존하고 조사 및 불필요한 문장 표현을 제외한다. 근거인 actionText는 바꾸지 않는다.
+                실제 장소는 locationText에 원문 이름을 복사해 메모로 보존하며, 제목 조각을 채우려고 문장 표현을 다시 넣지 않는다.
+                원문에서 붙어 있는 단어를 임의로 쪼개 공백을 만들지 않는다. 부정과 취소 의미는 불필요한 문장 표현으로 취급하지 않는다.
                 고유명사는 조사처럼 보이는 끝 글자도 포함해 보존한다. 수식어, 부정 표현과 복합 제목의 접속어를 삭제하거나 단어 순서를 바꾸지 않는다.
                 연결된 독립 행동을 각각 포함하고 다른 행동을 notes에 합쳐 누락하지 않는다.
                 날짜와 시각을 행동 제목에서 구분한다. 앞선 날짜가 이어지는 행동은 그 날짜 원문을 dateText에 복사한다.
