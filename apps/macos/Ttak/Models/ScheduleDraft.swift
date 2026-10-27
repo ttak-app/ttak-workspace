@@ -89,13 +89,14 @@ enum ScheduleDateParser {
 }
 
 enum ScheduleTimeParser {
+    static let clockPattern =
+        #"(?<![0-9])(오전|오후|아침|저녁|밤)?\s*([0-9]{1,2})(?::([0-9]{2})|시(?:\s*([0-9]{1,2})분)?(?:\s*(반))?)(?![0-9])"#
+
     static func clock(from expression: String?, source: String) -> (hour: Int, minute: Int)? {
         guard let expression else { return nil }
         let value = expression.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty, source.contains(value) else { return nil }
-        let pattern =
-            #"(?<![0-9])(오전|오후|아침|저녁|밤)?\s*([0-9]{1,2})(?::([0-9]{2})|시(?:\s*([0-9]{1,2})분)?(?:\s*(반))?)(?![0-9])"#
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return nil }
+        guard let regex = try? NSRegularExpression(pattern: clockPattern) else { return nil }
         let matches = regex.matches(in: value, range: NSRange(value.startIndex..., in: value))
         guard matches.count == 1, let match = matches.first,
             let clockRange = Range(match.range, in: value),
