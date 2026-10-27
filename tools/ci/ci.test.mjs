@@ -206,6 +206,8 @@ test('workflow uses default PR events, selected jobs and an always-running gate'
   assert.match(blocks.harness, /npm run workflow:test\n\s+node --test tools\/ci\/\*\.test\.mjs/);
   assert.match(blocks.web, /run: npm run format:check:web/);
   assert.match(blocks['macos-build'], /run: npm run format:check:macos/);
+  assert.match(blocks['macos-build'], /run: npm run macos:test/);
+  assert.ok(!blocks['macos-build'].includes('run: npm run macos:build'));
   assert.ok(!source.includes('continue-on-error'));
   for (const name of ['web', 'harness', 'macos-build']) {
     const condition = blocks[name].match(/^    if: (.+)$/m)[1];
