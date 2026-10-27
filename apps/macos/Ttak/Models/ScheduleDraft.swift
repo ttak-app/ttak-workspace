@@ -127,8 +127,6 @@ enum ScheduleTimeParser {
             guard ["오전", "오후"].contains(period), (1...12).contains(hour) else { return nil }
             hour %= 12
             if period == "오후" { hour += 12 }
-        } else if capture(3) == nil && hour < 13 {
-            return nil
         }
         guard (0...23).contains(hour) else { return nil }
         return (hour, minute)

@@ -134,9 +134,28 @@ struct ScheduleValidationTests {
 
     @Test func vagueAndEndOnlyTimeNeverBecomeStartClock() {
         #expect(ScheduleTimeParser.clock(from: "저녁", source: "저녁 회식") == nil)
-        #expect(ScheduleTimeParser.clock(from: "1시", source: "1시 모임") == nil)
         #expect(ScheduleTimeParser.clock(from: "18:00", source: "지금~18:00까지 모임") == nil)
         #expect(ScheduleTimeParser.clock(from: "13:08", source: "메시지 발송 시각 13:08") == nil)
+    }
+
+    @Test(arguments: [
+        ("0시", 0, 0), ("1시", 1, 0), ("9시", 9, 0), ("12시", 12, 0), ("21시", 21, 0), ("9시 반", 9, 30),
+        ("12시 15분", 12, 15),
+    ])
+    func numericClockDefaultsToTwentyFourHour(expression: String, hour: Int, minute: Int) {
+        let result = ScheduleTimeParser.clock(from: expression, source: "\(expression)에 합성 모임")
+        #expect(result?.hour == hour)
+        #expect(result?.minute == minute)
+    }
+
+    @Test func twentyFourHourDefaultKeepsExplicitPeriodsAndBounds() {
+        #expect(ScheduleTimeParser.clock(from: "9시", source: "오후 9시 합성 모임")?.hour == 21)
+        #expect(ScheduleTimeParser.clock(from: "12시", source: "오전 12시 합성 모임")?.hour == 0)
+        #expect(ScheduleTimeParser.clock(from: "24시", source: "24시 합성 모임") == nil)
+        #expect(ScheduleTimeParser.clock(from: "25시", source: "25시 합성 모임") == nil)
+        #expect(ScheduleTimeParser.clock(from: "9시 60분", source: "9시 60분 합성 모임") == nil)
+        #expect(ScheduleTimeParser.clock(from: "오후 13시", source: "오후 13시 합성 모임") == nil)
+        #expect(ScheduleTimeParser.clock(from: "저녁", source: "저녁 합성 모임") == nil)
     }
 
     @Test func explicitClockConversionKeepsMinutes() {

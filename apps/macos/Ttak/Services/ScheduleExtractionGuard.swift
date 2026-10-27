@@ -20,8 +20,15 @@ enum ScheduleExtractionGuard {
     }
 
     static func groundActions(_ activities: [String], source: String) throws -> [GroundedSchedule] {
-        let groups = Dictionary(grouping: activities, by: { $0 })
-        var located: [(text: String, range: NSRange)] = []
+        try groundActions(
+            activities.map { GroundedAction(actionText: $0, titleParts: []) }, source: source)
+    }
+
+    static func groundActions(_ activities: [GroundedAction], source: String) throws
+        -> [GroundedSchedule]
+    {
+        let groups = Dictionary(grouping: activities, by: \.actionText)
+        var located: [(text: String, range: NSRange, parts: [String])] = []
         for (activity, requested) in groups {
             var base = activity
             var positions = actionMatches(base, in: source)
@@ -38,7 +45,9 @@ enum ScheduleExtractionGuard {
                 throw AnalysisFailure.unverifiedExtraction(
                     "행동 원문의 위치가 없거나 여러 위치를 구별하지 못했어요: \(activity)")
             }
-            located += positions.map { ((source as NSString).substring(with: $0), $0) }
+            located += zip(positions, requested).map {
+                ((source as NSString).substring(with: $0.0), $0.0, $0.1.titleParts)
+            }
         }
         located.sort { $0.range.location < $1.range.location }
         for index in located.indices where index > 0 {
@@ -51,6 +60,7 @@ enum ScheduleExtractionGuard {
             dateEvidence(in: source).map(\.range)
             + matches(
                 ScheduleTimeParser.clockPattern, in: source)
+            + matches(timeOfDayPattern, in: source)
         var starts: [Int] = []
         for index in located.indices {
             let minimum = index == 0 ? 0 : NSMaxRange(located[index - 1].range)
@@ -78,7 +88,8 @@ enum ScheduleExtractionGuard {
                     !action.contains($0) && ScheduleTimeParser.clock(from: $0, source: quote) != nil
                 }
             return GroundedSchedule(
-                sourceText: quote, actionText: action, dateText: nil,
+                sourceText: quote, actionText: action, titleParts: located[index].parts,
+                dateText: nil,
                 startTimeText: clocks.count == 1 ? clocks.first : nil, notes: "", listID: nil)
         }
     }
@@ -106,6 +117,13 @@ enum ScheduleExtractionGuard {
             guard !action.isEmpty, actionRanges.count == 1, let relativeAction = actionRanges.first
             else {
                 issues.append("\(label): actionText는 sourceText 안에 있는 행동 제목이어야 합니다")
+                continue
+            }
+            let title: String
+            do {
+                title = try normalizedTitle(action: action, parts: item.titleParts)
+            } catch {
+                issues.append("\(label): 제목 조각이 원문 순서와 의미 단어를 보존하지 않았습니다")
                 continue
             }
             let actionRange = NSRange(
@@ -167,7 +185,7 @@ enum ScheduleExtractionGuard {
                 issues.append("\(label): notes를 입력에 실제로 있는 부가 정보로 복사하세요")
             }
             var fields = normalizedFields(
-                action: action, date: dateExpression, context: context,
+                action: title, date: dateExpression, context: context,
                 time: rawTime, listID: item.listID, notes: notes)
             if localDates.count > 1 {
                 fields.dateKind = .uncertain
@@ -185,6 +203,22 @@ enum ScheduleExtractionGuard {
             let containedActions = Set(actions.filter { contains(scope.quote, $0) }.map(\.location))
             if containedActions.count > 1 {
                 issues.append("\(scope.label): sourceText에 여러 행동이 겹칩니다. 해당 행동 구간만 복사하세요")
+            }
+            if let nextAction = actions.filter({ $0.location >= NSMaxRange(scope.action) })
+                .min(by: { $0.location < $1.location })
+            {
+                for period in matches(timeOfDayPattern, in: source)
+                where contains(scope.quote, period) && period.location >= NSMaxRange(scope.action)
+                    && NSMaxRange(period) <= nextAction.location
+                {
+                    let gap = nsSource.substring(
+                        with: NSRange(
+                            location: NSMaxRange(period),
+                            length: nextAction.location - NSMaxRange(period)))
+                    if gap.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        issues.append("\(scope.label): 다음 행동 바로 앞의 시간대를 이전 행동 구간에 붙이지 마세요")
+                    }
+                }
             }
             for note in scope.notes {
                 let locations = matches(NSRegularExpression.escapedPattern(for: note), in: source)
@@ -217,6 +251,44 @@ enum ScheduleExtractionGuard {
         }
         return ScheduleGuardResult(drafts: drafts, issues: Array(Set(issues)).sorted())
     }
+
+    static func normalizedTitle(action: String, parts: [String]) throws -> String {
+        guard !parts.isEmpty else { return action }
+        let source = action as NSString
+        var cursor = 0
+        var title: [String] = []
+        let removableParticles: Set<String> = [
+            "이랑", "랑", "와", "과", "에", "에서", "으로", "로", "을", "를", "은", "는", "이", "가",
+        ]
+        for part in parts {
+            let fragment = part.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !fragment.isEmpty, !fragment.contains("\n"),
+                let range = matches(NSRegularExpression.escapedPattern(for: fragment), in: action)
+                    .first(where: { $0.location >= cursor })
+            else {
+                throw AnalysisFailure.unverifiedExtraction("제목 조각의 원문 위치를 확인하지 못했어요")
+            }
+            let gap = source.substring(
+                with: NSRange(location: cursor, length: range.location - cursor))
+            let remaining = gap.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard
+                remaining.isEmpty
+                    || (!title.isEmpty && removableParticles.contains(remaining)
+                        && gap.last?.isWhitespace == true)
+            else {
+                throw AnalysisFailure.unverifiedExtraction("제목에서 조사 이외의 정보가 빠졌어요")
+            }
+            title.append(fragment)
+            cursor = NSMaxRange(range)
+        }
+        guard source.substring(from: cursor).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else {
+            throw AnalysisFailure.unverifiedExtraction("제목 끝의 의미 단어가 빠졌어요")
+        }
+        return title.joined(separator: " ")
+    }
+
+    private static let timeOfDayPattern = #"(?<![가-힣])(?:오전|오후|아침|저녁|밤)(?:에는|에)?(?=\s|$)"#
 
     private static func normalizedFields(
         action: String, date: String?, context: AnalysisContext,

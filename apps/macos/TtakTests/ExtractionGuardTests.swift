@@ -12,14 +12,102 @@ private func guardContext() -> AnalysisContext {
 }
 
 private func candidate(
-    _ source: String, action: String, date: String? = nil, time: String? = nil, notes: String = ""
+    _ source: String, action: String, date: String? = nil, time: String? = nil, notes: String = "",
+    titleParts: [String] = []
 ) -> GroundedSchedule {
     GroundedSchedule(
-        sourceText: source, actionText: action, dateText: date,
+        sourceText: source, actionText: action, titleParts: titleParts, dateText: date,
         startTimeText: time, notes: notes, listID: nil)
 }
 
 struct ExtractionGuardTests {
+    @Test func titleFragmentsRemoveOnlyTheLocatedParticle() {
+        let source = "12시에 민수랑 점심"
+        let result = ScheduleExtractionGuard.validate(
+            [
+                candidate(source, action: "민수랑 점심", time: "12시", titleParts: ["민수", "점심"])
+            ], source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.first?.title == "민수 점심")
+        #expect(result.drafts.first?.timeText == "12:00")
+        #expect(result.drafts.first?.notes.contains("민수랑 점심") == true)
+    }
+
+    @Test(arguments: ["온라인 줌 미팅", "아리랑 공연", "디자인 및 개발 회의", "친구와 저녁 식사"])
+    func completeTitlePhraseKeepsAllItsWords(action: String) throws {
+        #expect(
+            try ScheduleExtractionGuard.normalizedTitle(action: action, parts: [action]) == action)
+    }
+
+    @Test func titleCannotDropAPersonModeOrNegation() {
+        for (action, parts) in [
+            ("민수랑 점심", ["점심"]), ("온라인 줌 미팅", ["온라인", "미팅"]), ("회의 취소", ["회의"]),
+            ("회의 말고 점심", ["회의", "점심"]),
+        ] {
+            let result = ScheduleExtractionGuard.validate(
+                [
+                    candidate(action, action: action, titleParts: parts)
+                ], source: action, context: guardContext())
+            #expect(!result.issues.isEmpty)
+        }
+    }
+
+    @Test func titleFragmentsCannotHideMergedActivities() {
+        let source = "회의하고 점심"
+        let result = ScheduleExtractionGuard.validate(
+            [
+                candidate(source, action: source, titleParts: ["회의", "점심"])
+            ], source: source, context: guardContext())
+        #expect(!result.issues.isEmpty)
+    }
+
+    @Test func titleFragmentsKeepCompoundConjunctions() {
+        let action = "디자인 및 개발 회의"
+        #expect(throws: (any Error).self) {
+            try ScheduleExtractionGuard.normalizedTitle(action: action, parts: ["디자인", "개발 회의"])
+        }
+    }
+
+    @Test func titleCannotInventOrReorderWords() {
+        for parts in [["점심", "민수"], ["민수", "저녁"], ["민수", ""]] {
+            #expect(throws: (any Error).self) {
+                try ScheduleExtractionGuard.normalizedTitle(action: "민수랑 점심", parts: parts)
+            }
+        }
+    }
+
+    @Test func missingTitlePartsKeepSourcePhrase() throws {
+        #expect(
+            try ScheduleExtractionGuard.normalizedTitle(action: "민수랑 점심", parts: []) == "민수랑 점심")
+    }
+
+    @Test func repairKeepsTitleFragmentsAndVagueTimeWithTheFollowingActivity() throws {
+        let source = "9시에 산책갈거야 그리고 12시에 민수랑 점심 일정있고 저녁에 개발 동아리 회식 있어"
+        let activities = [
+            GroundedAction(actionText: "산책", titleParts: ["산책"]),
+            GroundedAction(actionText: "민수랑 점심", titleParts: ["민수", "점심"]),
+            GroundedAction(actionText: "개발 동아리 회식", titleParts: ["개발 동아리 회식"]),
+        ]
+        let candidates = try ScheduleExtractionGuard.groundActions(activities, source: source)
+        let result = ScheduleExtractionGuard.validate(
+            candidates, source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.map(\.title) == ["산책", "민수 점심", "개발 동아리 회식"])
+        #expect(result.drafts.map(\.timeText) == ["09:00", "12:00", ""])
+        #expect(candidates[2].sourceText.hasPrefix("저녁에"))
+        #expect(!candidates[1].sourceText.contains("저녁에"))
+    }
+
+    @Test func precedingQuoteCannotKeepTheNextActionsTimeOfDay() {
+        let source = "12시에 민수랑 점심 일정있고 저녁에 동아리 회식 있어"
+        let result = ScheduleExtractionGuard.validate(
+            [
+                candidate("12시에 민수랑 점심 일정있고 저녁에", action: "민수랑 점심", time: "12시"),
+                candidate("동아리 회식 있어", action: "동아리 회식"),
+            ], source: source, context: guardContext())
+        #expect(result.issues.contains { $0.contains("시간대") })
+    }
+
     @Test(arguments: [
         ("내일은 회의", "회의", "2026-10-28"), ("모레에 점심", "점심", "2026-10-29"),
         ("내일, 회의", "회의", "2026-10-28"),
@@ -321,6 +409,19 @@ struct ExtractionRetryTests {
         }
         #expect(await model.calls == 2)
     }
+    @Test func titleLossTriggersTheExistingSingleRepair() async throws {
+        let source = "12시에 민수랑 점심"
+        let model = ScriptedModel([
+            [candidate(source, action: "민수랑 점심", time: "12시", titleParts: ["점심"])],
+            [candidate(source, action: "민수랑 점심", time: "12시", titleParts: ["민수", "점심"])],
+        ])
+        let result = try await ScheduleAnalyzer(model: model).analyze(
+            text: source, context: guardContext())
+        #expect(result.first?.title == "민수 점심")
+        #expect(result.first?.timeText == "12:00")
+        #expect(await model.calls == 2)
+    }
+
     @Test func validResultDoesNotTriggerRepair() async throws {
         let model = ScriptedModel([[candidate("내일 회의", action: "회의", date: "내일")]])
         let result = try await ScheduleAnalyzer(model: model).analyze(
