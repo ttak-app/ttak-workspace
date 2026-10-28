@@ -94,10 +94,14 @@ enum ScheduleExtractionGuard {
             let clocks = matches(
                 ScheduleTimeParser.clockPattern,
                 in: quote
-            ).map { (quote as NSString).substring(with: $0).trimmingCharacters(in: .whitespaces) }
-                .filter {
-                    !action.contains($0) && ScheduleTimeParser.clock(from: $0, source: quote) != nil
-                }
+            ).compactMap { range -> String? in
+                let clock = (quote as NSString).substring(with: range).trimmingCharacters(
+                    in: .whitespaces)
+                guard !action.contains(clock),
+                    ScheduleTimeParser.clock(from: clock, source: quote, sourceRange: range) != nil
+                else { return nil }
+                return clock
+            }
             return GroundedSchedule(
                 sourceText: quote, actionText: action, titleParts: located[index].parts,
                 locationText: located[index].location, dateText: nil,
@@ -137,6 +141,22 @@ enum ScheduleExtractionGuard {
                     body = String(body.dropFirst(4))
                     continue
                 }
+                // A complete leading range has one reminder time: its start. Keep the
+                // entire range in sourceText, and remove it only from the action title.
+                let clock = ScheduleTimeParser.clockPattern
+                let rangePattern =
+                    "^(?:\(clock))[ \\t]*부터[ \\t]*(?:\(clock))[ \\t]*까지(?:에는|는|에)?(?=[ \\t]|$)"
+                if let span = matches(rangePattern, in: body).first,
+                    let spanRange = Range(span, in: body),
+                    let firstClock = matches(clock, in: body).first,
+                    let startTime = Range(firstClock, in: body),
+                    ScheduleTimeParser.clock(from: String(body[startTime]), source: quote) != nil,
+                    !body[spanRange.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines)
+                        .isEmpty
+                {
+                    body = String(body[spanRange.upperBound...])
+                    continue
+                }
                 let temporal =
                     (dateEvidence(in: body).map(\.range)
                     + matches(ScheduleTimeParser.clockPattern, in: body)
@@ -168,9 +188,15 @@ enum ScheduleExtractionGuard {
                     body = String(body.dropLast(2)).trimmingCharacters(in: .whitespacesAndNewlines)
                 }
             }
-            let clocks = matches(ScheduleTimeParser.clockPattern, in: quote).map {
-                (quote as NSString).substring(with: $0).trimmingCharacters(in: .whitespaces)
-            }.filter { ScheduleTimeParser.clock(from: $0, source: quote) != nil }
+            let clocks = matches(ScheduleTimeParser.clockPattern, in: quote).compactMap {
+                range -> String? in
+                let clock = (quote as NSString).substring(with: range).trimmingCharacters(
+                    in: .whitespaces)
+                guard
+                    ScheduleTimeParser.clock(from: clock, source: quote, sourceRange: range) != nil
+                else { return nil }
+                return clock
+            }
             let notes = metadata.filter { line in
                 guard let range = item.range else { return false }
                 let preceding = located.compactMap(\.range).filter {
@@ -318,9 +344,15 @@ enum ScheduleExtractionGuard {
                 record(index, "actionText", "rejected", "행동 앞 숫자 시작 시각을 제목에 포함")
                 issues.append("\(label): actionText에서 앞의 숫자 시작 시각을 분리하고 행동을 유지하세요")
             }
-            let sourceClocks = matches(ScheduleTimeParser.clockPattern, in: quote).map {
-                (quote as NSString).substring(with: $0).trimmingCharacters(in: .whitespaces)
-            }.filter { ScheduleTimeParser.clock(from: $0, source: quote) != nil }
+            let sourceClocks = matches(ScheduleTimeParser.clockPattern, in: quote).compactMap {
+                range -> String? in
+                let clock = (quote as NSString).substring(with: range).trimmingCharacters(
+                    in: .whitespaces)
+                guard
+                    ScheduleTimeParser.clock(from: clock, source: quote, sourceRange: range) != nil
+                else { return nil }
+                return clock
+            }
             if sourceClocks.count > 1 {
                 record(index, "startTimeText", "rejected", "일정 구간에 유효한 시작 시각 후보가 여러 개")
                 issues.append("\(label): 시작 시각 후보가 여러 개여서 해당 일정의 시각을 확정하지 못했어요")

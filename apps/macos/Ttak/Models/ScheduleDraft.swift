@@ -92,19 +92,35 @@ enum ScheduleTimeParser {
     static let clockPattern =
         #"(?<![0-9])(오전|오후|아침|저녁|밤)?\s*([0-9]{1,2})(?::([0-9]{2})|시(?:\s*([0-9]{1,2})분)?(?:\s*(반))?)(?![0-9])"#
 
-    static func clock(from expression: String?, source: String) -> (hour: Int, minute: Int)? {
+    static func clock(from expression: String?, source: String, sourceRange: NSRange? = nil) -> (
+        hour: Int, minute: Int, dayOffset: Int
+    )? {
         guard let expression else { return nil }
         let value = expression.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty, source.contains(value) else { return nil }
         guard let regex = try? NSRegularExpression(pattern: clockPattern) else { return nil }
         let matches = regex.matches(in: value, range: NSRange(value.startIndex..., in: value))
         guard matches.count == 1, let match = matches.first,
-            let clockRange = Range(match.range, in: value),
-            let evidence = source.range(
-                of: String(value[clockRange]).trimmingCharacters(in: .whitespaces))
+            let clockRange = Range(match.range, in: value)
         else { return nil }
-        let suffix = source[evidence.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !suffix.hasPrefix("까지"), !suffix.hasPrefix("종료"), !suffix.hasPrefix("마감") else {
+        let clockText = String(value[clockRange]).trimmingCharacters(in: .whitespacesAndNewlines)
+        let sourceMatches = regex.matches(
+            in: source, range: NSRange(source.startIndex..., in: source))
+        let evidenceMatch = sourceMatches.first { candidate in
+            if let sourceRange, candidate.range != sourceRange { return false }
+            guard let range = Range(candidate.range, in: source) else { return false }
+            let suffix = source[range.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !suffix.hasPrefix("까지"), !suffix.hasPrefix("종료"), !suffix.hasPrefix("마감") else {
+                return false
+            }
+            let candidateText = source[range].trimmingCharacters(in: .whitespacesAndNewlines)
+            if candidateText == clockText { return true }
+            guard candidateText.hasSuffix(clockText) else { return false }
+            let prefix = candidateText.dropLast(clockText.count).trimmingCharacters(
+                in: .whitespacesAndNewlines)
+            return ["오전", "오후", "아침", "저녁", "밤"].contains(prefix)
+        }
+        guard let evidenceMatch, let evidence = Range(evidenceMatch.range, in: source) else {
             return nil
         }
         let prefix =
@@ -122,13 +138,21 @@ enum ScheduleTimeParser {
             capture(3).flatMap(Int.init) ?? capture(4).flatMap(Int.init)
             ?? (capture(5) == nil ? 0 : 30)
         guard (0...59).contains(minute) else { return nil }
-        let period = capture(1) ?? ["오전", "오후", "아침", "저녁", "밤"].first(where: prefix.hasSuffix)
+        let evidencePeriod = Range(evidenceMatch.range(at: 1), in: source).map {
+            String(source[$0])
+        }
+        let period =
+            capture(1) ?? evidencePeriod
+            ?? ["오전", "오후", "아침", "저녁", "밤"].first(where: prefix.hasSuffix)
+        if period == "밤", hour == 12, minute == 0 {
+            return (0, 0, 1)
+        }
         if let period {
             guard ["오전", "오후"].contains(period), (1...12).contains(hour) else { return nil }
             hour %= 12
             if period == "오후" { hour += 12 }
         }
         guard (0...23).contains(hour) else { return nil }
-        return (hour, minute)
+        return (hour, minute, 0)
     }
 }

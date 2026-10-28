@@ -22,6 +22,40 @@ private func candidate(
 }
 
 struct ExtractionGuardTests {
+    @Test func nightMidnightBelongsToTheFollowingDay() {
+        for (source, expectedDate) in [
+            ("오늘 밤 12시에 서버 점검", "2026-10-28"),
+            ("내일 밤 12시에 서버 점검", "2026-10-29"),
+            ("2026년 12월 31일 밤 12시 점검", "2027-01-01"),
+        ] {
+            let rows = ScheduleExtractionGuard.groundSources([source], source: source)
+            let result = ScheduleExtractionGuard.validate(
+                rows, source: source, context: guardContext())
+            #expect(result.issues.isEmpty)
+            #expect(result.drafts.first?.dateText == expectedDate)
+            #expect(result.drafts.first?.timeText == "00:00")
+            #expect(result.drafts.first?.notes.contains(source) == true)
+        }
+    }
+
+    @Test func timeRangeUsesStartAndKeepsFullRangeInNotes() {
+        for (source, expected) in [
+            ("내일 오후 1시부터 3시까지 디자인 워크숍", "13:00"),
+            ("내일 18시부터 20시까지 독서모임 회식", "18:00"),
+            ("내일 11시부터 1시까지 회의", "11:00"),
+        ] {
+            let rows = ScheduleExtractionGuard.groundSources([source], source: source)
+            let result = ScheduleExtractionGuard.validate(
+                rows, source: source, context: guardContext())
+            #expect(result.issues.isEmpty)
+            #expect(result.drafts.count == 1)
+            #expect(result.drafts.first?.timeText == expected)
+            #expect(result.drafts.first?.notes.contains(source) == true)
+            #expect(result.drafts.first?.title.contains("부터") == false)
+            #expect(result.drafts.first?.title.contains("까지") == false)
+        }
+    }
+
     @Test func keywordTitlesKeepShortTitlesAndFullEvidenceSeparately() throws {
         let scopes = [
             "내일 오전 9시 반에 민수랑 온라인 줌으로 기획안 검토",
@@ -902,5 +936,65 @@ struct ExtractionRetryTests {
             #expect(error.localizedDescription.contains("일정 분리 확인 필요"))
         }
         #expect(await model.calls == 2)
+    }
+}
+
+struct GeminiScheduleModelTests {
+    @Test func parsesStructuredResponseAndPreservesGuard() async throws {
+        let model = GeminiScheduleModel(
+            apiKey: "test-key",
+            transport: { request in
+                #expect(request.value(forHTTPHeaderField: "x-goog-api-key") == "test-key")
+                #expect(request.url?.path.contains("gemini-3.5-flash-lite") == true)
+                let response = HTTPURLResponse(
+                    url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+                let body =
+                    #"{"candidates":[{"finishReason":"STOP","content":{"parts":[{"text":"{\"schedules\":[{\"sourceText\":\"내일 9시 회의\"}]}"}]}}]}"#
+                return (Data(body.utf8), response)
+            })
+        let drafts = try await ScheduleAnalyzer(model: model).analyze(
+            text: "내일 9시 회의", context: guardContext())
+        #expect(drafts.count == 1)
+        #expect(drafts[0].timeText == "09:00")
+    }
+
+    @Test func rejectsHttpErrorsWithoutExposingResponse() async throws {
+        let model = GeminiScheduleModel(
+            apiKey: "test-key",
+            transport: { request in
+                (
+                    Data("secret".utf8),
+                    HTTPURLResponse(
+                        url: request.url!, statusCode: 429, httpVersion: nil, headerFields: nil)!
+                )
+            })
+        do {
+            _ = try await model.extract(text: "회의", context: guardContext(), feedback: [])
+            Issue.record("HTTP error should fail")
+        } catch {
+            #expect(error.localizedDescription.contains("429"))
+            #expect(!error.localizedDescription.contains("secret"))
+        }
+    }
+
+    @Test func rejectsMissingKeyAndIncompleteResponse() async throws {
+        let missing = GeminiScheduleModel(apiKey: "")
+        await #expect(throws: AnalysisFailure.self) {
+            try await missing.extract(text: "회의", context: guardContext(), feedback: [])
+        }
+        let incomplete = GeminiScheduleModel(
+            apiKey: "test-key",
+            transport: { request in
+                let response = HTTPURLResponse(
+                    url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+                return (
+                    Data(
+                        #"{"candidates":[{"finishReason":"MAX_TOKENS","content":{"parts":[{"text":"{}"}]}}]}"#
+                            .utf8), response
+                )
+            })
+        await #expect(throws: AnalysisFailure.self) {
+            try await incomplete.extract(text: "회의", context: guardContext(), feedback: [])
+        }
     }
 }

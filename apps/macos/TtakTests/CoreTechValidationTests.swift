@@ -136,6 +136,7 @@ struct ScheduleValidationTests {
         #expect(ScheduleTimeParser.clock(from: "저녁", source: "저녁 회식") == nil)
         #expect(ScheduleTimeParser.clock(from: "18:00", source: "지금~18:00까지 모임") == nil)
         #expect(ScheduleTimeParser.clock(from: "13:08", source: "메시지 발송 시각 13:08") == nil)
+        #expect(ScheduleTimeParser.clock(from: "9시", source: "9시까지 자료 준비 후 9시에 발표")?.hour == 9)
     }
 
     @Test(arguments: [
@@ -168,9 +169,9 @@ struct ScheduleValidationTests {
     }
 
     @Test func nightClockIsNotSilentlyConvertedToNoon() {
-        #expect(ScheduleTimeParser.clock(from: "밤 12시", source: "밤 12시 모임") == nil)
+        #expect(ScheduleTimeParser.clock(from: "밤 12시", source: "밤 12시 모임")?.dayOffset == 1)
         #expect(ScheduleTimeParser.clock(from: "밤 1시", source: "밤 1시 모임") == nil)
-        #expect(ScheduleTimeParser.clock(from: "12:00", source: "밤 12:00 모임") == nil)
+        #expect(ScheduleTimeParser.clock(from: "12:00", source: "밤 12:00 모임")?.dayOffset == 1)
     }
 
     @Test func blankTitleCannotSave() {
