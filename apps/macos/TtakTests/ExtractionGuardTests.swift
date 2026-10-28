@@ -22,6 +22,293 @@ private func candidate(
 }
 
 struct ExtractionGuardTests {
+    @Test func keywordTitlesKeepShortTitlesAndFullEvidenceSeparately() throws {
+        let scopes = [
+            "내일 오전 9시 반에 민수랑 온라인 줌으로 기획안 검토",
+            "12시에는 지수랑 합정에서 점심 약속 있어",
+            "모레 오후 3시에는 도서관에서 내일신문 자료 조사",
+            "18시부터 20시까지 독서모임 회식 있어",
+        ]
+        let source = scopes[0] + "하고 " + scopes[1] + ". " + scopes[2] + "하고 " + scopes[3]
+        let rows = ScheduleExtractionGuard.groundSources(scopes, source: source).map { row in
+            var formatted = row
+            formatted.titleKeywords = ScheduleTitleNormalizer.compactKeywords(
+                action: row.actionText)
+            return formatted
+        }
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(rows.allSatisfy { $0.titleKeywords != nil })
+        #expect(
+            result.drafts.map(\.title) == [
+                "민수 온라인 줌 미팅", "지수 합정 점심", "도서관 자료조사", "독서모임 회식",
+            ])
+        #expect(result.drafts.map(\.timeText) == ["09:30", "12:00", "15:00", "18:00"])
+        #expect(result.drafts[0].notes.contains("기획안 검토"))
+        #expect(result.drafts[2].notes.contains("내일신문"))
+        #expect(result.drafts[3].notes.contains("20시까지"))
+    }
+
+    @Test func keywordTitleCannotBorrowAnotherPersonOrVenue() {
+        #expect(throws: AnalysisFailure.self) {
+            try ScheduleTitleNormalizer.keywordTitle(["지수", "부산", "점심"], source: "민수랑 합정에서 점심")
+        }
+    }
+
+    @Test func keywordTitleCannotDropNegationOrChangeCancellationIntoAMeeting() {
+        let source = "민수 없이 회의 취소 여부 확인"
+        #expect(throws: AnalysisFailure.self) {
+            try ScheduleTitleNormalizer.keywordTitle(["민수", "미팅"], source: source)
+        }
+        #expect(throws: AnalysisFailure.self) {
+            try ScheduleTitleNormalizer.keywordTitle(["민수", "없이", "회의", "취소"], source: source)
+        }
+        #expect(throws: Never.self) {
+            try ScheduleTitleNormalizer.keywordTitle(
+                ["민수", "없이", "회의", "취소", "여부", "확인"], source: source)
+        }
+    }
+
+    @Test func meetingAliasNeedsAMeetingContext() throws {
+        #expect(try ScheduleTitleNormalizer.keywordTitle(["미팅"], source: "줌으로 기획안 검토") == "미팅")
+        #expect(throws: AnalysisFailure.self) {
+            try ScheduleTitleNormalizer.keywordTitle(["미팅"], source: "줌 설치")
+        }
+        #expect(throws: AnalysisFailure.self) {
+            try ScheduleTitleNormalizer.keywordTitle(["미팅"], source: "회의실 청소")
+        }
+    }
+
+    @Test func compactTitlesUseNewNamesAndPreserveUnclearOrCriticalActions() {
+        #expect(
+            ScheduleTitleNormalizer.compactKeywords(action: "유진이랑 카페봄에서 아침 식사") == [
+                "유진", "카페봄", "아침식사",
+            ])
+        #expect(
+            ScheduleTitleNormalizer.compactKeywords(action: "지수랑 도서관에서 자료 정리하기") == [
+                "지수", "도서관", "자료정리",
+            ])
+        #expect(
+            ScheduleTitleNormalizer.compactKeywords(action: "온라인 줌 미팅 있어") == ["온라인", "줌", "미팅"])
+        for action in [
+            "민수 없이 온라인 회의 취소 여부 확인", "회의 안 하기", "아리랑 공연", "민수랑 역 앞에서 점심",
+            "온라인 회의 일정 변경", "민수랑 점심 대신 병원 가기", "줌 검토 내용 삭제",
+        ] {
+            #expect(ScheduleTitleNormalizer.compactKeywords(action: action) == nil)
+        }
+    }
+
+    @Test func keywordTitleDistinguishesClockFromAProperName() throws {
+        #expect(try ScheduleTitleNormalizer.keywordTitle(["내일신문"], source: "내일신문 구독") == "내일신문")
+        #expect(throws: AnalysisFailure.self) {
+            try ScheduleTitleNormalizer.keywordTitle(["9시", "회의"], source: "9시 회의")
+        }
+    }
+
+    @Test func compactTitlesKeepAPersonAndTheirGroupTogether() throws {
+        let source = "내일 18시에 민수랑 개발팀 회식 있어"
+        var rows = ScheduleExtractionGuard.groundSources([source], source: source)
+        rows[0].titleKeywords = ScheduleTitleNormalizer.compactKeywords(action: rows[0].actionText)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.first?.title == "민수 개발팀 회식")
+        #expect(result.drafts.first?.timeText == "18:00")
+        #expect(result.drafts.first?.notes.contains(source) == true)
+        #expect(
+            ScheduleTitleNormalizer.compactKeywords(action: "개발팀과 민수랑 개발팀 회식")
+                == ["개발팀", "민수", "회식"])
+    }
+
+    @Test func aLeadingNumericClockCannotBecomeTheActionTitle() {
+        let source = "9시에 산책"
+        let result = ScheduleExtractionGuard.validate(
+            [candidate(source, action: source, time: "9시")], source: source, context: guardContext()
+        )
+        #expect(result.issues.contains { $0.contains("앞의 숫자 시작 시각") })
+    }
+
+    @Test func digitsInsideAnActionArePreserved() {
+        let source = "12시에 3D 모델링 회의"
+        let result = ScheduleExtractionGuard.validate(
+            [candidate(source, action: "3D 모델링 회의", time: "12시")], source: source,
+            context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.first?.title == "3D 모델링 회의")
+    }
+
+    @Test func aClockCannotBecomeAnUnsupportedDate() {
+        let source = "9시에 산책"
+        let result = ScheduleExtractionGuard.validate(
+            [candidate(source, action: "산책", date: "9시", time: "9시")], source: source,
+            context: guardContext())
+        #expect(result.issues.contains { $0.contains("숫자 시각을 dateText") })
+        #expect(result.drafts.isEmpty)
+        #expect(result.checks.contains { $0.field == "dateText" && $0.status == "rejected" })
+    }
+
+    @Test func sourceGroundingPreservesPeopleGroupsPlacesAndClocks() {
+        let source = "9시에 산책갈거야\n그리고 12시에 민수랑 점심 약속 있어 역 앞에서\n그리고 18시에 독서모임 회식있어"
+        let rows = ScheduleExtractionGuard.groundSources(
+            [
+                "9시에 산책갈거야", "12시에 민수랑 점심 약속 있어 역 앞에서", "18시에 독서모임 회식있어",
+            ], source: source)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.map(\.title) == ["산책", "민수랑 점심 약속 있어 역 앞에서", "독서모임 회식"])
+        #expect(result.drafts.map(\.timeText) == ["09:00", "12:00", "18:00"])
+        #expect(result.drafts.allSatisfy { !$0.dateNeedsConfirmation })
+    }
+
+    @Test func sourceGroundingCannotSilentlyDropAPersonOutsideTheQuote() {
+        let source = "12시에 민수랑 점심"
+        let rows = ScheduleExtractionGuard.groundSources(["점심"], source: source)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.contains { $0.contains("원문에서 빠진 정보") })
+    }
+
+    @Test func sourceGroundingAttachesMetadataToThePrecedingActivity() {
+        let source = "내일 9시 회의\n장소: 회의실 A\n준비물: 노트북\n모레 12시 점심\n장소: 식당 B"
+        let rows = ScheduleExtractionGuard.groundSources(["내일 9시 회의", "모레 12시 점심"], source: source)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts[0].notes.contains("장소: 회의실 A"))
+        #expect(result.drafts[0].notes.contains("준비물: 노트북"))
+        #expect(!result.drafts[0].notes.contains("식당 B"))
+        #expect(result.drafts[1].notes.contains("장소: 식당 B"))
+    }
+
+    @Test func temporalParticlesCannotRemoveAProperNamePrefix() {
+        let source = "9시 에스파 공연"
+        let rows = ScheduleExtractionGuard.groundSources([source], source: source)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.first?.title == "에스파 공연")
+    }
+
+    @Test func anAttachedAmbiguousTemporalParticleIsPreserved() {
+        let source = "9시에스파 공연"
+        let rows = ScheduleExtractionGuard.groundSources([source], source: source)
+        #expect(rows.first?.actionText == "에스파 공연")
+    }
+
+    @Test func multipleValidStartClocksKeepTheExistingHoldBoundary() {
+        let source = "9시 또는 10시에 회의"
+        let rows = ScheduleExtractionGuard.groundSources([source], source: source)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.contains { $0.contains("시작 시각 후보가 여러 개") })
+        #expect(result.checks.contains { $0.field == "startTimeText" && $0.status == "rejected" })
+    }
+
+    @Test func aTrailingConnectorIsRemovedOnlyBeforeAnotherLocatedSchedule() {
+        let source = "내일 9시 회의하고 12시 점심"
+        let rows = ScheduleExtractionGuard.groundSources(["내일 9시 회의하고", "12시 점심"], source: source)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.map(\.title) == ["회의", "점심"])
+        let unsplit = ScheduleExtractionGuard.groundSources([source], source: source)
+        let rejected = ScheduleExtractionGuard.validate(
+            unsplit, source: source, context: guardContext())
+        #expect(!rejected.issues.isEmpty)
+    }
+
+    @Test func aTrailingConnectorWithoutTheNextScheduleIsNotSilentlyRemoved() {
+        let source = "내일 9시 회의하고 12시 점심"
+        let rows = ScheduleExtractionGuard.groundSources(["내일 9시 회의하고"], source: source)
+        #expect(rows.first?.actionText == "회의하고")
+        #expect(
+            !ScheduleExtractionGuard.validate(rows, source: source, context: guardContext()).issues
+                .isEmpty)
+    }
+
+    @Test func aDateWordInsideANameDoesNotMatchTheSharedDatePrefix() {
+        let source = "내일 15시에 내일신문 구독 신청"
+        let rows = ScheduleExtractionGuard.groundSources([source], source: source)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.first?.title == "내일신문 구독 신청")
+        #expect(result.drafts.first?.dateText == "2026-10-28")
+    }
+
+    @Test func separatelyExtractedMetadataStaysInThePrecedingActivityNotes() {
+        let source = "내일 오전 9시 회의\n장소: 가상 회의실\n준비물: 노트북\n모레 점심 팀 식사"
+        let rows = ScheduleExtractionGuard.groundSources(
+            [
+                "내일 오전 9시 회의", "장소: 가상 회의실", "준비물: 노트북", "모레 점심 팀 식사",
+            ], source: source)
+        #expect(rows.count == 2)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+        #expect(result.drafts.map(\.title) == ["회의", "점심 팀 식사"])
+        #expect(result.drafts.first?.notes.contains("장소: 가상 회의실") == true)
+        #expect(result.drafts.first?.notes.contains("준비물: 노트북") == true)
+        #expect(result.drafts.last?.notes.contains("노트북") == false)
+    }
+
+    @Test func sourceScopesContainingOnlyGroundedMetadataDoNotCreateAnActivity() {
+        let source = "장소: 가상 회의실\n준비물: 노트북"
+        let rows = ScheduleExtractionGuard.groundSources([source], source: source)
+        #expect(rows.isEmpty)
+    }
+
+    @Test func mixedMetadataAndActivityScopesAreNotDiscarded() {
+        let source = "장소: 가상 회의실\n내일 오전 9시 회의"
+        let rows = ScheduleExtractionGuard.groundSources([source], source: source)
+        #expect(rows.count == 1)
+        #expect(rows.first?.sourceText == source)
+        #expect(
+            !ScheduleExtractionGuard.validate(rows, source: source, context: guardContext()).issues
+                .isEmpty)
+    }
+
+    @Test func inventedOrPartialMetadataScopesStillReachTheEvidenceGuard() {
+        let source = "장소: 가상 회의실"
+        #expect(ScheduleExtractionGuard.groundSources(["장소: 없는 회의실"], source: source).count == 1)
+        #expect(ScheduleExtractionGuard.groundSources(["장소:"], source: source).count == 1)
+    }
+
+    @Test func metadataNormalizationCannotHideTheMissingFinalActivity() {
+        let source = "내일 오전 9시 회의\n장소: 가상 회의실\n준비물: 노트북\n모레 점심 팀 식사"
+        let rows = ScheduleExtractionGuard.groundSources(
+            [
+                "내일 오전 9시 회의", "장소: 가상 회의실", "준비물: 노트북",
+            ], source: source)
+        #expect(rows.count == 1)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.contains { $0.contains("원문에서 빠진 정보") || $0.contains("누락 의심") })
+    }
+
+    @Test func explicitMetadataBeforeTheFirstActivityIsNotSilentlyLost() {
+        let source = "장소: 가상 회의실\n준비물: 노트북\n내일 오전 9시 회의"
+        let rows = ScheduleExtractionGuard.groundSources(
+            [
+                "장소: 가상 회의실", "준비물: 노트북", "내일 오전 9시 회의",
+            ], source: source)
+        #expect(rows.count == 1)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.contains { $0.contains("부가 정보의 귀속") && $0.contains("장소:") })
+        #expect(result.issues.contains { $0.contains("부가 정보의 귀속") && $0.contains("준비물:") })
+        #expect(result.drafts.first?.notes.contains("가상 회의실") == false)
+    }
+
+    @Test func aDescriptiveCaptureHeaderDoesNotRequireAnActivityOwner() {
+        let source = "합성 대화 캡처\n내일 오전 9시 회의"
+        let rows = ScheduleExtractionGuard.groundSources(["내일 오전 9시 회의"], source: source)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.issues.isEmpty)
+    }
+
+    @Test func diagnosticChecksDistinguishRejectionFromUnevaluatedFields() {
+        let source = "9시 산책"
+        let result = ScheduleExtractionGuard.validate(
+            [candidate(source, action: "산책", time: "9시", location: "없는 장소")],
+            source: source, context: guardContext())
+        #expect(!result.issues.isEmpty)
+        #expect(result.drafts.isEmpty)
+        #expect(result.checks.contains { $0.field == "sourceText" && $0.status == "accepted" })
+        #expect(result.checks.contains { $0.field == "locationText" && $0.status == "rejected" })
+        #expect(result.checks.contains { $0.field == "titleParts" && $0.status == "not-evaluated" })
+    }
+
     @Test(arguments: [["런닝갈거야"], ["런닝", "갈거야"], ["런닝"]])
     func conversationalEndingMayBeIncludedOrOmittedInTitleParts(parts: [String]) throws {
         #expect(try ScheduleTitleNormalizer.normalize(action: "런닝갈거야", parts: parts) == "런닝")
@@ -519,7 +806,33 @@ private actor ScriptedModel: ScheduleModelServing {
     func select(candidates: [ScheduleDraft], guidance: String) async throws -> [Int] { [0] }
 }
 
+private actor DiagnosticRecorder {
+    var events: [ScheduleAnalysisDiagnostic] = []
+    func append(_ event: ScheduleAnalysisDiagnostic) { events.append(event) }
+}
+
 struct ExtractionRetryTests {
+    @Test func optInDiagnosticsPreserveTheSingleRepairBoundary() async throws {
+        let model = ScriptedModel([
+            [candidate("내일 회의", action: "런닝")],
+            [candidate("내일 회의", action: "회의", date: "내일")],
+        ])
+        let recorder = DiagnosticRecorder()
+        let result = try await ScheduleAnalyzer(
+            model: model, observer: { await recorder.append($0) }
+        )
+        .analyze(text: "내일 회의", context: guardContext())
+        #expect(result.first?.title == "회의")
+        #expect(await model.calls == 2)
+        let events = await recorder.events
+        #expect(events.filter { $0.stage == "guard" }.map(\.attempt) == [1, 2])
+        let first = try #require(events.first { $0.stage == "guard" })
+        let checks = try JSONDecoder().decode(
+            [ScheduleGuardCheck].self, from: Data(first.payload.utf8))
+        #expect(checks.contains { $0.field == "actionText" && $0.status == "rejected" })
+        #expect(events.allSatisfy { $0.elapsedSeconds >= 0 })
+    }
+
     @Test func metadataOnlyInputDoesNotCreateModelActivities() async {
         let model = ScriptedModel([[candidate("장소: 회의실", action: "회의실")]])
         do {

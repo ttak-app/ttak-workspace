@@ -1,6 +1,117 @@
 import Foundation
 
 enum ScheduleTitleNormalizer {
+    // Compact only recognized activity forms. Unclear grammar and critical meanings keep the source title.
+    static func compactKeywords(action: String) -> [String]? {
+        guard
+            matches(#"없이|취소|거절|금지|제외|말고|아닌|않|(?<![가-힣])(?:안|못)(?=\s|$)|확인|여부"#, in: action).isEmpty
+        else {
+            return nil
+        }
+        let body: String
+        do { body = try normalize(action: action, parts: []) } catch { return nil }
+        let hasZoom = !matches(#"(?i)(?<![가-힣A-Za-z])(?:줌|zoom)(?:으로|로|에서)?(?=\s|$)"#, in: body)
+            .isEmpty
+        let activity: String
+        if hasZoom, !matches(#"검토[.!?]?\s*$"#, in: body).isEmpty {
+            activity = "미팅"
+        } else if !matches(#"자료\s*조사(?:하기)?[.!?]?\s*$"#, in: body).isEmpty {
+            activity = "자료조사"
+        } else if !matches(#"자료\s*정리(?:하기)?[.!?]?\s*$"#, in: body).isEmpty {
+            activity = "자료정리"
+        } else if !matches(#"아침\s*식사[.!?]?\s*$"#, in: body).isEmpty {
+            activity = "아침식사"
+        } else if !matches(#"저녁\s*식사[.!?]?\s*$"#, in: body).isEmpty {
+            activity = "저녁식사"
+        } else if !matches(#"(?<![가-힣])점심(?:\s*(?:약속|식사))?[.!?]?\s*$"#, in: body).isEmpty {
+            activity = "점심"
+        } else if !matches(#"회식[.!?]?\s*$"#, in: body).isEmpty {
+            activity = "회식"
+        } else if !matches(#"미팅[.!?]?\s*$"#, in: body).isEmpty {
+            activity = "미팅"
+        } else if !matches(#"회의(?:가|를|는)?[.!?]?\s*$"#, in: body).isEmpty {
+            activity = "회의"
+        } else {
+            return nil
+        }
+
+        let nsBody = body as NSString
+        var people: [String] = []
+        for range in matches(#"(?<!\S)[^\s]+?(?:이랑|랑|와|과)(?=\s|$)"#, in: body) {
+            let word = nsBody.substring(with: range)
+            if let suffix = ["이랑", "랑", "와", "과"].first(where: word.hasSuffix) {
+                let stem = String(word.dropLast(suffix.count))
+                guard !stem.isEmpty else { return nil }
+                people.append(stem)
+            }
+        }
+        var places: [String] = []
+        for range in matches(#"(?<!\S)[^\s]+?에서(?=\s|$)"#, in: body) {
+            let stem = String(nsBody.substring(with: range).dropLast(2))
+            // A fragment like "앞" is not enough evidence for a multiword place such as "역 앞".
+            guard !stem.isEmpty, !["앞", "뒤", "옆", "근처", "안", "밖"].contains(stem) else { return nil }
+            places.append(stem)
+        }
+        let groups = body.split(whereSeparator: \.isWhitespace).map(String.init).filter { word in
+            ["가족", "친구"].contains(word)
+                || ["모임", "동아리", "동호회", "팀"].contains(where: word.hasSuffix)
+        }
+        var modes: [String] = []
+        for mode in ["온라인", "오프라인"] {
+            if !matches(mode + #"(?:으로|로|에서)?(?=\s|$)"#, in: body).isEmpty { modes.append(mode) }
+        }
+        var tools: [String] = []
+        if hasZoom {
+            tools =
+                body.contains("줌")
+                ? ["줌"]
+                : matches(#"(?i)zoom"#, in: body).prefix(1).map { nsBody.substring(with: $0) }
+        }
+        let context = people + groups + places + modes + tools
+        guard activity != "회의" || !context.isEmpty else { return nil }
+        var keywords: [String] = []
+        for word in context + [activity] where !keywords.contains(word) { keywords.append(word) }
+        do { _ = try keywordTitle(keywords, source: action) } catch { return nil }
+        return keywords
+    }
+
+    static func keywordTitle(_ keywords: [String], source: String) throws -> String {
+        let tokens = keywords.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        guard !tokens.isEmpty, tokens.allSatisfy({ !$0.isEmpty && !$0.contains("\n") }) else {
+            throw AnalysisFailure.unverifiedExtraction("제목 키워드가 비어 있거나 여러 줄이에요")
+        }
+        let compactSource = source.filter { !$0.isWhitespace }
+        for token in tokens {
+            let compact = token.filter { !$0.isWhitespace }
+            let hasMeetingContext =
+                !matches(#"회의(?:가|를|는|에)?(?=$|[\s\p{P}])"#, in: source).isEmpty
+                || source.contains("미팅")
+                || ((source.contains("줌") || source.lowercased().contains("zoom"))
+                    && source.contains("검토"))
+            let meetingAlias = token == "미팅" && hasMeetingContext
+            guard compactSource.contains(compact) || meetingAlias else {
+                throw AnalysisFailure.unverifiedExtraction("제목 키워드가 해당 일정 원문에 없어요: \(token)")
+            }
+            let clocks = matches(ScheduleTimeParser.clockPattern, in: token)
+            guard
+                !clocks.contains(where: {
+                    $0.location == 0 && $0.length == (token as NSString).length
+                }),
+                !["오늘", "내일", "모레", "글피"].contains(token)
+            else {
+                throw AnalysisFailure.unverifiedExtraction("날짜와 시각은 제목 키워드에서 분리하세요")
+            }
+        }
+        let title = tokens.joined(separator: " ")
+        let compactTitle = title.filter { !$0.isWhitespace }
+        let critical = matches(#"없이|취소|거절|금지|제외|(?<![가-힣])(?:안|못)(?=\s|$)|확인|여부"#, in: source)
+            .map { (source as NSString).substring(with: $0) }
+        guard critical.allSatisfy({ compactTitle.contains($0) }) else {
+            throw AnalysisFailure.unverifiedExtraction("제목에서 부정, 취소 또는 확인 의미가 빠졌어요")
+        }
+        return title
+    }
+
     private static let particles: Set<String> = [
         "이랑", "랑", "와", "과", "에", "에서", "으로", "로", "을", "를", "은", "는", "이", "가",
     ]

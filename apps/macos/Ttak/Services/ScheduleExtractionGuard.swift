@@ -1,8 +1,16 @@
 import Foundation
 
+struct ScheduleGuardCheck: Sendable, Codable {
+    var candidateIndex: Int
+    var field: String
+    var status: String
+    var reason: String
+}
+
 struct ScheduleGuardResult: Sendable {
     var drafts: [ScheduleDraft]
     var issues: [String]
+    var checks: [ScheduleGuardCheck] = []
 }
 
 enum ScheduleExtractionGuard {
@@ -97,13 +105,102 @@ enum ScheduleExtractionGuard {
         }
     }
 
+    static func groundSources(_ quotes: [String], source: String) -> [GroundedSchedule] {
+        let nsSource = source as NSString
+        let located = quotes.map { quote -> (quote: String, range: NSRange?) in
+            let trimmed = quote.trimmingCharacters(in: .whitespacesAndNewlines)
+            let ranges = matches(NSRegularExpression.escapedPattern(for: trimmed), in: source)
+            return (trimmed, !trimmed.isEmpty && ranges.count == 1 ? ranges.first : nil)
+        }.filter { item in
+            // Only complete metadata lines grounded in the original input are non-activity scopes.
+            // A mixed scope or an invented/partial quote must still reach the evidence guard.
+            guard let range = item.range else { return true }
+            let originalLines = nsSource.substring(with: nsSource.lineRange(for: range))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let lines = item.quote.components(separatedBy: .newlines)
+                .map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+            return originalLines != item.quote || lines.isEmpty || !lines.allSatisfy(isMetadata)
+        }
+        let metadata = matches(#"(?m)^[^\n]+$"#, in: source).compactMap {
+            range -> (text: String, range: NSRange)? in
+            let text = (source as NSString).substring(with: range).trimmingCharacters(
+                in: .whitespacesAndNewlines)
+            return isMetadata(text) ? (text, range) : nil
+        }
+        return located.map { item in
+            let quote = item.quote
+            var body = quote
+            // Only leading, recognized temporal evidence is removed. The remaining people and activity stay verbatim.
+            while !body.isEmpty {
+                body = body.trimmingCharacters(in: .whitespacesAndNewlines)
+                if body.hasPrefix("그리고 ") {
+                    body = String(body.dropFirst(4))
+                    continue
+                }
+                let temporal =
+                    (dateEvidence(in: body).map(\.range)
+                    + matches(ScheduleTimeParser.clockPattern, in: body)
+                    + matches(timeOfDayPattern, in: body)).filter { $0.location == 0 }.max {
+                        $0.length < $1.length
+                    }
+                guard let temporal, let range = Range(temporal, in: body) else { break }
+                body = String(body[range.upperBound...])
+                if let particle = matches(#"^(?:에는|에)(?=\s|$)"#, in: body).first,
+                    let particleRange = Range(particle, in: body)
+                {
+                    body = String(body[particleRange.upperBound...])
+                }
+            }
+            if let firstMetadata = metadata.first(where: { quote.contains($0.text) }),
+                let start = body.range(of: firstMetadata.text)
+            {
+                body = String(body[..<start.lowerBound]).trimmingCharacters(
+                    in: .whitespacesAndNewlines)
+            }
+            if body.hasSuffix("하고"), let range = item.range,
+                let next = located.compactMap(\.range).filter({ $0.location >= NSMaxRange(range) })
+                    .min(by: { $0.location < $1.location })
+            {
+                let gap = (source as NSString).substring(
+                    with: NSRange(
+                        location: NSMaxRange(range), length: next.location - NSMaxRange(range)))
+                if gap.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    body = String(body.dropLast(2)).trimmingCharacters(in: .whitespacesAndNewlines)
+                }
+            }
+            let clocks = matches(ScheduleTimeParser.clockPattern, in: quote).map {
+                (quote as NSString).substring(with: $0).trimmingCharacters(in: .whitespaces)
+            }.filter { ScheduleTimeParser.clock(from: $0, source: quote) != nil }
+            let notes = metadata.filter { line in
+                guard let range = item.range else { return false }
+                let preceding = located.compactMap(\.range).filter {
+                    NSMaxRange($0) <= line.range.location
+                }
+                .max { $0.location < $1.location }
+                return contains(range, line.range) || preceding == range
+            }.map(\.text).joined(separator: "\n")
+            return GroundedSchedule(
+                sourceText: quote, actionText: body, titleParts: [], locationText: nil,
+                dateText: nil, startTimeText: clocks.count == 1 ? clocks.first : nil, notes: notes,
+                listID: nil)
+        }
+    }
+
     static func validate(
         _ candidates: [GroundedSchedule], source: String, context: AnalysisContext
     ) -> ScheduleGuardResult {
         var issues: [String] = []
+        var checks: [ScheduleGuardCheck] = []
+        func record(_ index: Int, _ field: String, _ status: String, _ reason: String = "") {
+            checks.removeAll { $0.candidateIndex == index && $0.field == field }
+            checks.append(
+                ScheduleGuardCheck(
+                    candidateIndex: index, field: field, status: status, reason: reason))
+        }
         var drafts: [ScheduleDraft] = []
         var actions: [NSRange] = []
-        var scopes: [(quote: NSRange, action: NSRange, notes: [String], label: String)] = []
+        var scopes:
+            [(index: Int, quote: NSRange, action: NSRange, notes: [String], label: String)] = []
         var identities: Set<String> = []
         let dates = dateEvidence(in: source)
         let nsSource = source as NSString
@@ -113,42 +210,56 @@ enum ScheduleExtractionGuard {
             let requestedAction = item.actionText.trimmingCharacters(in: .whitespacesAndNewlines)
             let quoteRanges = matches(NSRegularExpression.escapedPattern(for: quote), in: source)
             guard !quote.isEmpty, quoteRanges.count == 1, let quoteRange = quoteRanges.first else {
+                record(index, "sourceText", "rejected", "원문 내 유일한 연속 구간이 아님")
                 issues.append("\(label): sourceText를 원문의 한 행동 구간으로 정확히 복사하고 중복 위치를 구별하세요")
                 continue
             }
+            record(index, "sourceText", "accepted")
             let actionRanges = actionMatches(requestedAction, in: quote)
             guard !requestedAction.isEmpty, actionRanges.count == 1,
                 let relativeAction = actionRanges.first
             else {
+                record(index, "actionText", "rejected", "일정 구간 내 유일한 행동 원문이 아님")
                 issues.append("\(label): actionText는 sourceText 안에 있는 행동 제목이어야 합니다")
                 continue
             }
+            record(index, "actionText", "accepted")
             let action = (quote as NSString).substring(with: relativeAction)
             let location = cleanOptional(item.locationText)
             if let location, ScheduleTitleNormalizer.locationRanges(location, in: quote).count != 1
             {
+                record(index, "locationText", "rejected", "유일한 실제 장소 원문 근거 없음")
                 issues.append("\(label): 장소를 해당 일정 원문의 구별 가능한 실제 이름으로 복사하세요")
                 continue
             }
+            record(index, "locationText", location == nil ? "absent" : "accepted")
             let title: String
             do {
-                title = try ScheduleTitleNormalizer.normalize(
-                    action: action, parts: item.titleParts, location: location)
+                if let keywords = item.titleKeywords {
+                    title = try ScheduleTitleNormalizer.keywordTitle(keywords, source: quote)
+                } else {
+                    title = try ScheduleTitleNormalizer.normalize(
+                        action: action, parts: item.titleParts, location: location)
+                }
             } catch {
+                record(index, "titleParts", "rejected", error.localizedDescription)
                 issues.append(
                     "\(label): 제목 조각이 원문 순서와 의미 단어를 보존하지 않았습니다: \(error.localizedDescription)")
                 continue
             }
+            record(index, "titleParts", "accepted")
             let actionRange = NSRange(
                 location: quoteRange.location + relativeAction.location,
                 length: relativeAction.length)
             actions.append(actionRange)
             if !matches(#"하고(?=\s|$)|그리고\s+|\n+"#, in: action).isEmpty {
+                record(index, "actionText", "rejected", "독립 행동의 연결 또는 줄바꿈 포함")
                 issues.append("\(label): actionText에 여러 행동이나 줄이 합쳐졌습니다. 행동 제목을 구분하세요")
             }
             let line = nsSource.substring(with: nsSource.lineRange(for: actionRange))
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             if isDescriptiveLine(line) {
+                record(index, "actionText", "rejected", "일정 행동이 아닌 메타정보")
                 issues.append("\(label): 장소와 준비물 또는 메시지 시각을 일정 행동으로 만들지 마세요")
             }
             let localDates = dates.filter { contains(quoteRange, $0.range) }
@@ -166,6 +277,15 @@ enum ScheduleExtractionGuard {
             }
             var dateExpression = evidence?.text
             if let requestedDate = cleanOptional(item.dateText) {
+                let clocks = matches(ScheduleTimeParser.clockPattern, in: requestedDate)
+                if dateEvidence(in: requestedDate).isEmpty, clocks.count == 1,
+                    let clock = clocks.first, clock.location == 0,
+                    NSMaxRange(clock) == (requestedDate as NSString).length
+                {
+                    record(index, "dateText", "rejected", "숫자 시각을 날짜로 사용")
+                    issues.append("\(label): 숫자 시각을 dateText에 넣지 말고 날짜가 없으면 nil로 두세요")
+                    continue
+                }
                 if let evidence, source.contains(requestedDate),
                     dateEvidence(in: requestedDate).map(\.text) == [evidence.text]
                 {
@@ -176,24 +296,58 @@ enum ScheduleExtractionGuard {
                     // A grounded but unsupported date is preserved for manual confirmation.
                     dateExpression = requestedDate
                 } else {
+                    record(index, "dateText", "rejected", "해당 일정 날짜의 근거와 불일치")
                     issues.append("\(label): dateText를 해당 행동에 적용되는 실제 날짜 표현과 일치시키세요")
                     continue
                 }
             }
-            if let evidence, action.hasPrefix(evidence.text) {
+            record(index, "dateText", dateExpression == nil ? "absent" : "accepted")
+            if let evidence,
+                dateEvidence(in: action).contains(where: {
+                    $0.range.location == 0 && $0.text == evidence.text
+                })
+            {
+                record(index, "actionText", "rejected", "행동 앞 날짜를 제목에 포함")
                 issues.append("\(label): actionText에서 날짜 표현을 분리하고 행동을 유지하세요")
             }
+            if let leadingClock = matches(ScheduleTimeParser.clockPattern, in: action).first,
+                leadingClock.location == 0,
+                ScheduleTimeParser.clock(
+                    from: (action as NSString).substring(with: leadingClock), source: quote) != nil
+            {
+                record(index, "actionText", "rejected", "행동 앞 숫자 시작 시각을 제목에 포함")
+                issues.append("\(label): actionText에서 앞의 숫자 시작 시각을 분리하고 행동을 유지하세요")
+            }
+            let sourceClocks = matches(ScheduleTimeParser.clockPattern, in: quote).map {
+                (quote as NSString).substring(with: $0).trimmingCharacters(in: .whitespaces)
+            }.filter { ScheduleTimeParser.clock(from: $0, source: quote) != nil }
+            if sourceClocks.count > 1 {
+                record(index, "startTimeText", "rejected", "일정 구간에 유효한 시작 시각 후보가 여러 개")
+                issues.append("\(label): 시작 시각 후보가 여러 개여서 해당 일정의 시각을 확정하지 못했어요")
+            }
             var rawTime = cleanOptional(item.startTimeText)
+            var timeIsGrounded = true
             if let time = rawTime {
                 if dates.contains(where: { $0.text == time }) {
                     rawTime = nil
                 } else if !quote.contains(time) {
+                    timeIsGrounded = false
                     issues.append("\(label): 다른 행동의 시각을 가져오지 말고 sourceText 안의 시작 시각만 사용하세요")
                 }
             }
+            record(
+                index, "startTimeText",
+                timeIsGrounded && sourceClocks.count <= 1
+                    ? (rawTime == nil ? "absent" : "accepted") : "rejected",
+                !timeIsGrounded
+                    ? "해당 일정 구간에 시각 근거 없음" : (sourceClocks.count > 1 ? "일정 구간에 시작 시각 후보가 여러 개" : "")
+            )
             let notes = item.notes.trimmingCharacters(in: .whitespacesAndNewlines)
             let noteLines = notes.components(separatedBy: .newlines).filter { !$0.isEmpty }
-            scopes.append((quoteRange, actionRange, noteLines, label))
+            scopes.append((index, quoteRange, actionRange, noteLines, label))
+            record(
+                index, "notes",
+                noteLines.contains(where: { !source.contains($0) }) ? "rejected" : "accepted")
             if noteLines.contains(where: { !source.contains($0) }) {
                 issues.append("\(label): notes를 입력에 실제로 있는 부가 정보로 복사하세요")
             }
@@ -212,6 +366,7 @@ enum ScheduleExtractionGuard {
             if !fields.notes.contains(quote) { fields.notes += "\n원문: \(quote)" }
             let identity = "\(actionRange.location):\(actionRange.length)"
             if !identities.insert(identity).inserted {
+                record(index, "actionText", "rejected", "같은 행동의 중복 추출")
                 issues.append("\(label): 같은 원문 행동을 중복 추출했습니다. 별개 행동의 근거를 구별하세요")
             }
             drafts.append(ScheduleAnalyzer.makeDraft(fields, context: context, source: quote))
@@ -219,6 +374,7 @@ enum ScheduleExtractionGuard {
         for scope in scopes {
             let containedActions = Set(actions.filter { contains(scope.quote, $0) }.map(\.location))
             if containedActions.count > 1 {
+                record(scope.index, "sourceText", "rejected", "다른 후보 행동과 겹친 일정 구간")
                 issues.append("\(scope.label): sourceText에 여러 행동이 겹칩니다. 해당 행동 구간만 복사하세요")
             }
             if let nextAction = actions.filter({ $0.location >= NSMaxRange(scope.action) })
@@ -233,6 +389,7 @@ enum ScheduleExtractionGuard {
                             location: NSMaxRange(period),
                             length: nextAction.location - NSMaxRange(period)))
                     if gap.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        record(scope.index, "sourceText", "rejected", "다음 행동의 시간대가 현재 구간에 포함")
                         issues.append("\(scope.label): 다음 행동 바로 앞의 시간대를 이전 행동 구간에 붙이지 마세요")
                     }
                 }
@@ -246,7 +403,55 @@ enum ScheduleExtractionGuard {
                     return isMetadata(note) && precedingAction?.location == scope.action.location
                 }
                 if !belongs {
+                    record(scope.index, "notes", "rejected", "다른 행동의 부가정보이거나 귀속 불명")
                     issues.append("\(scope.label): notes가 다른 행동에 속하거나 관련 위치를 확인하지 못했습니다")
+                }
+            }
+        }
+        let explicitMetadata = matches(#"(?m)^[^\n]+$"#, in: source).compactMap {
+            range -> (text: String, range: NSRange)? in
+            let text = nsSource.substring(with: range).trimmingCharacters(
+                in: .whitespacesAndNewlines)
+            let labels = ["장소:", "장소 :", "준비물:", "준비물 :", "메모:", "참고:"]
+            return labels.contains(where: text.hasPrefix) ? (text, range) : nil
+        }
+        for metadata in explicitMetadata {
+            let preserved = scopes.contains {
+                contains($0.quote, metadata.range) || $0.notes.contains(metadata.text)
+            }
+            if !preserved {
+                issues.append("부가 정보의 귀속을 확인하지 못했어요: \(metadata.text). 관련 일정 원문이나 메모에 보존해야 합니다")
+            }
+        }
+        if !candidates.isEmpty {
+            var coveredRanges = candidates.flatMap { item -> [NSRange] in
+                let quote = item.sourceText.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !quote.isEmpty else { return [] }
+                let ranges = matches(NSRegularExpression.escapedPattern(for: quote), in: source)
+                return ranges.count == 1 ? ranges : []
+            }
+            coveredRanges += matches(#"(?m)^[^\n]+$"#, in: source).filter {
+                isMetadata(
+                    nsSource.substring(with: $0).trimmingCharacters(in: .whitespacesAndNewlines))
+            }
+            coveredRanges += matches(#"하고(?=\s|$)|그리고\s+"#, in: source)
+            let uncovered = (0..<nsSource.length).filter { position in
+                !coveredRanges.contains { NSLocationInRange(position, $0) }
+            }
+            // Check gaps as contiguous source ranges. Do not reconstruct a missing person's name or qualifier.
+            var gaps: [NSRange] = []
+            for position in uncovered {
+                if let last = gaps.last, NSMaxRange(last) == position {
+                    gaps[gaps.count - 1].length += 1
+                } else {
+                    gaps.append(NSRange(location: position, length: 1))
+                }
+            }
+            for gap in gaps {
+                let text = nsSource.substring(with: gap).trimmingCharacters(
+                    in: .whitespacesAndNewlines.union(.punctuationCharacters))
+                if !text.isEmpty {
+                    issues.append("원문에서 빠진 정보: \(text). 인물, 수식어와 시간 정보를 포함한 일정 원문 전체를 복사하세요")
                 }
             }
         }
@@ -266,7 +471,17 @@ enum ScheduleExtractionGuard {
                 }
             }
         }
-        return ScheduleGuardResult(drafts: drafts, issues: Array(Set(issues)).sorted())
+        for index in candidates.indices {
+            for field in [
+                "sourceText", "actionText", "locationText", "titleParts", "dateText",
+                "startTimeText", "notes",
+            ]
+            where !checks.contains(where: { $0.candidateIndex == index && $0.field == field }) {
+                record(index, field, "not-evaluated", "앞선 필수 필드 검증에서 중단")
+            }
+        }
+        return ScheduleGuardResult(
+            drafts: drafts, issues: Array(Set(issues)).sorted(), checks: checks)
     }
 
     private static let timeOfDayPattern = #"(?<![가-힣])(?:오전|오후|아침|저녁|밤)(?:에는|에)?(?=\s|$)"#

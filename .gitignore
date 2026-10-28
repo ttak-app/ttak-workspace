@@ -15,10 +15,12 @@ dist/
 .vite/
 coverage/
 *.log
-# Local configuration
+# Local configuration, including apps/macos/.env for Gemini API development
 .env
 .env.*
 !.env.example
+# Editor history may contain local secrets
+apps/macos/.history/
 
 # Local agent evidence (not shared or published)
 .tmp/

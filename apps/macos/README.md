@@ -16,6 +16,21 @@
 Bundle Identifier `app.ttak.Ttak`은 초기 개발용이며 배포 전에 확정합니다.
 앱 샌드박스는 켜져 있으며 미리 알림 entitlement는 EventKit 연동 시 추가합니다.
 
+## Gemini API 로컬 설정
+
+`apps/macos/.env`는 로컬 개발용 비밀값을 보관하며 Git에서 제외합니다.
+같은 폴더의 `.env.example`에는 공유 가능한 변수 이름만 기록합니다.
+`.env` 파일을 열어 `GEMINI_API_KEY=` 뒤에 본인의 키를 입력합니다.
+
+```dotenv
+GEMINI_API_KEY=여기에_발급받은_키
+```
+
+파일이 없다면 `apps/macos/.env.example`을 `apps/macos/.env`로 복사하고 키를 입력합니다.
+이 파일은 자동으로 읽히지 않습니다. 향후 Gemini 테스트 도구에서 환경 변수를 읽도록 연결해야 하며,
+현재 앱은 이 설정만으로 Gemini API를 호출하지 않습니다. 키는 채팅이나 저장소에 공유하지 않습니다.
+배포 시에는 공용 API 키를 앱에 포함하지 않고 서버의 비밀값 저장소에서 관리합니다.
+
 ## 빌드
 
 ```sh
