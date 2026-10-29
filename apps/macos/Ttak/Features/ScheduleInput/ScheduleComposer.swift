@@ -20,35 +20,6 @@ struct ScheduleComposer: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if let attachment, let image = NSImage(data: attachment.data) {
-                HStack(spacing: 12) {
-                    Image(nsImage: image)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 64, height: 64)
-                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 9))
-                        .accessibilityLabel("첨부 이미지 미리보기")
-                    Text(attachment.name)
-                        .font(.caption)
-                        .lineLimit(2)
-                    Spacer(minLength: 8)
-                    Button("삭제", systemImage: "xmark") {
-                        self.attachment = nil
-                        attachmentError = nil
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.secondary)
-                    .disabled(!isEnabled)
-                    .accessibilityLabel("첨부 이미지 삭제")
-                }
-                .padding(12)
-                .background(.background.opacity(0.85), in: RoundedRectangle(cornerRadius: 18))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 18)
-                        .stroke(.primary.opacity(0.06), lineWidth: 1)
-                }
-            }
-
             HStack(alignment: .center, spacing: 10) {
                 Button(action: selectImage) {
                     Image(systemName: "plus")
@@ -103,28 +74,42 @@ struct ScheduleComposer: View {
             .padding(.leading, 12)
             .padding(.trailing, 13)
             .padding(.vertical, 9)
-            .background {
-                RoundedRectangle(cornerRadius: 30)
-                    .fill(
-                        LinearGradient(
-                            colors: colorScheme == .dark
-                                ? [
-                                    Color(nsColor: .controlBackgroundColor),
-                                    Color(nsColor: .windowBackgroundColor),
-                                ]
-                                : [TtakTokens.Colors.brandTint.opacity(0.6), .white.opacity(0.95)],
-                            startPoint: .leading, endPoint: .trailing
-                        )
-                    )
-                    .shadow(
-                        color: TtakTokens.Colors.brandCoral.opacity(
-                            colorScheme == .dark ? 0.08 : 0.14), radius: 15, y: 6
-                    )
-                    .shadow(color: .black.opacity(0.07), radius: 10, y: 5)
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: 30)
-                    .stroke(TtakTokens.Colors.brandCoral.opacity(0.13), lineWidth: 1)
+            .glassEffect(
+                .regular.tint(
+                    colorScheme == .dark
+                        ? Color(nsColor: .controlBackgroundColor).opacity(0.45)
+                        : TtakTokens.Colors.brandTint.opacity(0.35)
+                ),
+                in: RoundedRectangle(cornerRadius: 30)
+            )
+            .shadow(color: .black.opacity(colorScheme == .dark ? 0.18 : 0.08), radius: 12, y: 5)
+
+            if let attachment, let image = NSImage(data: attachment.data) {
+                HStack(spacing: 12) {
+                    Image(nsImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 64, height: 64)
+                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 9))
+                        .accessibilityLabel("첨부 이미지 미리보기")
+                    Text(attachment.name)
+                        .font(.caption)
+                        .lineLimit(2)
+                    Spacer(minLength: 8)
+                    Button("삭제", systemImage: "xmark") {
+                        self.attachment = nil
+                        attachmentError = nil
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.secondary)
+                    .disabled(!isEnabled)
+                    .accessibilityLabel("첨부 이미지 삭제")
+                }
+                .padding(12)
+                .glassEffect(
+                    .regular.tint(Color(nsColor: .windowBackgroundColor).opacity(0.35)),
+                    in: RoundedRectangle(cornerRadius: 18)
+                )
             }
 
             if let attachmentError {
