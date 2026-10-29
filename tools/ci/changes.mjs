@@ -18,6 +18,9 @@ function impact(path) {
     || path.startsWith('.github/ISSUE_TEMPLATE/') || path === 'AGENTS.md' || /^apps\/(macos|web)\/AGENTS\.md$/.test(path)
     || path.startsWith('.agents/') || path.startsWith('docs/rules/') || path.startsWith('docs/ai-workflow/')
     || path.startsWith('docs/branch-review/')) return ['harness_structure'];
+  // All generated outputs must run the shared consistency check in the Web job.
+  if (path === 'apps/macos/Ttak/Resources/TtakTokens.swift') return ['web', 'macos'];
+  if (path === 'docs/design-system/tokens.md') return ['web'];
   if (['README.md', 'apps/macos/README.md', 'apps/web/README.md', 'apps/macos/TtakTests/README.md'].includes(path)
     || /^docs\/.*\.md$/.test(path)) return [];
   // Shared brand sources and generators produce both web CSS and Swift colors.

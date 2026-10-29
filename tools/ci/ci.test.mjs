@@ -20,6 +20,8 @@ const matrix = [
   ['apps/web/.prettierignore', ['web']],
   ['package-lock.json', ['web']],
   ['design-system/tokens.json', ['web', 'macos']],
+  ['apps/macos/Ttak/Resources/TtakTokens.swift', ['web', 'macos']],
+  ['docs/design-system/tokens.md', ['web']],
   ['tools/design-tokens/build.mjs', ['web', 'macos']],
   ['tools/design-tokens/swift.test.mjs', ['web', 'macos']],
   ['docs/design-system/preview.html', ['web']],
@@ -229,6 +231,10 @@ test('workflow uses default PR events, selected jobs and an always-running gate'
   assert.match(blocks.harness, /tests: \$\{\{ steps.tests.outcome \}\}/);
   assert.match(blocks.harness, /npm run workflow:test\n\s+node --test tools\/ci\/\*\.test\.mjs/);
   assert.match(blocks.web, /run: npm run format:check:web/);
+  assert.match(blocks.web, /run: npm run tokens:check/);
+  assert.ok(blocks.web.indexOf('run: npm ci') < blocks.web.indexOf('run: npm run tokens:check'));
+  assert.ok(!blocks.harness.includes('run: npm run tokens:check'));
+  assert.ok(!blocks['macos-build'].includes('run: npm run tokens:check'));
   assert.match(blocks['macos-build'], /run: npm run format:check:macos/);
   assert.match(blocks['macos-build'], /run: npm run macos:test/);
   assert.ok(!blocks['macos-build'].includes('run: npm run macos:build'));
