@@ -10,6 +10,8 @@ struct ScheduleComposer: View {
     let onAnalyze: () -> Void
 
     @State private var attachmentError: String?
+    @State private var editorHeight: CGFloat = 26
+    @Environment(\.colorScheme) private var colorScheme
 
     private var canRequestAnalysis: Bool {
         isEnabled && !isAnalyzing && canAnalyze
@@ -23,7 +25,8 @@ struct ScheduleComposer: View {
                     Image(nsImage: image)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 84, height: 72)
+                        .frame(width: 64, height: 64)
+                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 9))
                         .accessibilityLabel("첨부 이미지 미리보기")
                     Text(attachment.name)
                         .font(.caption)
@@ -33,58 +36,104 @@ struct ScheduleComposer: View {
                         self.attachment = nil
                         attachmentError = nil
                     }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.secondary)
                     .disabled(!isEnabled)
                     .accessibilityLabel("첨부 이미지 삭제")
                 }
-                .padding(10)
-                .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+                .padding(12)
+                .background(.background.opacity(0.85), in: RoundedRectangle(cornerRadius: 18))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(.primary.opacity(0.06), lineWidth: 1)
+                }
             }
 
-            ZStack(alignment: .topLeading) {
-                if text.isEmpty {
-                    Text(attachment == nil ? "일정을 말하듯 적어주세요" : "이미지에 대한 설명을 덧붙여도 좋아요")
-                        .foregroundStyle(.tertiary)
-                        .padding(.horizontal, 5)
-                        .padding(.top, 8)
-                        .allowsHitTesting(false)
-                        .accessibilityHidden(true)
+            HStack(alignment: .center, spacing: 10) {
+                Button(action: selectImage) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 18, weight: .regular))
+                        .frame(width: 30, height: 36)
+                        .contentShape(Rectangle())
                 }
-                ComposerTextEditor(
-                    text: $text, isEnabled: isEnabled,
-                    onPasteImage: pasteImage, onAnalyze: requestAnalysis
-                )
-                .frame(height: 108)
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .disabled(!isEnabled)
+                .accessibilityLabel("이미지 첨부")
+                .help("PNG, JPEG, HEIC, TIFF 이미지 한 장을 선택하거나 입력창에서 ⌘V로 붙여넣으세요.")
+
+                ZStack(alignment: .topLeading) {
+                    if text.isEmpty {
+                        Text(attachment == nil ? "일정을 적거나 이미지를 첨부하세요" : "이미지에 대한 설명을 덧붙여도 좋아요")
+                            .font(.system(size: 16))
+                            .foregroundStyle(.tertiary)
+                            .padding(.leading, 5)
+                            .padding(.top, 3)
+                            .allowsHitTesting(false)
+                            .accessibilityHidden(true)
+                    }
+                    ComposerTextEditor(
+                        text: $text, height: $editorHeight, isEnabled: isEnabled,
+                        onPasteImage: pasteImage, onAnalyze: requestAnalysis
+                    )
+                    .frame(height: editorHeight)
+                }
+                .frame(maxWidth: .infinity)
+
+                Button(action: requestAnalysis) {
+                    ZStack {
+                        Circle().fill(.background.opacity(colorScheme == .dark ? 0.6 : 0.85))
+                        if isAnalyzing {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Image(systemName: "arrow.up")
+                                .font(.system(size: 19, weight: .medium))
+                                .foregroundStyle(.secondary)
+                                .opacity(canRequestAnalysis ? 1 : 0.4)
+                        }
+                    }
+                    .frame(width: 36, height: 36)
+                    .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .disabled(!canRequestAnalysis)
+                .accessibilityLabel(isAnalyzing ? "분석 중" : "일정 분석하기")
+                .help("⌘Enter로 분석")
+            }
+            .padding(.leading, 12)
+            .padding(.trailing, 13)
+            .padding(.vertical, 9)
+            .background {
+                RoundedRectangle(cornerRadius: 30)
+                    .fill(
+                        LinearGradient(
+                            colors: colorScheme == .dark
+                                ? [
+                                    Color(nsColor: .controlBackgroundColor),
+                                    Color(nsColor: .windowBackgroundColor),
+                                ]
+                                : [TtakTokens.Colors.brandTint.opacity(0.6), .white.opacity(0.95)],
+                            startPoint: .leading, endPoint: .trailing
+                        )
+                    )
+                    .shadow(
+                        color: TtakTokens.Colors.brandCoral.opacity(
+                            colorScheme == .dark ? 0.08 : 0.14), radius: 15, y: 6
+                    )
+                    .shadow(color: .black.opacity(0.07), radius: 10, y: 5)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 30)
+                    .stroke(TtakTokens.Colors.brandCoral.opacity(0.13), lineWidth: 1)
             }
 
             if let attachmentError {
                 Text(attachmentError)
                     .font(.caption)
                     .foregroundStyle(.red)
+                    .padding(.horizontal, 16)
                     .accessibilityLabel("첨부 오류: \(attachmentError)")
             }
-
-            HStack {
-                Button("이미지 첨부", systemImage: "plus") { selectImage() }
-                    .disabled(!isEnabled)
-                    .help("PNG, JPEG, HEIC, TIFF 이미지 한 장을 선택하거나 입력창에서 ⌘V로 붙여넣으세요.")
-                Spacer()
-                if isAnalyzing {
-                    ProgressView().controlSize(.small)
-                    Text("분석 중")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
-                Button("분석", systemImage: "arrow.up") { requestAnalysis() }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(!canRequestAnalysis)
-                    .help("⌘Enter로 분석")
-            }
-        }
-        .padding(14)
-        .background(.background, in: RoundedRectangle(cornerRadius: 12))
-        .overlay {
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
         }
     }
 
@@ -126,6 +175,7 @@ struct ScheduleComposer: View {
 
 private struct ComposerTextEditor: NSViewRepresentable {
     @Binding var text: String
+    @Binding var height: CGFloat
     let isEnabled: Bool
     let onPasteImage: (NSPasteboard) -> Bool
     let onAnalyze: () -> Void
@@ -138,22 +188,34 @@ private struct ComposerTextEditor: NSViewRepresentable {
         editor.isRichText = false
         editor.importsGraphics = false
         editor.drawsBackground = false
-        editor.font = .preferredFont(forTextStyle: .body)
+        editor.font = .systemFont(ofSize: 16)
         editor.textColor = .labelColor
-        editor.textContainerInset = NSSize(width: 0, height: 8)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.minimumLineHeight = 22
+        paragraphStyle.maximumLineHeight = 22
+        editor.defaultParagraphStyle = paragraphStyle
+        editor.typingAttributes = [
+            .font: NSFont.systemFont(ofSize: 16),
+            .paragraphStyle: paragraphStyle,
+            .foregroundColor: NSColor.labelColor,
+        ]
+        editor.textContainerInset = NSSize(width: 0, height: 2)
         editor.isHorizontallyResizable = false
         editor.isVerticallyResizable = true
-        editor.minSize = NSSize(width: 0, height: 108)
+        editor.minSize = NSSize(width: 0, height: 26)
         editor.maxSize = NSSize(
             width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
         editor.autoresizingMask = [.width]
         editor.textContainer?.widthTracksTextView = true
+        editor.textContainer?.lineFragmentPadding = 0
         editor.textContainer?.containerSize = NSSize(
             width: 0, height: CGFloat.greatestFiniteMagnitude)
         editor.setAccessibilityLabel("일정 또는 이미지 보조 설명")
         let scroll = NSScrollView()
         scroll.drawsBackground = false
         scroll.hasVerticalScroller = true
+        scroll.autohidesScrollers = true
+        scroll.scrollerStyle = .overlay
         scroll.documentView = editor
         return scroll
     }
@@ -161,21 +223,55 @@ private struct ComposerTextEditor: NSViewRepresentable {
     func updateNSView(_ scroll: NSScrollView, context: Context) {
         guard let editor = scroll.documentView as? ComposerNativeTextView else { return }
         context.coordinator.parent = self
-        if editor.string != text { editor.string = text }
+        if editor.string != text && !editor.hasMarkedText() {
+            editor.string = text
+        }
         editor.isEditable = isEnabled
         editor.textColor = isEnabled ? .labelColor : .disabledControlTextColor
         editor.onPasteImage = onPasteImage
         editor.onAnalyze = onAnalyze
+        editor.onWidthChange = { [weak coordinator = context.coordinator, weak editor] in
+            guard let editor else { return }
+            coordinator?.scheduleHeightUpdate(for: editor)
+        }
+        context.coordinator.scheduleHeightUpdate(for: editor)
     }
 
+    @MainActor
     final class Coordinator: NSObject, NSTextViewDelegate {
         var parent: ComposerTextEditor
+        private var isHeightUpdateScheduled = false
 
         init(_ parent: ComposerTextEditor) { self.parent = parent }
 
         func textDidChange(_ notification: Notification) {
             guard let editor = notification.object as? NSTextView else { return }
             parent.text = editor.string
+            scheduleHeightUpdate(for: editor)
+        }
+
+        func scheduleHeightUpdate(for editor: NSTextView) {
+            guard !isHeightUpdateScheduled else { return }
+            isHeightUpdateScheduled = true
+            // Layout can run during a SwiftUI update. Publish the measured height on the next turn.
+            Task { @MainActor [weak self, weak editor] in
+                guard let self else { return }
+                isHeightUpdateScheduled = false
+                guard let editor, let container = editor.textContainer,
+                    let manager = editor.layoutManager, container.containerSize.width > 0
+                else { return }
+                manager.ensureLayout(for: container)
+                let usedHeight = max(
+                    manager.usedRect(for: container).maxY,
+                    manager.extraLineFragmentRect.maxY)
+                let contentHeight = max(26, ceil(usedHeight + editor.textContainerInset.height * 2))
+                let measuredHeight = min(92, contentHeight)
+                if parent.height != measuredHeight { parent.height = measuredHeight }
+                let documentHeight = max(measuredHeight, contentHeight)
+                if editor.frame.height != documentHeight {
+                    editor.setFrameSize(NSSize(width: editor.frame.width, height: documentHeight))
+                }
+            }
         }
     }
 }
@@ -183,6 +279,13 @@ private struct ComposerTextEditor: NSViewRepresentable {
 private final class ComposerNativeTextView: NSTextView {
     var onPasteImage: ((NSPasteboard) -> Bool)?
     var onAnalyze: (() -> Void)?
+    var onWidthChange: (() -> Void)?
+
+    override func setFrameSize(_ newSize: NSSize) {
+        let didChangeWidth = frame.width != newSize.width
+        super.setFrameSize(newSize)
+        if didChangeWidth { onWidthChange?() }
+    }
 
     override func paste(_ sender: Any?) {
         guard isEditable else { return }

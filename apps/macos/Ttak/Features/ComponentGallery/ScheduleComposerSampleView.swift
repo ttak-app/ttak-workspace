@@ -27,7 +27,12 @@
                     isEnabled: selectedState != .disabled,
                     onAnalyze: { actionCount += 1 }
                 )
-                .frame(maxWidth: 440)
+                .frame(maxWidth: 580)
+                .padding(.vertical, 32)
+                .padding(.horizontal, 20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: 20))
 
                 Text("모의 분석 요청: \(actionCount)회")
                     .monospacedDigit()
