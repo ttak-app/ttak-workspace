@@ -257,7 +257,7 @@ private struct ComposerTextEditor: NSViewRepresentable {
         context.coordinator.parent = self
         if editor.string != text && !editor.hasMarkedText() {
             // Parent-driven replacement starts a new editing history for this input.
-            editor.undoManager?.removeAllActions()
+            editor.undoManager?.removeAllActions(withTarget: editor)
             editor.string = text
         }
         editor.isEditable = isEnabled
@@ -311,10 +311,6 @@ private struct ComposerTextEditor: NSViewRepresentable {
 }
 
 private final class ComposerNativeTextView: NSTextView {
-    private let inputUndoManager = UndoManager()
-
-    override var undoManager: UndoManager? { inputUndoManager }
-
     var onPasteImage: ((NSPasteboard) -> Bool)?
     var onAnalyze: (() -> Void)?
     var onWidthChange: (() -> Void)?
