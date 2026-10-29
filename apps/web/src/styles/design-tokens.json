@@ -1015,6 +1015,685 @@
       "description": "review-title 자간",
       "source": "landing.css: .review-heading h2",
       "status": "observed"
+    },
+    "space.0": {
+      "type": "dimension",
+      "value": "0px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.4": {
+      "type": "dimension",
+      "value": "4px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.5": {
+      "type": "dimension",
+      "value": "5px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.6": {
+      "type": "dimension",
+      "value": "6px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.8": {
+      "type": "dimension",
+      "value": "8px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.10": {
+      "type": "dimension",
+      "value": "10px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.11": {
+      "type": "dimension",
+      "value": "11px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.12": {
+      "type": "dimension",
+      "value": "12px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.13": {
+      "type": "dimension",
+      "value": "13px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.14": {
+      "type": "dimension",
+      "value": "14px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.15": {
+      "type": "dimension",
+      "value": "15px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.16": {
+      "type": "dimension",
+      "value": "16px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.18": {
+      "type": "dimension",
+      "value": "18px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.20": {
+      "type": "dimension",
+      "value": "20px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.22": {
+      "type": "dimension",
+      "value": "22px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.24": {
+      "type": "dimension",
+      "value": "24px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.26": {
+      "type": "dimension",
+      "value": "26px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.28": {
+      "type": "dimension",
+      "value": "28px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.30": {
+      "type": "dimension",
+      "value": "30px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.32": {
+      "type": "dimension",
+      "value": "32px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.34": {
+      "type": "dimension",
+      "value": "34px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.35": {
+      "type": "dimension",
+      "value": "35px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.36": {
+      "type": "dimension",
+      "value": "36px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.38": {
+      "type": "dimension",
+      "value": "38px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.40": {
+      "type": "dimension",
+      "value": "40px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.42": {
+      "type": "dimension",
+      "value": "42px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.46": {
+      "type": "dimension",
+      "value": "46px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.48": {
+      "type": "dimension",
+      "value": "48px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.56": {
+      "type": "dimension",
+      "value": "56px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.64": {
+      "type": "dimension",
+      "value": "64px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.80": {
+      "type": "dimension",
+      "value": "80px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "space.96": {
+      "type": "dimension",
+      "value": "96px",
+      "description": "관찰된 간격. 일관된 배수 스케일로 재설계하지 않음",
+      "source": "landing.css: padding, margin, gap",
+      "status": "observed"
+    },
+    "radius.4": {
+      "type": "dimension",
+      "value": "4px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.5": {
+      "type": "dimension",
+      "value": "5px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.7": {
+      "type": "dimension",
+      "value": "7px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.8": {
+      "type": "dimension",
+      "value": "8px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.9": {
+      "type": "dimension",
+      "value": "9px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.10": {
+      "type": "dimension",
+      "value": "10px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.12": {
+      "type": "dimension",
+      "value": "12px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.16": {
+      "type": "dimension",
+      "value": "16px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.17": {
+      "type": "dimension",
+      "value": "17px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.18": {
+      "type": "dimension",
+      "value": "18px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.20": {
+      "type": "dimension",
+      "value": "20px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.22": {
+      "type": "dimension",
+      "value": "22px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.24": {
+      "type": "dimension",
+      "value": "24px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.28": {
+      "type": "dimension",
+      "value": "28px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.30": {
+      "type": "dimension",
+      "value": "30px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.32": {
+      "type": "dimension",
+      "value": "32px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.36": {
+      "type": "dimension",
+      "value": "36px",
+      "description": "관찰된 모서리 반경",
+      "source": "landing.css: border-radius",
+      "status": "observed"
+    },
+    "radius.circle": {
+      "type": "dimension",
+      "value": "50%",
+      "description": "원형 반경",
+      "source": "landing.css: .send, .spinner",
+      "status": "observed"
+    },
+    "border.width.hairline": {
+      "type": "dimension",
+      "value": "1px",
+      "description": "경계선 또는 포커스 두께",
+      "source": "landing.css: border, :focus-visible",
+      "status": "observed"
+    },
+    "border.width.focus": {
+      "type": "dimension",
+      "value": "2px",
+      "description": "경계선 또는 포커스 두께",
+      "source": "landing.css: border, :focus-visible",
+      "status": "observed"
+    },
+    "elevation.input": {
+      "type": "shadow",
+      "value": "0 9px 24px -6px #28344922, 0 1px 3px #27324609",
+      "description": "입력 표면 그림자",
+      "source": "landing.css: .input-bar",
+      "status": "observed"
+    },
+    "elevation.panel": {
+      "type": "shadow",
+      "value": "0 12px 30px -12px #26324725",
+      "description": "검토 표면 그림자",
+      "source": "landing.css: .review-panel",
+      "status": "observed"
+    },
+    "elevation.attachment": {
+      "type": "shadow",
+      "value": "0 6px 18px #2834490a",
+      "description": "첨부 미리보기 그림자",
+      "source": "landing.css: .attachment-preview",
+      "status": "observed"
+    },
+    "blur.glass": {
+      "type": "dimension",
+      "value": "20px",
+      "description": "유리 표면 배경 흐림",
+      "source": "landing.css: .review-panel, .attachment-preview",
+      "status": "observed"
+    },
+    "blur.input": {
+      "type": "dimension",
+      "value": "24px",
+      "description": "입력 배경 흐림",
+      "source": "landing.css: .input-bar",
+      "status": "observed"
+    },
+    "blur.halo": {
+      "type": "dimension",
+      "value": "14px",
+      "description": "입력 외곽 광원 흐림",
+      "source": "landing.css: .input-bar::after",
+      "status": "observed"
+    },
+    "blur.reveal": {
+      "type": "dimension",
+      "value": "4px",
+      "description": "패널 등장 시작 프레임 흐림",
+      "source": "review-motion.txt: revealReview",
+      "status": "observed"
+    },
+    "opacity.disabled": {
+      "type": "number",
+      "value": "0.45",
+      "description": "비활성 상태 불투명도",
+      "source": "landing.css: button:disabled",
+      "status": "observed"
+    },
+    "opacity.halo.idle": {
+      "type": "number",
+      "value": "0.14",
+      "description": "광원 기본 및 완료 상태",
+      "source": "landing.css: .input-bar",
+      "status": "observed"
+    },
+    "opacity.halo.focused": {
+      "type": "number",
+      "value": "0.3",
+      "description": "광원 포커스 상태",
+      "source": "landing.css: [data-motion='focused']",
+      "status": "observed"
+    },
+    "opacity.halo.typing": {
+      "type": "number",
+      "value": "0.4",
+      "description": "광원 입력 상태",
+      "source": "landing.css: [data-motion='typing']",
+      "status": "observed"
+    },
+    "opacity.halo.analyzing": {
+      "type": "number",
+      "value": "0.48",
+      "description": "광원 분석 상태",
+      "source": "landing.css: [data-motion='analyzing']",
+      "status": "observed"
+    },
+    "opacity.halo.reduced-analyzing": {
+      "type": "number",
+      "value": "0.3",
+      "description": "움직임 감소 시 분석 상태 광원",
+      "source": "landing.css: prefers-reduced-motion",
+      "status": "observed"
+    },
+    "layout.max-width": {
+      "type": "dimension",
+      "value": "1440px",
+      "description": "랜딩 최대 너비",
+      "source": "landing.css: .landing 마지막 기본 선언",
+      "status": "observed"
+    },
+    "layout.features-max-width": {
+      "type": "dimension",
+      "value": "1240px",
+      "description": "기능 설명 최대 너비",
+      "source": "landing.css: .product-features",
+      "status": "observed"
+    },
+    "layout.gutter": {
+      "type": "dimension",
+      "value": "56px",
+      "description": "기본 좌우 여백",
+      "source": "landing.css: .landing",
+      "status": "observed"
+    },
+    "layout.gap": {
+      "type": "dimension",
+      "value": "56px",
+      "description": "기본 2열 사이 간격",
+      "source": "landing.css: .landing",
+      "status": "observed"
+    },
+    "layout.breakpoint.compact": {
+      "type": "dimension",
+      "value": "640px",
+      "description": "작은 모바일 규칙 상한",
+      "source": "landing.css: @media(max-width:640px)",
+      "status": "observed"
+    },
+    "layout.breakpoint.mobile": {
+      "type": "dimension",
+      "value": "760px",
+      "description": "단일 열 전환 상한",
+      "source": "landing.css: @media(max-width:760px)",
+      "status": "observed"
+    },
+    "layout.breakpoint.tablet": {
+      "type": "dimension",
+      "value": "1100px",
+      "description": "태블릿 규칙 상한",
+      "source": "landing.css: @media(max-width:1100px) and (min-width:761px)",
+      "status": "observed"
+    },
+    "layout.height.compact": {
+      "type": "dimension",
+      "value": "760px",
+      "description": "짧은 데스크탑 화면 규칙 상한",
+      "source": "landing.css: @media(min-width:761px) and (max-height:760px)",
+      "status": "observed"
+    },
+    "layout.height.short": {
+      "type": "dimension",
+      "value": "650px",
+      "description": "더 짧은 화면의 padding 규칙 상한",
+      "source": "landing.css: @media(min-width:761px) and (max-height:650px)",
+      "status": "observed"
+    },
+    "radius.surface.control": {
+      "type": "dimension",
+      "value": "{radius.7}",
+      "description": "기본 필드 반경",
+      "source": "landing.css: .result-fields",
+      "status": "observed"
+    },
+    "radius.surface.action": {
+      "type": "dimension",
+      "value": "{radius.12}",
+      "description": "주요 액션 반경",
+      "source": "landing.css: .hero-cta",
+      "status": "observed"
+    },
+    "radius.surface.panel": {
+      "type": "dimension",
+      "value": "{radius.20}",
+      "description": "검토 패널 반경",
+      "source": "landing.css: .review-panel",
+      "status": "observed"
+    },
+    "radius.surface.desktop": {
+      "type": "dimension",
+      "value": "{radius.24}",
+      "description": "데스크탑 표면 반경",
+      "source": "landing.css: .desktop",
+      "status": "observed"
+    },
+    "radius.surface.pill": {
+      "type": "dimension",
+      "value": "{radius.32}",
+      "description": "입력 표면 반경",
+      "source": "landing.css: .input-bar",
+      "status": "observed"
+    },
+    "motion.duration.hover": {
+      "type": "duration",
+      "value": "150ms",
+      "description": "관찰한 hover 지속 시간",
+      "source": "landing.css: transition",
+      "status": "observed"
+    },
+    "motion.duration.opacity": {
+      "type": "duration",
+      "value": "800ms",
+      "description": "관찰한 opacity 지속 시간",
+      "source": "landing.css: .input-bar::after",
+      "status": "observed"
+    },
+    "motion.duration.drift-idle": {
+      "type": "duration",
+      "value": "12000ms",
+      "description": "관찰한 drift-idle 지속 시간",
+      "source": "landing.css: .input-bar",
+      "status": "observed"
+    },
+    "motion.duration.drift-typing": {
+      "type": "duration",
+      "value": "10000ms",
+      "description": "관찰한 drift-typing 지속 시간",
+      "source": "landing.css: [data-motion='typing']",
+      "status": "observed"
+    },
+    "motion.duration.drift-analyzing": {
+      "type": "duration",
+      "value": "6000ms",
+      "description": "관찰한 drift-analyzing 지속 시간",
+      "source": "landing.css: [data-motion='analyzing']",
+      "status": "observed"
+    },
+    "motion.duration.spinner": {
+      "type": "duration",
+      "value": "800ms",
+      "description": "관찰한 spinner 지속 시간",
+      "source": "landing.css: .spinner",
+      "status": "observed"
+    },
+    "motion.duration.panel": {
+      "type": "duration",
+      "value": "480ms",
+      "description": "관찰한 panel 지속 시간",
+      "source": "review-motion.txt: expansion",
+      "status": "observed"
+    },
+    "motion.duration.row": {
+      "type": "duration",
+      "value": "240ms",
+      "description": "관찰한 row 지속 시간",
+      "source": "review-motion.txt: appearance",
+      "status": "observed"
+    },
+    "motion.delay.row-start": {
+      "type": "duration",
+      "value": "90ms",
+      "description": "행 순차 표시 지연",
+      "source": "review-motion.txt: delay 90 + Math.min(index, 4) * 35",
+      "status": "observed"
+    },
+    "motion.delay.row-stagger": {
+      "type": "duration",
+      "value": "35ms",
+      "description": "행 순차 표시 지연",
+      "source": "review-motion.txt: delay 90 + Math.min(index, 4) * 35",
+      "status": "observed"
+    },
+    "motion.row-stagger-limit": {
+      "type": "number",
+      "value": "4",
+      "description": "다섯 번째 행부터 추가 지연 고정",
+      "source": "review-motion.txt: Math.min(index, 4)",
+      "status": "observed"
+    },
+    "motion.easing.standard": {
+      "type": "cubicBezier",
+      "value": "ease",
+      "description": "관찰한 standard easing",
+      "source": "landing.css: transition",
+      "status": "observed"
+    },
+    "motion.easing.drift": {
+      "type": "cubicBezier",
+      "value": "ease-in-out",
+      "description": "관찰한 drift easing",
+      "source": "landing.css: shadow-drift",
+      "status": "observed"
+    },
+    "motion.easing.linear": {
+      "type": "cubicBezier",
+      "value": "linear",
+      "description": "관찰한 linear easing",
+      "source": "landing.css: .spinner",
+      "status": "observed"
+    },
+    "motion.easing.reveal": {
+      "type": "cubicBezier",
+      "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+      "description": "관찰한 reveal easing",
+      "source": "review-motion.txt: easing",
+      "status": "observed"
+    },
+    "motion.distance.panel": {
+      "type": "dimension",
+      "value": "-8px",
+      "description": "패널 등장 시작 이동",
+      "source": "review-motion.txt: expansion",
+      "status": "observed"
+    },
+    "motion.distance.row": {
+      "type": "dimension",
+      "value": "7px",
+      "description": "행 등장 시작 이동",
+      "source": "review-motion.txt: appearance",
+      "status": "observed"
+    },
+    "motion.scale.panel": {
+      "type": "number",
+      "value": "0.985",
+      "description": "패널 등장 시작 배율",
+      "source": "review-motion.txt: expansion",
+      "status": "observed"
     }
   },
   "overrides": [
@@ -1023,7 +1702,9 @@
       "description": "landing.css: 마지막 태블릿 규칙",
       "values": {
         "typography.hero.size": "clamp(30px, 4vw, 44px)",
-        "typography.input.size": "{font.size.13}"
+        "typography.input.size": "{font.size.13}",
+        "layout.gutter": "{space.32}",
+        "layout.gap": "{space.32}"
       }
     },
     {
@@ -1038,7 +1719,9 @@
         "typography.body.size": "{font.size.13}",
         "typography.input.size": "{font.size.12}",
         "typography.action.size": "{font.size.12}",
-        "typography.caption.size": "{font.size.10}"
+        "typography.caption.size": "{font.size.10}",
+        "layout.gutter": "{space.20}",
+        "layout.gap": "{space.38}"
       }
     },
     {
@@ -1050,7 +1733,32 @@
         "typography.input.line-height": "26px",
         "typography.notice.size": "{font.size.9}",
         "typography.notice.line-height": "1.7",
-        "typography.review-title.size": "{font.size.12}"
+        "typography.review-title.size": "{font.size.12}",
+        "radius.surface.action": "{radius.10}",
+        "radius.surface.pill": "{radius.28}",
+        "radius.surface.desktop": "{radius.18}",
+        "radius.surface.panel": "{radius.17}"
+      }
+    },
+    {
+      "media": "(prefers-reduced-motion: reduce)",
+      "description": "움직임 감소 시 공간 이동과 반복 애니메이션을 실행하지 않음. 소비자도 animation:none 및 WAAPI 분기 필요.",
+      "values": {
+        "motion.duration.hover": "0ms",
+        "motion.duration.opacity": "0ms",
+        "motion.duration.drift-idle": "0ms",
+        "motion.duration.drift-typing": "0ms",
+        "motion.duration.drift-analyzing": "0ms",
+        "motion.duration.spinner": "0ms",
+        "motion.duration.panel": "0ms",
+        "motion.duration.row": "0ms",
+        "motion.delay.row-start": "0ms",
+        "motion.delay.row-stagger": "0ms",
+        "motion.distance.panel": "0px",
+        "motion.distance.row": "0px",
+        "motion.scale.panel": "1",
+        "blur.reveal": "0px",
+        "opacity.halo.analyzing": "{opacity.halo.reduced-analyzing}"
       }
     }
   ]
