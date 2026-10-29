@@ -1704,7 +1704,8 @@
         "typography.hero.size": "clamp(30px, 4vw, 44px)",
         "typography.input.size": "{font.size.13}",
         "layout.gutter": "{space.32}",
-        "layout.gap": "{space.32}"
+        "layout.gap": "{space.32}",
+        "typography.feature-title.size": "{font.size.20}"
       }
     },
     {
@@ -1729,15 +1730,10 @@
       "description": "landing.css: 기존 640px 규칙에서 살아남은 속성",
       "values": {
         "typography.hero.line-height": "1.28",
-        "typography.section.letter-spacing": "-1.3px",
         "typography.input.line-height": "26px",
-        "typography.notice.size": "{font.size.9}",
-        "typography.notice.line-height": "1.7",
         "typography.review-title.size": "{font.size.12}",
         "radius.surface.action": "{radius.10}",
-        "radius.surface.pill": "{radius.28}",
-        "radius.surface.desktop": "{radius.18}",
-        "radius.surface.panel": "{radius.17}"
+        "radius.surface.pill": "{radius.28}"
       }
     },
     {
