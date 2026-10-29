@@ -27,7 +27,6 @@
                     isEnabled: selectedState != .disabled,
                     onAnalyze: { actionCount += 1 }
                 )
-                .frame(maxWidth: 580)
                 .padding(.vertical, 32)
                 .padding(.horizontal, 20)
                 .frame(maxWidth: .infinity, alignment: .leading)

@@ -114,10 +114,7 @@ struct ScheduleComposer: View {
                 .transition(
                     reduceMotion
                         ? .opacity
-                        : .modifier(
-                            active: AttachmentDropletTransition(progress: 0),
-                            identity: AttachmentDropletTransition(progress: 1)
-                        )
+                        : .offset(y: -28).combined(with: .opacity)
                 )
             }
 
@@ -130,9 +127,10 @@ struct ScheduleComposer: View {
             }
         }
         .animation(
-            reduceMotion ? .easeOut(duration: 0.15) : .spring(duration: 0.48, bounce: 0.16),
+            reduceMotion ? .easeOut(duration: 0.15) : .easeOut(duration: 0.6),
             value: attachment != nil
         )
+        .frame(maxWidth: 500)
     }
 
     private func requestAnalysis() {
@@ -168,32 +166,6 @@ struct ScheduleComposer: View {
             attachmentError = error.localizedDescription
             return true
         }
-    }
-}
-
-// Start as a bead below the attachment button, then stretch and spread into the card.
-nonisolated private struct AttachmentDropletTransition: AnimatableModifier {
-    var progress: CGFloat
-
-    var animatableData: CGFloat {
-        get { progress }
-        set { progress = newValue }
-    }
-
-    func body(content: Content) -> some View {
-        let phase = min(max(progress, 0), 1)
-        let fall = min(phase / 0.35, 1)
-        let spread = max((phase - 0.35) / 0.65, 0)
-        let easedSpread = 1 - pow(1 - spread, 3)
-        content
-            .scaleEffect(
-                x: 0.065 + 0.035 * fall + 0.9 * easedSpread,
-                y: 0.38 + 0.82 * fall - 0.2 * spread,
-                anchor: UnitPoint(x: 0.05, y: 0)
-            )
-            .offset(y: -48 * (1 - phase))
-            .opacity(min(phase * 5, 1))
-            .blur(radius: 1.5 * (1 - phase))
     }
 }
 
