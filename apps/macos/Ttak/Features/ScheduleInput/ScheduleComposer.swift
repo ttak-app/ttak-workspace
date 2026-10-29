@@ -134,6 +134,9 @@ struct ScheduleComposer: View {
             value: attachment != nil
         )
         .frame(maxWidth: 500)
+        .onChange(of: attachment) { _, _ in
+            attachmentError = nil
+        }
     }
 
     private func requestAnalysis() {
@@ -214,6 +217,7 @@ private struct ComposerTextEditor: NSViewRepresentable {
         let editor = ComposerNativeTextView()
         editor.delegate = context.coordinator
         editor.isRichText = false
+        editor.allowsUndo = true
         editor.importsGraphics = false
         editor.drawsBackground = false
         editor.font = .systemFont(ofSize: 16)
@@ -252,6 +256,8 @@ private struct ComposerTextEditor: NSViewRepresentable {
         guard let editor = scroll.documentView as? ComposerNativeTextView else { return }
         context.coordinator.parent = self
         if editor.string != text && !editor.hasMarkedText() {
+            // Parent-driven replacement starts a new editing history for this input.
+            editor.undoManager?.removeAllActions()
             editor.string = text
         }
         editor.isEditable = isEnabled
@@ -305,6 +311,10 @@ private struct ComposerTextEditor: NSViewRepresentable {
 }
 
 private final class ComposerNativeTextView: NSTextView {
+    private let inputUndoManager = UndoManager()
+
+    override var undoManager: UndoManager? { inputUndoManager }
+
     var onPasteImage: ((NSPasteboard) -> Bool)?
     var onAnalyze: (() -> Void)?
     var onWidthChange: (() -> Void)?
