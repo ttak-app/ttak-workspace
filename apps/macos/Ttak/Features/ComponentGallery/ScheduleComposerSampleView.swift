@@ -32,11 +32,25 @@
                 .padding(.horizontal, 20)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(
-                    Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: 20))
+                    LinearGradient(
+                        colors: [
+                            Color(.sRGB, red: 0.22, green: 0.23, blue: 0.26),
+                            Color(.sRGB, red: 0.12, green: 0.13, blue: 0.15),
+                        ],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    ),
+                    in: RoundedRectangle(cornerRadius: 20)
+                )
 
                 Text("모의 분석 요청: \(actionCount)회")
                     .monospacedDigit()
-                Button("횟수 초기화") { actionCount = 0 }
+                HStack {
+                    Button("횟수 초기화") { actionCount = 0 }
+                    Button(attachment == nil ? "샘플 이미지 첨부" : "샘플 이미지 삭제") {
+                        attachment = attachment == nil ? Self.sampleAttachment() : nil
+                    }
+                    .disabled(selectedState == .disabled)
+                }
                 Text("파일 선택과 ⌘V로 실제 이미지를 첨부할 수 있어요. 두 번째 이미지는 기존 이미지를 교체합니다.")
                 Text("Enter는 줄바꿈, ⌘Enter는 모의 분석 요청입니다. 분석 진행 상태는 위 메뉴에서 직접 바꿉니다.")
                 Text("지원 형식: PNG, JPEG, HEIC, TIFF. 분석이나 저장 서비스는 호출하지 않습니다.")
