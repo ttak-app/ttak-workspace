@@ -62,3 +62,24 @@ JSON 경로의 점을 하이픈으로 바꾸고 `--ttak-`를 붙인다. 예를 �
 ## 시각적 확인
 
 `npm run tokens:preview`를 실행하고 [로컬 미리보기](http://127.0.0.1:4174)를 연다. [HTML 파일](preview.html)을 직접 열어도 된다. 관리 원본에서 자동 생성하므로 토큰 변경 뒤에는 `tokens:build`를 실행하고 새로고침한다. 컬러, 그라디언트, 타이포그래피, 간격, 반경, 그림자와 모션 수치를 확인할 수 있다. 미리보기의 레이아웃 스타일은 문서용이며 제품 컴포넌트가 아니다.
+
+## macOS에서 사용
+
+동일 원본에서 [TtakTokens.swift](../../apps/macos/Ttak/Resources/TtakTokens.swift)를 생성하며 Xcode 앱 타깃에 연결했다. 파일을 직접 수정하지 않고 `tokens:build`를 실행한다.
+
+```swift
+// 후속 화면에서 필요한 속성에 연결하는 예시
+// .foregroundStyle(TtakTokens.Colors.textPrimary)
+// .padding(TtakTokens.Spacing.value24)
+// .font(.system(size: TtakTokens.FontSize.value14))
+```
+
+| 공유 항목 | macOS 출력 | 단위와 제한 |
+|---|---|---|
+| 의미 컬러와 알파 표면 | `TtakTokens.Colors` | sRGB RGBA. dark mode 자동 적응 색상 아님 |
+| 간격, 수치 반경, 경계선 | `Spacing`, `Radius`, `BorderWidth` | 동일 수치를 논리 point로 제공. 웹 CSS px와 물리 픽셀 동등성을 뜻하지 않음 |
+| 원시 폰트 크기 스케일 | `FontSize` | point. 화면별 typography 역할을 자동 매핑하지 않음 |
+| 투명도 | `Opacity` | 0–1 |
+| 지속 시간과 지연 | `Duration`, `Delay` | 원본 ms를 초로 변환 |
+
+CSS 폰트 스택, `vw`, `clamp`, 웹 breakpoint, 퍼센트 반경, CSS 다중 그림자와 블러, 그라디언트 각도 및 easing은 SwiftUI로 자동 변환하지 않았다. 플랫폼의 폰트 weight와 행간, 그라디언트 좌표, material 및 모션 적용은 실제 앱 화면에 맞춰 검토한다. 특히 앱은 `accessibilityReduceMotion`을 확인해 반복 및 공간 이동을 중단해야 하며 Swift 상수 자체가 OS 설정을 자동 반영하지 않는다. 기존 앱 화면에 토큰을 연결하는 작업은 후속 범위다.

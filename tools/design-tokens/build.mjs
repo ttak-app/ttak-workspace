@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { preview } from './preview.mjs';
+import { swift } from './swift.mjs';
 import { format } from 'prettier';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +12,7 @@ const outputs = {
   css: 'apps/web/src/styles/tokens.css',
   catalog: 'docs/design-system/tokens.md',
   preview: 'docs/design-system/preview.html',
+  swift: 'apps/macos/Ttak/Resources/TtakTokens.swift',
 };
 const types = new Set(['color', 'gradient', 'fontFamily', 'dimension', 'number',
   'lineHeight', 'letterSpacing', 'shadow', 'duration', 'cubicBezier']);
@@ -93,7 +95,7 @@ export function compile(source) {
 export async function build({ check = false } = {}) {
   const source = JSON.parse(readFileSync(resolve(root, sourcePath), 'utf8'));
   for (const path of Object.values(source.sources)) readFileSync(resolve(root, path));
-  const generated = { ...compile(source), preview: preview(source) };
+  const generated = { ...compile(source), preview: preview(source), swift: swift(source) };
   const formatting = JSON.parse(readFileSync(resolve(root, 'apps/web/.prettierrc.json'), 'utf8'));
   generated.css = await format(generated.css, { ...formatting, parser: 'css' });
   generated.preview = await format(generated.preview, { ...formatting, parser: 'html' });
