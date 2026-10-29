@@ -260,6 +260,15 @@ struct ExtractionGuardTests {
         #expect(ScheduleTimeParser.clock(from: "9시", source: validSource)?.hour == 9)
     }
 
+    @Test func messageTimestampLabelWithParticleIsNotAStartTime() {
+        let source = "내일 9시에 회의, 메시지 발송시간은 13:08"
+        let rows = ScheduleExtractionGuard.groundSources([source], source: source)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.timeConfirmation.isEmpty)
+        #expect(ScheduleTimeParser.clock(from: "13:08", source: source) == nil)
+        #expect(result.drafts.first?.timeText == "09:00")
+    }
+
     @Test func aTrailingConnectorIsRemovedOnlyBeforeAnotherLocatedSchedule() {
         let source = "내일 9시 회의하고 12시 점심"
         let rows = ScheduleExtractionGuard.groundSources(["내일 9시 회의하고", "12시 점심"], source: source)

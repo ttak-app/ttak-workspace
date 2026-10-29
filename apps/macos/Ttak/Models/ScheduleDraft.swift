@@ -97,7 +97,10 @@ enum ScheduleTimeParser {
         let label =
             compact.hasSuffix(":") || compact.hasSuffix("：") ? String(compact.dropLast()) : compact
         return ["발송시각", "전송시각", "메시지시각", "작성시각", "발송시간", "전송시간", "메시지시간", "작성시간"]
-            .contains(where: label.hasSuffix)
+            .contains { name in
+                label.hasSuffix(name)
+                    || ["은", "는", "이", "가"].contains { label.hasSuffix(name + $0) }
+            }
     }
 
     static func clock(from expression: String?, source: String, sourceRange: NSRange? = nil) -> (
