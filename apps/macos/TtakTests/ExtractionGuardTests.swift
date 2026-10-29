@@ -893,6 +893,27 @@ private actor DiagnosticRecorder {
 }
 
 struct ExtractionRetryTests {
+    @Test(arguments: [
+        "내일 오후 3시로부터 2시간 후에 회의", "내일 오후 3시보다 2시간 전에 회의",
+        "2시간 후에 운동", "30분 뒤에 회의", "1시간 30분 후에 점검",
+        "내일 오후 3시(2시간 후)에 회의",
+    ])
+    func relativeStartTimeRequiresConfirmationWithoutRetry(source: String) async {
+        let model = ScriptedModel([ScheduleExtractionGuard.groundSources([source], source: source)])
+        do {
+            _ = try await ScheduleAnalyzer(model: model).analyze(
+                text: source, context: guardContext())
+            Issue.record("상대 시각의 기준 시각이 실제 시작 시각으로 반환됨")
+        } catch {
+            guard case AnalysisFailure.timeNeedsConfirmation(let message) = error else {
+                Issue.record("시각 확인 필요 오류와 다른 오류가 반환됨: \(error)")
+                return
+            }
+            #expect(message.contains("상대 시작 시각"))
+        }
+        #expect(await model.calls == 1)
+    }
+
     @Test func multipleValidStartClocksAreHeldWithoutModelRetry() async {
         let source = "내일 오전 9시 또는 오전 10시에 회의"
         let model = ScriptedModel([ScheduleExtractionGuard.groundSources([source], source: source)])
@@ -954,6 +975,7 @@ struct ExtractionRetryTests {
         ("내일 회의", ""), ("내일 저녁에 회의", ""),
         ("내일 오전 9시에 회의", "09:00"), ("내일 밤 12시에 서버 점검", "00:00"),
         ("내일 오후 1시부터 밤 3시까지 회의", "13:00"),
+        ("내일 오후 3시에 2시간 회의", "15:00"), ("내일 2시간 운동 후 휴식", ""),
         ("내일 18시까지 자료 제출", ""), ("내일 11시부터 1시까지 회의", "11:00"),
         ("내일 오전 9시에 회의\n메시지 발송 시각: 13:08", "09:00"),
     ])

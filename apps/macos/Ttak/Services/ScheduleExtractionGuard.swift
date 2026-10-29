@@ -360,7 +360,21 @@ enum ScheduleExtractionGuard {
                 issues.append("\(label): actionText에서 앞의 숫자 시작 시각을 분리하고 행동을 유지하세요")
             }
             let sourceClocks = startClocks(in: quote)
-            if sourceClocks.count > 1 || sourceClocks.contains(where: { !$0.isValid }) {
+            let relativeTimes = matches(
+                #"(?<![0-9])(?:[0-9]+(?:\.[0-9]+)?\s*시간(?:\s*[0-9]+\s*분)?|[0-9]+\s*분)\s*(?:후|뒤|전)(?:부터|까지|에는|에|은|는)?(?=[\s\p{P}]|$)"#,
+                in: quote
+            ).filter { range in
+                let line = (quote as NSString).substring(
+                    with: (quote as NSString).lineRange(for: range)
+                )
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                return !isMetadata(line)
+            }.map { (quote as NSString).substring(with: $0) }
+            if !relativeTimes.isEmpty {
+                timeConfirmation.append(
+                    "\(label): 상대 시작 시각을 확인해야 해요: \(relativeTimes.joined(separator: ", ")). 실제 시작 시각을 명확하게 입력하세요"
+                )
+            } else if sourceClocks.count > 1 || sourceClocks.contains(where: { !$0.isValid }) {
                 let expressions = sourceClocks.map(\.text).joined(separator: ", ")
                 let invalid = sourceClocks.filter { !$0.isValid }.map(\.text).joined(
                     separator: ", ")
@@ -389,6 +403,7 @@ enum ScheduleExtractionGuard {
                 index, "startTimeText",
                 timeIsGrounded && sourceClocks.count <= 1
                     && !sourceClocks.contains(where: { !$0.isValid })
+                    && relativeTimes.isEmpty
                     ? (rawTime == nil ? "absent" : "accepted") : "rejected",
                 !timeIsGrounded
                     ? "해당 일정 구간에 시각 근거 없음" : (sourceClocks.count > 1 ? "일정 구간에 시작 시각 후보가 여러 개" : "")
