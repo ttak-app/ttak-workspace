@@ -6,6 +6,9 @@ struct ScheduleInputView: View {
     @State private var model = ScheduleInputModel()
     @State private var attachmentError = ""
     @FocusState private var isInputFocused: Bool
+    #if DEBUG
+        @Environment(\.openWindow) private var openWindow
+    #endif
 
     var body: some View {
         ScrollView {
@@ -85,7 +88,7 @@ struct ScheduleInputView: View {
                     }
                 }
                 if !model.message.isEmpty {
-                    Text(model.message).font(.callout).textSelection(.enabled)
+                    ScheduleMessageView(message: model.message)
                 }
                 if !model.saveOutcomes.isEmpty {
                     ForEach(model.saveOutcomes) { outcome in
@@ -98,6 +101,11 @@ struct ScheduleInputView: View {
                     Button("미리 알림 확인 후 새 입력 시작") { model.beginNewInputAfterCheckingReminders() }
                 }
                 Divider()
+                #if DEBUG
+                    Button("개발용 컴포넌트 갤러리") {
+                        openWindow(id: ComponentGalleryView.windowID)
+                    }
+                #endif
                 Button("Ttak 종료") { NSApplication.shared.terminate(nil) }
             }
             .padding(20)
