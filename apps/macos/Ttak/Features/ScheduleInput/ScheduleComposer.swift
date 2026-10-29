@@ -83,6 +83,9 @@ struct ScheduleComposer: View {
                 ),
                 in: RoundedRectangle(cornerRadius: 30)
             )
+            .background {
+                ComposerAmbientGlow(reduceMotion: reduceMotion)
+            }
             .shadow(color: .black.opacity(colorScheme == .dark ? 0.18 : 0.08), radius: 12, y: 5)
 
             if let attachment, let image = NSImage(data: attachment.data) {
@@ -166,6 +169,35 @@ struct ScheduleComposer: View {
             attachmentError = error.localizedDescription
             return true
         }
+    }
+}
+
+private struct ComposerAmbientGlow: View {
+    let reduceMotion: Bool
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 30)
+            .fill(
+                LinearGradient(
+                    colors: [
+                        TtakTokens.Colors.brandCoral,
+                        TtakTokens.Colors.brandOrange,
+                        TtakTokens.Colors.logoCoral,
+                    ],
+                    startPoint: .topLeading, endPoint: .bottomTrailing
+                )
+            )
+            .padding(.horizontal, 6)
+            .blur(radius: 18)
+            .phaseAnimator(reduceMotion ? [false] : [false, true]) { glow, isBright in
+                glow
+                    .opacity(isBright ? 0.38 : 0.2)
+                    .scaleEffect(x: isBright ? 1.015 : 0.985, y: isBright ? 1.12 : 0.94)
+            } animation: { _ in
+                .easeInOut(duration: 3)
+            }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
 }
 
