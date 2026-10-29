@@ -4,7 +4,7 @@
 
 - 이슈: #19 / https://github.com/ttak-app/ttak-workspace/issues/19
 - 브랜치: feat/component-gallery/#19
-- specRevision: 1
+- specRevision: 2
 
 ## 목적
 
@@ -28,7 +28,7 @@
 
 ## 설계 결정
 
-- TtakApp에 #if DEBUG로 보호한 별도 Window를 추가한다. 입력 화면의 개발용 버튼에서 openWindow로 연다. Release에는 진입점과 갤러리 타입을 포함하지 않는다.
+- TtakApp에 #if DEBUG로 보호한 별도 Window를 추가한다. Debug 실행 시 갤러리를 먼저 표시하고 전면 활성화한다. 입력 화면의 개발용 버튼에서도 openWindow로 연다. Release에는 진입점과 갤러리 타입을 포함하지 않는다.
 - Features/ComponentGallery에 샘플 목록과 순수 로컬 상태를 소유하는 View를 둔다. 서비스나 ScheduleInputModel을 갤러리에서 생성하지 않는다.
 - 브랜드 색은 TtakTokens를 재사용한다. 글자와 컨트롤, 간격은 기존 네이티브 기준의 사용 예시로 표시하고 별도 공통 버튼 체계를 추가하지 않는다.
 - 기존 앱의 부작용 없는 표시 요소를 최소 범위로 추출해 실제 화면과 갤러리가 같은 View를 사용하도록 한다. 새 제품 동작을 추가하지 않는다.
@@ -64,3 +64,5 @@ Swift 포맷 검사, macos:build, 기존 macos:test, workflow:harness-check를 �
 | specRevision | 변경한 결정 | 이유 |
 | --- | --- | --- |
 | 1 | 최초 설계 | 이슈 #19와 사용자 구현 요청 |
+
+| 2 | Debug 실행 시 갤러리 자동 표시 | 사용자 실기 확인에서 앱 아이콘 클릭 후 창이 보이지 않아 진입 개선 |
