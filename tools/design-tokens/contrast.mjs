@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-const { tokens } = JSON.parse(readFileSync(new URL('../../apps/web/src/styles/design-tokens.json', import.meta.url), 'utf8'));
+const { tokens } = JSON.parse(readFileSync(new URL('../../design-system/tokens.json', import.meta.url), 'utf8'));
 const resolve = (name) => {
   const value = tokens[name].value;
   const alias = /^\{(.+)\}$/.exec(value);

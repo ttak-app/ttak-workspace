@@ -1,6 +1,6 @@
 # 디자인 토큰 목록
 
-자동 생성 파일. 수정은 [JSON 원본](../../apps/web/src/styles/design-tokens.json)에서 하고 `npm run tokens:build`를 실행한다.
+자동 생성 파일. 수정은 [JSON 원본](../../design-system/tokens.json)에서 하고 `npm run tokens:build`를 실행한다.
 
 용도와 제약은 [사용 지침](README.md), 실제 사용 근거는 [분석 기록](audit.md), 참조 파일은 [원본 목록](reference/README.md)을 확인한다.
 

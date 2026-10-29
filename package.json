@@ -29,6 +29,7 @@
     "workflow:harness-check": "node tools/ai-workflow/harness-check.mjs",
     "workflow:test": "node --test tools/ai-workflow/*.test.mjs tools/macos/*.test.mjs",
     "tokens:build": "node tools/design-tokens/build.mjs",
-    "tokens:check": "node tools/design-tokens/build.mjs --check && node --test tools/design-tokens/*.test.mjs"
+    "tokens:check": "node tools/design-tokens/build.mjs --check && node --test tools/design-tokens/*.test.mjs",
+    "tokens:preview": "node tools/design-tokens/serve.mjs"
   }
 }

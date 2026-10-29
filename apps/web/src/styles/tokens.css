@@ -1,4 +1,4 @@
-/* Generated from apps/web/src/styles/design-tokens.json. Run npm run tokens:build. */
+/* Generated from design-system/tokens.json. Run npm run tokens:build. */
 :root {
   --ttak-color-palette-white: #ffffff;
   --ttak-color-palette-ink: #191f28;

@@ -2,7 +2,7 @@
 
 이슈 [#17](https://github.com/ttak-app/ttak-workspace/issues/17)의 결과물이다. 최신 랜딩에서 관찰한 디자인 기초를 코드에서 참조할 수 있도록 정리했다. UI 컴포넌트나 새 디자인 시스템 패키지는 포함하지 않는다.
 
-- [관리 원본 JSON](../../apps/web/src/styles/design-tokens.json)
+- [관리 원본 JSON](../../design-system/tokens.json)
 - [생성 CSS](../../apps/web/src/styles/tokens.css)
 - [전체 토큰 목록](tokens.md): 이름, 값, 종류, 용도, 출처와 상태
 - [랜딩 분석과 확인 결과](audit.md), [분석 근거](reference/README.md)
@@ -15,9 +15,10 @@
 npm run tokens:build
 npm run tokens:check
 node tools/design-tokens/contrast.mjs
+npm run tokens:preview
 ```
 
-JSON을 수정한 뒤 CSS와 목록을 함께 재생성한다. `tokens:check`는 참조 누락, 순환, 직접 참조의 타입 불일치, 변수명 충돌, 생성물 차이와 생성 도구의 회귀 검사를 확인한다. 이 검사는 모든 CSS 문법과 접근성 또는 원본 화면 일치 여부를 자동 보장하지 않는다. 새 값의 CSS 문법과 실제 화면은 별도 확인한다. 새 CI나 자동 강제 정책은 추가하지 않았다.
+공통 `design-system/tokens.json`을 수정한 뒤 플랫폼 출력과 목록을 함께 재생성한다. `tokens:check`는 참조 누락, 순환, 직접 참조의 타입 불일치, 변수명 충돌, 생성물 차이와 생성 도구의 회귀 검사를 확인한다. 이 검사는 모든 CSS 문법과 접근성 또는 원본 화면 일치 여부를 자동 보장하지 않는다. 새 값의 CSS 문법과 실제 화면은 별도 확인한다. 새 CI나 자동 강제 정책은 추가하지 않았다.
 
 후속 화면에서 사용할 때 CSS를 한 번 import하고 용도에 맞는 의미 토큰을 참조한다. 현재 React 앱은 이 CSS를 아직 import하지 않는다. 아래는 사용 방법이며 이번 작업에서 적용한 화면 변경은 아니다.
 
@@ -56,4 +57,8 @@ JSON 경로의 점을 하이픈으로 바꾸고 `--ttak-`를 붙인다. 예를 �
 - reduced-motion override는 지속 시간과 이동량을 줄인다. 반복 애니메이션의 `0ms`만으로 중단을 보장하지 않으므로 소비 화면은 `animation: none`, 필요한 `transition: none`, JavaScript `matchMedia` 분기를 함께 적용해야 한다. 원본도 CSS 반복 애니메이션과 Web Animations API를 각각 중단한다.
 - 유리 효과와 알파 색상은 배경에 따라 합성된다. 그림자, 블러, 그라디언트의 픽셀 결과는 별도 화면 검증이 필요하다.
 
-다크 모드, 새 폰트 채택, Swift 또는 Figma 변환, 낮은 대비 색상의 대체안과 기존 화면 마이그레이션은 미확정 후속 항목이다.
+다크 모드, 새 폰트 채택, Figma 변환, 낮은 대비 색상의 대체안과 기존 화면 마이그레이션은 미확정 후속 항목이다.
+
+## 시각적 확인
+
+`npm run tokens:preview`를 실행하고 [로컬 미리보기](http://127.0.0.1:4174)를 연다. [HTML 파일](preview.html)을 직접 열어도 된다. 관리 원본에서 자동 생성하므로 토큰 변경 뒤에는 `tokens:build`를 실행하고 새로고침한다. 컬러, 그라디언트, 타이포그래피, 간격, 반경, 그림자와 모션 수치를 확인할 수 있다. 미리보기의 레이아웃 스타일은 문서용이며 제품 컴포넌트가 아니다.

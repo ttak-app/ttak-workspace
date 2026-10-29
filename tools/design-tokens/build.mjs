@@ -1,14 +1,16 @@
 import assert from 'node:assert/strict';
+import { preview } from './preview.mjs';
 import { format } from 'prettier';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-export const sourcePath = 'apps/web/src/styles/design-tokens.json';
+export const sourcePath = 'design-system/tokens.json';
 const outputs = {
   css: 'apps/web/src/styles/tokens.css',
   catalog: 'docs/design-system/tokens.md',
+  preview: 'docs/design-system/preview.html',
 };
 const types = new Set(['color', 'gradient', 'fontFamily', 'dimension', 'number',
   'lineHeight', 'letterSpacing', 'shadow', 'duration', 'cubicBezier']);
@@ -91,9 +93,10 @@ export function compile(source) {
 export async function build({ check = false } = {}) {
   const source = JSON.parse(readFileSync(resolve(root, sourcePath), 'utf8'));
   for (const path of Object.values(source.sources)) readFileSync(resolve(root, path));
-  const generated = compile(source);
+  const generated = { ...compile(source), preview: preview(source) };
   const formatting = JSON.parse(readFileSync(resolve(root, 'apps/web/.prettierrc.json'), 'utf8'));
   generated.css = await format(generated.css, { ...formatting, parser: 'css' });
+  generated.preview = await format(generated.preview, { ...formatting, parser: 'html' });
   for (const [kind, path] of Object.entries(outputs)) {
     if (check) {
       assert.equal(readFileSync(resolve(root, path), 'utf8'), generated[kind], `${path}가 원본과 다릅니다. npm run tokens:build 실행 필요`);

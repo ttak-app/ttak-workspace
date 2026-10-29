@@ -1,0 +1,1089 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Ttak 디자인 토큰</title>
+    <link rel="stylesheet" href="../../apps/web/src/styles/tokens.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #f7f8fa;
+        color: #191f28;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+      }
+      header,
+      main {
+        max-width: 1280px;
+        margin: auto;
+        padding: 48px 32px;
+      }
+      header {
+        padding-bottom: 16px;
+      }
+      header > p:first-child {
+        color: #a94f27;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+      }
+      h1 {
+        font-size: 40px;
+        letter-spacing: -0.04em;
+        margin: 12px 0;
+      }
+      header p {
+        line-height: 1.8;
+        color: #4e5968;
+        max-width: 780px;
+      }
+      nav {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 24px;
+      }
+      nav a {
+        padding: 10px 16px;
+        border: 1px solid #d9dee5;
+        background: white;
+        border-radius: 24px;
+        text-decoration: none;
+        color: inherit;
+        font-size: 13px;
+      }
+      nav a:focus-visible {
+        outline: 2px solid #a94f27;
+        outline-offset: 3px;
+      }
+      section {
+        margin: 0 0 64px;
+        scroll-margin-top: 24px;
+      }
+      section > h2 {
+        font-size: 26px;
+        letter-spacing: -0.03em;
+      }
+      section > p {
+        color: #4e5968;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+      }
+      article {
+        min-width: 0;
+        background: white;
+        border: 1px solid #e9edf2;
+        border-radius: 16px;
+        padding: 20px;
+        overflow: hidden;
+      }
+      article h3 {
+        font-size: 12px;
+        margin: 18px 0 10px;
+        overflow-wrap: anywhere;
+        font-family: ui-monospace, monospace;
+      }
+      article code {
+        font-size: 12px;
+        overflow-wrap: anywhere;
+        color: #4e5968;
+      }
+      article p {
+        font-size: 12px;
+        line-height: 1.7;
+        color: #4e5968;
+      }
+      .swatch {
+        height: 90px;
+        border-radius: 10px;
+        border: 1px solid #00000012;
+      }
+      .gradient {
+        height: 110px;
+      }
+      .space-demo {
+        height: 24px;
+        background: #d75d57;
+        border-radius: 3px;
+        max-width: 100%;
+      }
+      .radius-demo {
+        height: 88px;
+        width: 88px;
+        background: #fff3e9;
+        border: 2px solid #a94f27;
+      }
+      .shadow-demo {
+        height: 90px;
+        background: white;
+        border-radius: 16px;
+        margin: 10px;
+      }
+      .type-sample {
+        margin-bottom: 16px;
+        padding: 24px;
+      }
+      .type-sample > p {
+        color: #191f28;
+        overflow-wrap: anywhere;
+      }
+      .type-sample h3 {
+        margin-top: 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        font-size: 13px;
+      }
+      td,
+      th {
+        text-align: left;
+        padding: 14px;
+        border-bottom: 1px solid #e9edf2;
+        overflow-wrap: anywhere;
+      }
+      .note {
+        border-left: 3px solid #a94f27;
+        padding: 12px 16px;
+        background: #fff3e9;
+      }
+      .platform {
+        display: inline-block;
+        padding: 5px 10px;
+        margin-right: 8px;
+        border-radius: 8px;
+        background: #e9edf2;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      @media (max-width: 640px) {
+        header,
+        main {
+          padding: 28px 20px;
+        }
+        h1 {
+          font-size: 32px;
+        }
+        .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        article {
+          padding: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <p>TTAK / FOUNDATIONS</p>
+      <h1>디자인 토큰 미리보기</h1>
+      <p>
+        랜딩 페이지에서 추출한 컬러, 폰트, 간격과 표면 효과를 한곳에서
+        확인합니다. 컴포넌트 제작 전 디자인 기초를 검토하는 화면입니다.
+      </p>
+      <span class="platform">Web</span><span class="platform">macOS</span>
+      <p class="note">
+        공통 JSON이 관리 원본입니다. 웹의 반응형 타이포그래피와 CSS 효과는 웹
+        전용이며, macOS는 공유 가능한 색상과 수치 스케일을 사용합니다. 약한
+        텍스트와 로고 색상의 대비 제한은 분석 문서를 확인하세요.
+      </p>
+      <nav>
+        <a href="#colors">컬러</a><a href="#gradients">그라디언트</a
+        ><a href="#typography">타이포그래피</a><a href="#spacing">간격</a
+        ><a href="#radius">모서리</a><a href="#effects">그림자</a
+        ><a href="#motion">모션</a>
+      </nav>
+    </header>
+    <main>
+      <section id="colors">
+        <h2>컬러</h2>
+        <p>
+          브랜드, 텍스트, 표면, 상태와 포커스의 의미 토큰입니다. 아래 값은 현재
+          관찰값이며 모든 조합의 접근성 승인을 뜻하지 않습니다.
+        </p>
+        <div class="grid">
+          <article>
+            <div class="swatch" style="background: #191f28"></div>
+            <h3>color.text.primary</h3>
+            <code>#191F28</code>
+            <p>용도: text.primary</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #333d4b"></div>
+            <h3>color.text.body</h3>
+            <code>#333D4B</code>
+            <p>용도: text.body</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #6b7684"></div>
+            <h3>color.text.secondary</h3>
+            <code>#6B7684</code>
+            <p>용도: text.secondary</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #8b95a1"></div>
+            <h3>color.text.muted</h3>
+            <code>#8B95A1</code>
+            <p>용도: text.muted</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #adb5bd"></div>
+            <h3>color.text.subtle</h3>
+            <code>#ADB5BD</code>
+            <p>용도: text.subtle</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #9497a1"></div>
+            <h3>color.text.placeholder</h3>
+            <code>#9497A1</code>
+            <p>용도: text.placeholder</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #929aa5"></div>
+            <h3>color.text.caption</h3>
+            <code>#929AA5</code>
+            <p>용도: text.caption</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #9ba3ae"></div>
+            <h3>color.text.notice</h3>
+            <code>#9BA3AE</code>
+            <p>용도: text.notice</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #ffffff"></div>
+            <h3>color.text.on-action</h3>
+            <code>#FFFFFF</code>
+            <p>용도: text.on-action</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #d75d57"></div>
+            <h3>color.brand.coral</h3>
+            <code>#D75D57</code>
+            <p>용도: brand.coral</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #e39343"></div>
+            <h3>color.brand.orange</h3>
+            <code>#E39343</code>
+            <p>용도: brand.orange</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #a94f27"></div>
+            <h3>color.brand.strong</h3>
+            <code>#A94F27</code>
+            <p>용도: brand.strong</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #fff3e9"></div>
+            <h3>color.brand.tint</h3>
+            <code>#FFF3E9</code>
+            <p>용도: brand.tint</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #ef7868"></div>
+            <h3>color.logo.coral</h3>
+            <code>#EF7868</code>
+            <p>용도: logo.coral</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #f6ad55"></div>
+            <h3>color.logo.orange</h3>
+            <code>#F6AD55</code>
+            <p>용도: logo.orange</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #3182f6"></div>
+            <h3>color.accent.legacy-blue</h3>
+            <code>#3182F6</code>
+            <p>용도: accent.legacy-blue</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #242735"></div>
+            <h3>color.action.primary</h3>
+            <code>#242735</code>
+            <p>용도: action.primary</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #353949"></div>
+            <h3>color.action.hover</h3>
+            <code>#353949</code>
+            <p>용도: action.hover</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #ffffff"></div>
+            <h3>color.surface.default</h3>
+            <code>#FFFFFF</code>
+            <p>용도: surface.default</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #f2f4f6"></div>
+            <h3>color.surface.field</h3>
+            <code>#F2F4F6</code>
+            <p>용도: surface.field</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #f7f8fa"></div>
+            <h3>color.surface.subtle</h3>
+            <code>#F7F8FA</code>
+            <p>용도: surface.subtle</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #e9edf2"></div>
+            <h3>color.border.default</h3>
+            <code>#E9EDF2</code>
+            <p>용도: border.default</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #eef0f3"></div>
+            <h3>color.border.divider</h3>
+            <code>#EEF0F3</code>
+            <p>용도: border.divider</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #3b6d5b"></div>
+            <h3>color.status.success</h3>
+            <code>#3B6D5B</code>
+            <p>용도: status.success</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #b84538"></div>
+            <h3>color.status.error</h3>
+            <code>#B84538</code>
+            <p>용도: status.error</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #d45454"></div>
+            <h3>color.status.destructive</h3>
+            <code>#D45454</code>
+            <p>용도: status.destructive</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #fff0f0"></div>
+            <h3>color.status.destructive-surface</h3>
+            <code>#FFF0F0</code>
+            <p>용도: status.destructive-surface</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #a94f27"></div>
+            <h3>color.focus.ring</h3>
+            <code>#A94F27</code>
+            <p>용도: focus.ring</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #ffffffed"></div>
+            <h3>color.surface.glass-panel</h3>
+            <code>#FFFFFFED</code>
+            <p>알파를 포함한 표면 또는 경계선 원시값</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #ffffffbd"></div>
+            <h3>color.surface.glass-attachment</h3>
+            <code>#FFFFFFBD</code>
+            <p>알파를 포함한 표면 또는 경계선 원시값</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #ffffff70"></div>
+            <h3>color.surface.glass-menu</h3>
+            <code>#FFFFFF70</code>
+            <p>알파를 포함한 표면 또는 경계선 원시값</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #ffffff99"></div>
+            <h3>color.surface.glass-action</h3>
+            <code>#FFFFFF99</code>
+            <p>알파를 포함한 표면 또는 경계선 원시값</p>
+          </article>
+          <article>
+            <div class="swatch" style="background: #ffffffb3"></div>
+            <h3>color.surface.border-input</h3>
+            <code>#FFFFFFB3</code>
+            <p>알파를 포함한 표면 또는 경계선 원시값</p>
+          </article>
+        </div>
+      </section>
+      <section id="gradients">
+        <h2>그라디언트</h2>
+        <p>
+          웹 기준 각도와 stop을 보존합니다. 브랜드 그라디언트는 기존 초안에만
+          있는 값입니다.
+        </p>
+        <div class="grid">
+          <article>
+            <div
+              class="swatch gradient"
+              style="
+                background: linear-gradient(115deg, #ef7868 10%, #f6ad55 90%);
+              "
+            ></div>
+            <h3>gradient.logo</h3>
+            <code>linear-gradient(115deg, #EF7868 10%, #F6AD55 90%)</code>
+            <p>용도: logo</p>
+          </article>
+          <article>
+            <div
+              class="swatch gradient"
+              style="
+                background: linear-gradient(115deg, #d75d57 10%, #e39343 90%);
+              "
+            ></div>
+            <h3>gradient.brand</h3>
+            <code>linear-gradient(115deg, #D75D57 10%, #E39343 90%)</code>
+            <p>용도: brand</p>
+          </article>
+          <article>
+            <div
+              class="swatch gradient"
+              style="
+                background: linear-gradient(
+                  110deg,
+                  #fff8f2,
+                  #fffaf7 60%,
+                  #fff9f5
+                );
+              "
+            ></div>
+            <h3>gradient.surface-input</h3>
+            <code>linear-gradient(110deg, #FFF8F2, #FFFAF7 60%, #FFF9F5)</code>
+            <p>용도: surface-input</p>
+          </article>
+          <article>
+            <div
+              class="swatch gradient"
+              style="
+                background: linear-gradient(
+                  135deg,
+                  #e9edf2,
+                  #edf0f4 42%,
+                  #e6e8ed
+                );
+              "
+            ></div>
+            <h3>gradient.surface-desktop</h3>
+            <code>linear-gradient(135deg, #e9edf2, #edf0f4 42%, #e6e8ed)</code>
+            <p>용도: surface-desktop</p>
+          </article>
+          <article>
+            <div
+              class="swatch gradient"
+              style="
+                background: linear-gradient(
+                  110deg,
+                  #d75d57 0%,
+                  #e39343 25%,
+                  #eaa173 50%,
+                  #e39343 75%,
+                  #d75d57 100%
+                );
+              "
+            ></div>
+            <h3>gradient.halo</h3>
+            <code
+              >linear-gradient(110deg, #D75D57 0%, #E39343 25%, #eaa173 50%,
+              #E39343 75%, #D75D57 100%)</code
+            >
+            <p>용도: halo</p>
+          </article>
+          <article>
+            <div
+              class="swatch gradient"
+              style="background: linear-gradient(115deg, #fff8f3, #fffdfb)"
+            ></div>
+            <h3>gradient.surface-example</h3>
+            <code>linear-gradient(115deg, #fff8f3, #fffdfb)</code>
+            <p>용도: surface-example</p>
+          </article>
+          <article>
+            <div
+              class="swatch gradient"
+              style="background: linear-gradient(145deg, #e7aa75, #f8e2cd)"
+            ></div>
+            <h3>gradient.illustration-paper</h3>
+            <code>linear-gradient(145deg, #e7aa75, #f8e2cd)</code>
+            <p>용도: illustration-paper</p>
+          </article>
+        </div>
+      </section>
+      <section id="typography">
+        <h2>타이포그래피</h2>
+        <p>
+          이 샘플은 웹 기준입니다. 브라우저 너비를 조절하면 원본의 반응형 규칙을
+          확인할 수 있습니다. macOS 폰트 레이아웃은 화면 적용 시 별도로
+          결정합니다.
+        </p>
+        <article class="type-sample">
+          <h3>typography.hero</h3>
+          <p
+            style="
+              font-family: var(--ttak-font-family-system);
+              font-size: var(--ttak-typography-hero-size);
+              font-weight: var(--ttak-typography-hero-weight);
+              line-height: var(--ttak-typography-hero-line-height);
+              letter-spacing: var(--ttak-typography-hero-letter-spacing);
+            "
+          >
+            생각난 순간, 일정 정리는 딱.<br />Schedule your next idea.
+          </p>
+        </article>
+        <article class="type-sample">
+          <h3>typography.description</h3>
+          <p
+            style="
+              font-family: var(--ttak-font-family-system);
+              font-size: var(--ttak-typography-description-size);
+              font-weight: var(--ttak-typography-description-weight);
+              line-height: var(--ttak-typography-description-line-height);
+              letter-spacing: var(--ttak-typography-description-letter-spacing);
+            "
+          >
+            생각난 순간, 일정 정리는 딱.<br />Schedule your next idea.
+          </p>
+        </article>
+        <article class="type-sample">
+          <h3>typography.section</h3>
+          <p
+            style="
+              font-family: var(--ttak-font-family-system);
+              font-size: var(--ttak-typography-section-size);
+              font-weight: var(--ttak-typography-section-weight);
+              line-height: var(--ttak-typography-section-line-height);
+              letter-spacing: var(--ttak-typography-section-letter-spacing);
+            "
+          >
+            생각난 순간, 일정 정리는 딱.<br />Schedule your next idea.
+          </p>
+        </article>
+        <article class="type-sample">
+          <h3>typography.feature-title</h3>
+          <p
+            style="
+              font-family: var(--ttak-font-family-system);
+              font-size: var(--ttak-typography-feature-title-size);
+              font-weight: var(--ttak-typography-feature-title-weight);
+              line-height: var(--ttak-typography-feature-title-line-height);
+              letter-spacing: var(
+                --ttak-typography-feature-title-letter-spacing
+              );
+            "
+          >
+            생각난 순간, 일정 정리는 딱.<br />Schedule your next idea.
+          </p>
+        </article>
+        <article class="type-sample">
+          <h3>typography.body</h3>
+          <p
+            style="
+              font-family: var(--ttak-font-family-system);
+              font-size: var(--ttak-typography-body-size);
+              font-weight: var(--ttak-typography-body-weight);
+              line-height: var(--ttak-typography-body-line-height);
+              letter-spacing: var(--ttak-typography-body-letter-spacing);
+            "
+          >
+            생각난 순간, 일정 정리는 딱.<br />Schedule your next idea.
+          </p>
+        </article>
+        <article class="type-sample">
+          <h3>typography.input</h3>
+          <p
+            style="
+              font-family: var(--ttak-font-family-system);
+              font-size: var(--ttak-typography-input-size);
+              font-weight: var(--ttak-typography-input-weight);
+              line-height: var(--ttak-typography-input-line-height);
+              letter-spacing: var(--ttak-typography-input-letter-spacing);
+            "
+          >
+            생각난 순간, 일정 정리는 딱.<br />Schedule your next idea.
+          </p>
+        </article>
+        <article class="type-sample">
+          <h3>typography.action</h3>
+          <p
+            style="
+              font-family: var(--ttak-font-family-system);
+              font-size: var(--ttak-typography-action-size);
+              font-weight: var(--ttak-typography-action-weight);
+              line-height: var(--ttak-typography-action-line-height);
+              letter-spacing: var(--ttak-typography-action-letter-spacing);
+            "
+          >
+            생각난 순간, 일정 정리는 딱.<br />Schedule your next idea.
+          </p>
+        </article>
+        <article class="type-sample">
+          <h3>typography.field</h3>
+          <p
+            style="
+              font-family: var(--ttak-font-family-system);
+              font-size: var(--ttak-typography-field-size);
+              font-weight: var(--ttak-typography-field-weight);
+              line-height: var(--ttak-typography-field-line-height);
+              letter-spacing: var(--ttak-typography-field-letter-spacing);
+            "
+          >
+            생각난 순간, 일정 정리는 딱.<br />Schedule your next idea.
+          </p>
+        </article>
+        <article class="type-sample">
+          <h3>typography.caption</h3>
+          <p
+            style="
+              font-family: var(--ttak-font-family-system);
+              font-size: var(--ttak-typography-caption-size);
+              font-weight: var(--ttak-typography-caption-weight);
+              line-height: var(--ttak-typography-caption-line-height);
+              letter-spacing: var(--ttak-typography-caption-letter-spacing);
+            "
+          >
+            생각난 순간, 일정 정리는 딱.<br />Schedule your next idea.
+          </p>
+        </article>
+        <article class="type-sample">
+          <h3>typography.notice</h3>
+          <p
+            style="
+              font-family: var(--ttak-font-family-system);
+              font-size: var(--ttak-typography-notice-size);
+              font-weight: var(--ttak-typography-notice-weight);
+              line-height: var(--ttak-typography-notice-line-height);
+              letter-spacing: var(--ttak-typography-notice-letter-spacing);
+            "
+          >
+            생각난 순간, 일정 정리는 딱.<br />Schedule your next idea.
+          </p>
+        </article>
+        <article class="type-sample">
+          <h3>typography.review-title</h3>
+          <p
+            style="
+              font-family: var(--ttak-font-family-system);
+              font-size: var(--ttak-typography-review-title-size);
+              font-weight: var(--ttak-typography-review-title-weight);
+              line-height: var(--ttak-typography-review-title-line-height);
+              letter-spacing: var(
+                --ttak-typography-review-title-letter-spacing
+              );
+            "
+          >
+            생각난 순간, 일정 정리는 딱.<br />Schedule your next idea.
+          </p>
+        </article>
+      </section>
+      <section id="spacing">
+        <h2>간격</h2>
+        <p>
+          관찰한 수치 스케일입니다. 웹에서는 px, macOS에서는 point 단위로
+          참조합니다.
+        </p>
+        <div class="grid">
+          <article>
+            <div class="space-demo" style="width: 0px"></div>
+            <h3>space.0</h3>
+            <code>0px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 4px"></div>
+            <h3>space.4</h3>
+            <code>4px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 5px"></div>
+            <h3>space.5</h3>
+            <code>5px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 6px"></div>
+            <h3>space.6</h3>
+            <code>6px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 8px"></div>
+            <h3>space.8</h3>
+            <code>8px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 10px"></div>
+            <h3>space.10</h3>
+            <code>10px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 11px"></div>
+            <h3>space.11</h3>
+            <code>11px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 12px"></div>
+            <h3>space.12</h3>
+            <code>12px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 13px"></div>
+            <h3>space.13</h3>
+            <code>13px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 14px"></div>
+            <h3>space.14</h3>
+            <code>14px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 15px"></div>
+            <h3>space.15</h3>
+            <code>15px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 16px"></div>
+            <h3>space.16</h3>
+            <code>16px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 18px"></div>
+            <h3>space.18</h3>
+            <code>18px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 20px"></div>
+            <h3>space.20</h3>
+            <code>20px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 22px"></div>
+            <h3>space.22</h3>
+            <code>22px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 24px"></div>
+            <h3>space.24</h3>
+            <code>24px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 26px"></div>
+            <h3>space.26</h3>
+            <code>26px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 28px"></div>
+            <h3>space.28</h3>
+            <code>28px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 30px"></div>
+            <h3>space.30</h3>
+            <code>30px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 32px"></div>
+            <h3>space.32</h3>
+            <code>32px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 34px"></div>
+            <h3>space.34</h3>
+            <code>34px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 35px"></div>
+            <h3>space.35</h3>
+            <code>35px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 36px"></div>
+            <h3>space.36</h3>
+            <code>36px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 38px"></div>
+            <h3>space.38</h3>
+            <code>38px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 40px"></div>
+            <h3>space.40</h3>
+            <code>40px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 42px"></div>
+            <h3>space.42</h3>
+            <code>42px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 46px"></div>
+            <h3>space.46</h3>
+            <code>46px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 48px"></div>
+            <h3>space.48</h3>
+            <code>48px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 56px"></div>
+            <h3>space.56</h3>
+            <code>56px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 64px"></div>
+            <h3>space.64</h3>
+            <code>64px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 80px"></div>
+            <h3>space.80</h3>
+            <code>80px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+          <article>
+            <div class="space-demo" style="width: 96px"></div>
+            <h3>space.96</h3>
+            <code>96px</code>
+            <p>관찰된 간격. 일관된 배수 스케일로 재설계하지 않음</p>
+          </article>
+        </div>
+      </section>
+      <section id="radius">
+        <h2>모서리</h2>
+        <p>기초 반경의 형태를 확인합니다. 퍼센트 원형은 웹 표현입니다.</p>
+        <div class="grid">
+          <article>
+            <div class="radius-demo" style="border-radius: 4px"></div>
+            <h3>radius.4</h3>
+            <code>4px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 5px"></div>
+            <h3>radius.5</h3>
+            <code>5px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 7px"></div>
+            <h3>radius.7</h3>
+            <code>7px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 8px"></div>
+            <h3>radius.8</h3>
+            <code>8px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 9px"></div>
+            <h3>radius.9</h3>
+            <code>9px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 10px"></div>
+            <h3>radius.10</h3>
+            <code>10px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 12px"></div>
+            <h3>radius.12</h3>
+            <code>12px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 16px"></div>
+            <h3>radius.16</h3>
+            <code>16px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 17px"></div>
+            <h3>radius.17</h3>
+            <code>17px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 18px"></div>
+            <h3>radius.18</h3>
+            <code>18px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 20px"></div>
+            <h3>radius.20</h3>
+            <code>20px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 22px"></div>
+            <h3>radius.22</h3>
+            <code>22px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 24px"></div>
+            <h3>radius.24</h3>
+            <code>24px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 28px"></div>
+            <h3>radius.28</h3>
+            <code>28px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 30px"></div>
+            <h3>radius.30</h3>
+            <code>30px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 32px"></div>
+            <h3>radius.32</h3>
+            <code>32px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 36px"></div>
+            <h3>radius.36</h3>
+            <code>36px</code>
+            <p>관찰된 모서리 반경</p>
+          </article>
+          <article>
+            <div class="radius-demo" style="border-radius: 50%"></div>
+            <h3>radius.circle</h3>
+            <code>50%</code>
+            <p>원형 반경</p>
+          </article>
+        </div>
+      </section>
+      <section id="effects">
+        <h2>그림자</h2>
+        <p>
+          아래는 CSS 다중 그림자입니다. SwiftUI용 그림자 변환을 뜻하지 않습니다.
+        </p>
+        <div class="grid">
+          <article>
+            <div
+              class="shadow-demo"
+              style="
+                box-shadow:
+                  0 9px 24px -6px #28344922,
+                  0 1px 3px #27324609;
+              "
+            ></div>
+            <h3>elevation.input</h3>
+            <code>0 9px 24px -6px #28344922, 0 1px 3px #27324609</code>
+            <p>입력 표면 그림자</p>
+          </article>
+          <article>
+            <div
+              class="shadow-demo"
+              style="box-shadow: 0 12px 30px -12px #26324725"
+            ></div>
+            <h3>elevation.panel</h3>
+            <code>0 12px 30px -12px #26324725</code>
+            <p>검토 표면 그림자</p>
+          </article>
+          <article>
+            <div
+              class="shadow-demo"
+              style="box-shadow: 0 6px 18px #2834490a"
+            ></div>
+            <h3>elevation.attachment</h3>
+            <code>0 6px 18px #2834490a</code>
+            <p>첨부 미리보기 그림자</p>
+          </article>
+        </div>
+      </section>
+      <section id="motion">
+        <h2>모션</h2>
+        <p>
+          현재 랜딩에서 관찰한 지속 시간입니다. 움직임 감소 설정에서는 반복
+          애니메이션과 공간 이동을 중단해야 합니다.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>토큰</th>
+              <th>원본 지속 시간</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>motion.duration.hover</td>
+              <td>150ms</td>
+            </tr>
+            <tr>
+              <td>motion.duration.opacity</td>
+              <td>800ms</td>
+            </tr>
+            <tr>
+              <td>motion.duration.drift-idle</td>
+              <td>12000ms</td>
+            </tr>
+            <tr>
+              <td>motion.duration.drift-typing</td>
+              <td>10000ms</td>
+            </tr>
+            <tr>
+              <td>motion.duration.drift-analyzing</td>
+              <td>6000ms</td>
+            </tr>
+            <tr>
+              <td>motion.duration.spinner</td>
+              <td>800ms</td>
+            </tr>
+            <tr>
+              <td>motion.duration.panel</td>
+              <td>480ms</td>
+            </tr>
+            <tr>
+              <td>motion.duration.row</td>
+              <td>240ms</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <p>관리 원본: design-system/tokens.json / 생성: npm run tokens:build</p>
+    </main>
+  </body>
+</html>
