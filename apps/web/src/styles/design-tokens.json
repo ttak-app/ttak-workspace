@@ -1,0 +1,496 @@
+{
+  "version": 1,
+  "description": "최신 랜딩 기반 디자인 기초 토큰. 관찰값이며 접근성 검토 항목은 audit.md 참조.",
+  "sources": {
+    "landing.css": "docs/design-system/reference/landing.css",
+    "legacy-tokens.css": "docs/design-system/reference/legacy-tokens.css",
+    "legacy-tokens.json": "docs/design-system/reference/legacy-tokens.json",
+    "review-motion.txt": "docs/design-system/reference/review-motion.txt"
+  },
+  "tokens": {
+    "color.palette.white": {
+      "type": "color",
+      "value": "#FFFFFF",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.ink": {
+      "type": "color",
+      "value": "#191F28",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.body": {
+      "type": "color",
+      "value": "#333D4B",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.secondary": {
+      "type": "color",
+      "value": "#6B7684",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.muted": {
+      "type": "color",
+      "value": "#8B95A1",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.subtle": {
+      "type": "color",
+      "value": "#ADB5BD",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.placeholder": {
+      "type": "color",
+      "value": "#9497A1",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.caption": {
+      "type": "color",
+      "value": "#929AA5",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.notice": {
+      "type": "color",
+      "value": "#9BA3AE",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.coral": {
+      "type": "color",
+      "value": "#D75D57",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.orange": {
+      "type": "color",
+      "value": "#E39343",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.strong": {
+      "type": "color",
+      "value": "#A94F27",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.tint": {
+      "type": "color",
+      "value": "#FFF3E9",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.logo-coral": {
+      "type": "color",
+      "value": "#EF7868",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.logo-orange": {
+      "type": "color",
+      "value": "#F6AD55",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.blue": {
+      "type": "color",
+      "value": "#3182F6",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.action": {
+      "type": "color",
+      "value": "#242735",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.action-hover": {
+      "type": "color",
+      "value": "#353949",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.field": {
+      "type": "color",
+      "value": "#F2F4F6",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.canvas": {
+      "type": "color",
+      "value": "#F7F8FA",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.border": {
+      "type": "color",
+      "value": "#E9EDF2",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.divider": {
+      "type": "color",
+      "value": "#EEF0F3",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.success": {
+      "type": "color",
+      "value": "#3B6D5B",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.error": {
+      "type": "color",
+      "value": "#B84538",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.destructive": {
+      "type": "color",
+      "value": "#D45454",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.destructive-tint": {
+      "type": "color",
+      "value": "#FFF0F0",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.warm-start": {
+      "type": "color",
+      "value": "#FFF8F2",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.warm-middle": {
+      "type": "color",
+      "value": "#FFFAF7",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.palette.warm-end": {
+      "type": "color",
+      "value": "#FFF9F5",
+      "description": "랜딩에서 추출한 원시 색상",
+      "source": "legacy-tokens.css, landing.css (:root, 텍스트, 상태, 입력 표면)",
+      "status": "observed"
+    },
+    "color.text.primary": {
+      "type": "color",
+      "value": "{color.palette.ink}",
+      "description": "용도: text.primary",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.text.body": {
+      "type": "color",
+      "value": "{color.palette.body}",
+      "description": "용도: text.body",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.text.secondary": {
+      "type": "color",
+      "value": "{color.palette.secondary}",
+      "description": "용도: text.secondary",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.text.muted": {
+      "type": "color",
+      "value": "{color.palette.muted}",
+      "description": "용도: text.muted",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.text.subtle": {
+      "type": "color",
+      "value": "{color.palette.subtle}",
+      "description": "용도: text.subtle",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.text.placeholder": {
+      "type": "color",
+      "value": "{color.palette.placeholder}",
+      "description": "용도: text.placeholder",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.text.caption": {
+      "type": "color",
+      "value": "{color.palette.caption}",
+      "description": "용도: text.caption",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.text.notice": {
+      "type": "color",
+      "value": "{color.palette.notice}",
+      "description": "용도: text.notice",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.text.on-action": {
+      "type": "color",
+      "value": "{color.palette.white}",
+      "description": "용도: text.on-action",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.brand.coral": {
+      "type": "color",
+      "value": "{color.palette.coral}",
+      "description": "용도: brand.coral",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.brand.orange": {
+      "type": "color",
+      "value": "{color.palette.orange}",
+      "description": "용도: brand.orange",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.brand.strong": {
+      "type": "color",
+      "value": "{color.palette.strong}",
+      "description": "용도: brand.strong",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.brand.tint": {
+      "type": "color",
+      "value": "{color.palette.tint}",
+      "description": "용도: brand.tint",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.logo.coral": {
+      "type": "color",
+      "value": "{color.palette.logo-coral}",
+      "description": "용도: logo.coral",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.logo.orange": {
+      "type": "color",
+      "value": "{color.palette.logo-orange}",
+      "description": "용도: logo.orange",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.accent.legacy-blue": {
+      "type": "color",
+      "value": "{color.palette.blue}",
+      "description": "용도: accent.legacy-blue",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.action.primary": {
+      "type": "color",
+      "value": "{color.palette.action}",
+      "description": "용도: action.primary",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.action.hover": {
+      "type": "color",
+      "value": "{color.palette.action-hover}",
+      "description": "용도: action.hover",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.surface.default": {
+      "type": "color",
+      "value": "{color.palette.white}",
+      "description": "용도: surface.default",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.surface.field": {
+      "type": "color",
+      "value": "{color.palette.field}",
+      "description": "용도: surface.field",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.surface.subtle": {
+      "type": "color",
+      "value": "{color.palette.canvas}",
+      "description": "용도: surface.subtle",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.border.default": {
+      "type": "color",
+      "value": "{color.palette.border}",
+      "description": "용도: border.default",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.border.divider": {
+      "type": "color",
+      "value": "{color.palette.divider}",
+      "description": "용도: border.divider",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.status.success": {
+      "type": "color",
+      "value": "{color.palette.success}",
+      "description": "용도: status.success",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.status.error": {
+      "type": "color",
+      "value": "{color.palette.error}",
+      "description": "용도: status.error",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.status.destructive": {
+      "type": "color",
+      "value": "{color.palette.destructive}",
+      "description": "용도: status.destructive",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.status.destructive-surface": {
+      "type": "color",
+      "value": "{color.palette.destructive-tint}",
+      "description": "용도: status.destructive-surface",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "color.focus.ring": {
+      "type": "color",
+      "value": "{color.palette.strong}",
+      "description": "용도: focus.ring",
+      "source": "landing.css / legacy-tokens.css",
+      "status": "observed"
+    },
+    "gradient.logo": {
+      "type": "gradient",
+      "value": "linear-gradient(115deg, {color.logo.coral} 10%, {color.logo.orange} 90%)",
+      "description": "용도: logo",
+      "source": "legacy-tokens.css: --logo-gradient; landing.css: .hero-accent",
+      "status": "observed"
+    },
+    "gradient.brand": {
+      "type": "gradient",
+      "value": "linear-gradient(115deg, {color.brand.coral} 10%, {color.brand.orange} 90%)",
+      "description": "용도: brand",
+      "source": "legacy-tokens.css: --brand-gradient (현재 화면 직접 사용 없음)",
+      "status": "draft-only"
+    },
+    "gradient.surface-input": {
+      "type": "gradient",
+      "value": "linear-gradient(110deg, {color.palette.warm-start}, {color.palette.warm-middle} 60%, {color.palette.warm-end})",
+      "description": "용도: surface-input",
+      "source": "landing.css: .input-bar::before",
+      "status": "observed"
+    },
+    "gradient.surface-desktop": {
+      "type": "gradient",
+      "value": "linear-gradient(135deg, #e9edf2, #edf0f4 42%, #e6e8ed)",
+      "description": "용도: surface-desktop",
+      "source": "landing.css: .desktop",
+      "status": "observed"
+    },
+    "gradient.halo": {
+      "type": "gradient",
+      "value": "linear-gradient(110deg, {color.brand.coral} 0%, {color.brand.orange} 25%, #eaa173 50%, {color.brand.orange} 75%, {color.brand.coral} 100%)",
+      "description": "용도: halo",
+      "source": "landing.css: .input-bar::after",
+      "status": "observed"
+    },
+    "gradient.surface-example": {
+      "type": "gradient",
+      "value": "linear-gradient(115deg, #fff8f3, #fffdfb)",
+      "description": "용도: surface-example",
+      "source": "landing.css: .sample-sentence",
+      "status": "observed"
+    },
+    "gradient.illustration-paper": {
+      "type": "gradient",
+      "value": "linear-gradient(145deg, #e7aa75, #f8e2cd)",
+      "description": "용도: illustration-paper",
+      "source": "landing.css: .mini-paper",
+      "status": "observed"
+    },
+    "color.surface.glass-panel": {
+      "type": "color",
+      "value": "#FFFFFFED",
+      "description": "알파를 포함한 표면 또는 경계선 원시값",
+      "source": "landing.css: .review-panel",
+      "status": "observed"
+    },
+    "color.surface.glass-attachment": {
+      "type": "color",
+      "value": "#FFFFFFBD",
+      "description": "알파를 포함한 표면 또는 경계선 원시값",
+      "source": "landing.css: .attachment-preview",
+      "status": "observed"
+    },
+    "color.surface.glass-menu": {
+      "type": "color",
+      "value": "#FFFFFF70",
+      "description": "알파를 포함한 표면 또는 경계선 원시값",
+      "source": "landing.css: .menubar",
+      "status": "observed"
+    },
+    "color.surface.glass-action": {
+      "type": "color",
+      "value": "#FFFFFF99",
+      "description": "알파를 포함한 표면 또는 경계선 원시값",
+      "source": "landing.css: .send",
+      "status": "observed"
+    },
+    "color.surface.border-input": {
+      "type": "color",
+      "value": "#FFFFFFB3",
+      "description": "알파를 포함한 표면 또는 경계선 원시값",
+      "source": "landing.css: .input-bar",
+      "status": "observed"
+    }
+  },
+  "overrides": []
+}
