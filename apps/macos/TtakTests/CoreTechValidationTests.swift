@@ -132,6 +132,28 @@ struct ScheduleValidationTests {
         #expect(ScheduleTimeParser.clock(from: "내일 오전 9시", source: "내일 오전 9시 회의")?.hour == 9)
     }
 
+    @Test func durationIsNotTreatedAsAClockAndRemainsInTitle() {
+        let cases = [
+            ("내일 오후 3시에 2시간 회의", "15:00", "2시간 회의"),
+            ("내일 2시간 운동", "", "2시간 운동"),
+            ("내일 12시간 회의", "", "12시간 회의"),
+        ]
+        for (source, expectedTime, expectedTitle) in cases {
+            let candidates = ScheduleExtractionGuard.groundSources([source], source: source)
+            let result = ScheduleExtractionGuard.validate(
+                candidates, source: source, context: testContext())
+            #expect(result.issues.isEmpty)
+            #expect(result.timeConfirmation.isEmpty)
+            #expect(result.drafts.count == 1)
+            #expect(result.drafts.first?.title == expectedTitle)
+            #expect(result.drafts.first?.timeText == expectedTime)
+            #expect(result.drafts.first?.notes.contains(source) == true)
+        }
+        #expect(ScheduleTimeParser.clock(from: "2시", source: "2시간 운동") == nil)
+        #expect(ScheduleTimeParser.clock(from: "9시 반", source: "9시 반 회의")?.minute == 30)
+        #expect(ScheduleTimeParser.clock(from: "12시 15분", source: "12시 15분 회의")?.minute == 15)
+    }
+
     @Test func vagueAndEndOnlyTimeNeverBecomeStartClock() {
         #expect(ScheduleTimeParser.clock(from: "저녁", source: "저녁 회식") == nil)
         #expect(ScheduleTimeParser.clock(from: "18:00", source: "지금~18:00까지 모임") == nil)

@@ -362,8 +362,18 @@ enum ScheduleExtractionGuard {
             let sourceClocks = startClocks(in: quote)
             if sourceClocks.count > 1 || sourceClocks.contains(where: { !$0.isValid }) {
                 let expressions = sourceClocks.map(\.text).joined(separator: ", ")
-                timeConfirmation.append(
-                    "\(label): 시작 시각을 확인할 수 없어요: \(expressions). 오전 또는 오후와 숫자 시각을 명확하게 입력하세요")
+                let invalid = sourceClocks.filter { !$0.isValid }.map(\.text).joined(
+                    separator: ", ")
+                let reason: String
+                if sourceClocks.count > 1, !invalid.isEmpty {
+                    reason =
+                        "시작 시각 후보가 여러 개예요: \(expressions). 해석할 수 없는 시각: \(invalid). 일정을 나누거나 시작 시각 하나를 명확하게 입력하세요"
+                } else if sourceClocks.count > 1 {
+                    reason = "시작 시각 후보가 여러 개예요: \(expressions). 시작 시각을 하나만 남기거나 일정을 나누어 입력하세요"
+                } else {
+                    reason = "시작 시각을 확인할 수 없어요: \(expressions). 오전 또는 오후와 숫자 시각을 명확하게 입력하세요"
+                }
+                timeConfirmation.append("\(label): \(reason)")
             }
             var rawTime = cleanOptional(item.startTimeText)
             var timeIsGrounded = true

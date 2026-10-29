@@ -90,7 +90,7 @@ enum ScheduleDateParser {
 
 enum ScheduleTimeParser {
     static let clockPattern =
-        #"(?<![0-9])(오전|오후|아침|저녁|밤)?\s*([0-9]{1,2})(?::([0-9]{2})|시(?:\s*([0-9]{1,2})분)?(?:\s*(반))?)(?![0-9])"#
+        #"(?<![0-9])(오전|오후|아침|저녁|밤)?\s*([0-9]{1,2})(?::([0-9]{2})|시(?!간)(?:\s*([0-9]{1,2})분)?(?:\s*(반))?)(?![0-9])"#
 
     static func isMessageTimePrefix(_ prefix: String) -> Bool {
         let compact = prefix.filter { !$0.isWhitespace }

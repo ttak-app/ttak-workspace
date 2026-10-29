@@ -245,8 +245,19 @@ struct ExtractionGuardTests {
         let source = "9시 또는 10시에 회의"
         let rows = ScheduleExtractionGuard.groundSources([source], source: source)
         let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
-        #expect(!result.timeConfirmation.isEmpty)
+        #expect(result.timeConfirmation.contains { $0.contains("시작 시각 후보가 여러 개") })
+        #expect(result.timeConfirmation.contains { $0.contains("시작 시각을 하나만") })
+        #expect(!result.timeConfirmation.contains { $0.contains("시작 시각을 확인할 수 없어요") })
         #expect(result.checks.contains { $0.field == "startTimeText" && $0.status == "rejected" })
+    }
+
+    @Test func mixedValidAndUnparseableStartClocksExplainBothProblems() {
+        let source = "내일 오전 9시 또는 밤 1시에 회의"
+        let rows = ScheduleExtractionGuard.groundSources([source], source: source)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.timeConfirmation.contains { $0.contains("시작 시각 후보가 여러 개") })
+        #expect(result.timeConfirmation.contains { $0.contains("해석할 수 없는 시각: 밤 1시") })
+        #expect(result.issues.isEmpty)
     }
 
     @Test func messageTimestampDoesNotHideLaterUnparseableScheduleTime() {
@@ -882,6 +893,23 @@ private actor DiagnosticRecorder {
 }
 
 struct ExtractionRetryTests {
+    @Test func multipleValidStartClocksAreHeldWithoutModelRetry() async {
+        let source = "내일 오전 9시 또는 오전 10시에 회의"
+        let model = ScriptedModel([ScheduleExtractionGuard.groundSources([source], source: source)])
+        do {
+            _ = try await ScheduleAnalyzer(model: model).analyze(
+                text: source, context: guardContext())
+            Issue.record("복수 시작 시각이 정상 초안으로 반환됨")
+        } catch {
+            guard case AnalysisFailure.timeNeedsConfirmation(let message) = error else {
+                Issue.record("시각 확인 필요 오류와 다른 오류가 반환됨: \(error)")
+                return
+            }
+            #expect(message.contains("시작 시각 후보가 여러 개"))
+        }
+        #expect(await model.calls == 1)
+    }
+
     @Test(arguments: [
         "내일 밤 1시에 서버 점검", "내일 저녁 7시에 식사", "모레 아침 9시에 산책",
         "내일 밤 12시 30분에 백업", "내일 25시에 회의", "내일 9시 60분에 점검",
