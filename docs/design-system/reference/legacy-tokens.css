@@ -1,0 +1,35 @@
+:root{
+  --logo-coral:#EF7868;
+  --logo-orange:#F6AD55;
+  --logo-gradient:linear-gradient(115deg,var(--logo-coral) 10%,var(--logo-orange) 90%);
+  --brand-coral:#D75D57;
+  --brand-orange:#E39343;
+  --brand-strong:#A94F27;
+  --brand-tint:#FFF3E9;
+  --text-primary:#191F28;
+  --text-body:#333D4B;
+  --text-secondary:#6B7684;
+  --text-muted:#8B95A1;
+  --action-primary:#242735;
+  --action-hover:#353949;
+  --surface:#FFFFFF;
+  --surface-field:#F2F4F6;
+  --surface-glass:#FFFAF6;
+  --border:#E9EDF2;
+  --success:#3B6D5B;
+  --error:#B84538;
+  --brand-gradient:linear-gradient(115deg,var(--brand-coral) 10%,var(--brand-orange) 90%);
+  --space-4:4px;
+  --space-8:8px;
+  --space-12:12px;
+  --space-16:16px;
+  --space-20:20px;
+  --space-24:24px;
+  --space-32:32px;
+  --space-48:48px;
+  --space-56:56px;
+  --radius-field:7px;
+  --radius-button:12px;
+  --radius-panel:20px;
+  --radius-pill:32px;
+}

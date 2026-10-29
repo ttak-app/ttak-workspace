@@ -1,0 +1,14 @@
+/* Generated from design-system/tokens.json. Run npm run tokens:build. */
+:root {
+  --ttak-color-brand-coral: #d75d57;
+  --ttak-color-brand-orange: #e39343;
+  --ttak-color-brand-strong: #a94f27;
+  --ttak-color-brand-tint: #fff3e9;
+  --ttak-color-logo-coral: #ef7868;
+  --ttak-color-logo-orange: #f6ad55;
+  --ttak-gradient-logo: linear-gradient(
+    115deg,
+    var(--ttak-color-logo-coral) 10%,
+    var(--ttak-color-logo-orange) 90%
+  );
+}

@@ -1,0 +1,134 @@
+{
+  "version": "0.1",
+  "status": "Review draft · 2026-10-25",
+  "colors": {
+    "brand-coral": "#D75D57",
+    "brand-orange": "#E39343",
+    "brand-strong": "#A94F27",
+    "brand-tint": "#FFF3E9",
+    "text-primary": "#191F28",
+    "text-body": "#333D4B",
+    "text-secondary": "#6B7684",
+    "text-muted": "#8B95A1",
+    "action-primary": "#242735",
+    "action-hover": "#353949",
+    "surface": "#FFFFFF",
+    "surface-field": "#F2F4F6",
+    "surface-glass": "#FFFAF6",
+    "border": "#E9EDF2",
+    "success": "#3B6D5B",
+    "error": "#B84538"
+  },
+  "gradient": {
+    "css": "linear-gradient(115deg, #D75D57 10%, #E39343 90%)",
+    "angle": 115,
+    "stops": [
+      {
+        "position": 0.1,
+        "color": "brand-coral"
+      },
+      {
+        "position": 0.9,
+        "color": "brand-orange"
+      }
+    ]
+  },
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    48,
+    56
+  ],
+  "radius": {
+    "field": 7,
+    "button": 12,
+    "panel": 20,
+    "pill": 32
+  },
+  "typography": {
+    "native": "SF Pro / Apple SD Gothic Neo (system)",
+    "figma": "Noto Sans KR (font fallback, native parity pending)",
+    "title": {
+      "size": 62,
+      "weight": 750,
+      "lineHeight": 1.28
+    },
+    "input": {
+      "size": 16,
+      "lineHeight": 27
+    },
+    "body": {
+      "size": 14,
+      "lineHeight": 22
+    },
+    "field": {
+      "size": 12,
+      "lineHeight": 18
+    },
+    "caption": {
+      "size": 11,
+      "lineHeight": 18
+    }
+  },
+  "motion": {
+    "hover": 150,
+    "shadowOpacity": 800,
+    "shadowDrift": {
+      "idle": 12000,
+      "typing": 10000,
+      "analyzing": 6000
+    },
+    "panel": 480,
+    "row": 240,
+    "rowDelay": 90,
+    "rowStagger": 35,
+    "easing": "cubic-bezier(.22,1,.36,1)",
+    "reducedMotion": "No spatial animation or continuous movement"
+  },
+  "components": {
+    "Input": {
+      "minHeight": 62,
+      "radius": 32,
+      "textareaMin": 27,
+      "textareaMax": 104
+    },
+    "DownloadButton": {
+      "height": 44,
+      "radius": 12,
+      "fontSize": 14
+    },
+    "RegisterButton": {
+      "height": 40,
+      "radius": 9,
+      "fontSize": 12
+    },
+    "Field": {
+      "height": 34,
+      "radius": 7,
+      "fontSize": 12
+    },
+    "ReviewPanel": {
+      "padding": 20,
+      "radius": 20
+    }
+  },
+  "logoGradient": {
+    "css": "linear-gradient(115deg, #EF7868 10%, #F6AD55 90%)",
+    "angle": 115,
+    "stops": [
+      {
+        "position": 0.1,
+        "color": "#EF7868"
+      },
+      {
+        "position": 0.9,
+        "color": "#F6AD55"
+      }
+    ]
+  }
+}

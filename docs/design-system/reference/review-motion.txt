@@ -1,0 +1,39 @@
+  $('review-form').classList.remove('is-revealing');
+}
+reducedMotion.addEventListener('change', event => { if (event.matches) stopReviewMotion(); });
+function revealReview() {
+  const panel = $('review-form');
+  if (reducedMotion.matches || !panel.animate) return;
+  const style = getComputedStyle(panel);
+  const height = panel.getBoundingClientRect().height;
+  const finalFrame = {
+    height: `${height}px`, paddingTop: style.paddingTop, paddingBottom: style.paddingBottom,
+    marginTop: style.marginTop, borderTopWidth: style.borderTopWidth,
+    borderBottomWidth: style.borderBottomWidth,
+    opacity: 1, transform: 'translateY(0) scale(1)', filter: 'blur(0px)',
+  };
+  panel.classList.add('is-revealing');
+  const expansion = panel.animate([
+    {height: '0px', paddingTop: '0px', paddingBottom: '0px', marginTop: '0px',
+      borderTopWidth: '0px', borderBottomWidth: '0px', opacity: 0,
+      transform: 'translateY(-8px) scale(.985)', filter: 'blur(4px)'},
+    finalFrame,
+  ], {duration: 480, easing: 'cubic-bezier(.22, 1, .36, 1)'});
+  reviewAnimations.add(expansion);
+  expansion.onfinish = () => {
+    reviewAnimations.delete(expansion);
+    panel.classList.remove('is-revealing');
+  };
+  panel.querySelectorAll('.result-row').forEach((row, index) => {
+    const appearance = row.animate([
+      {opacity: 0, transform: 'translateY(7px)'},
+      {opacity: 1, transform: 'translateY(0)'},
+    ], {duration: 240, delay: 90 + Math.min(index, 4) * 35,
+      easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards'});
+    reviewAnimations.add(appearance);
+    appearance.onfinish = () => reviewAnimations.delete(appearance);
+  });
+}
+
+function renderResults() {
+  const entering = phase === 'review' && $('review-form').hidden;

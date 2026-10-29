@@ -19,6 +19,18 @@ const matrix = [
   ['apps/web/.prettierrc.json', ['web']],
   ['apps/web/.prettierignore', ['web']],
   ['package-lock.json', ['web']],
+  ['design-system/tokens.json', ['web', 'macos']],
+  ['apps/macos/Ttak/Resources/TtakTokens.swift', ['web', 'macos']],
+  ['docs/design-system/tokens.md', ['web']],
+  ['tools/design-tokens/build.mjs', ['web', 'macos']],
+  ['tools/design-tokens/swift.test.mjs', ['web', 'macos']],
+  ['docs/design-system/preview.html', ['web']],
+  ['docs/design-system/reference/landing.css', ['web']],
+  ['docs/design-system/reference/legacy-tokens.css', ['web']],
+  ['docs/design-system/reference/legacy-tokens.json', ['web']],
+  ['docs/design-system/reference/review-motion.txt', ['web']],
+  ['docs/design-system/README.md', []],
+  ['docs/design-system/reference/README.md', []],
   ['tools/macos/check.test.mjs', ['macos', 'harness_structure', 'harness_tests']],
   ['tools/ai-workflow/record.mjs', ['harness_structure', 'harness_tests']],
   ['tools/branch-review/collect_scope.sh', ['harness_structure', 'harness_tests']],
@@ -44,6 +56,20 @@ test('consumer matrix selects exactly the affected targets', () => {
   assert.deepEqual(classifyPaths(['.coderabbit.yaml', 'apps/web/src/App.tsx']).selected, selected('web'));
   assert.deepEqual(classifyPaths(['.coderabbit.yaml', 'apps/macos/Ttak/App/TtakApp.swift']).selected, selected('macos'));
   assert.equal(classifyPaths(['.gitignore', '.gitignore']).fileCount, 1);
+});
+
+test('design-system PR paths select both consumers without a root package change', () => {
+  const paths = [
+    'design-system/tokens.json', 'tools/design-tokens/build.mjs',
+    'tools/design-tokens/build.test.mjs', 'tools/design-tokens/contrast.mjs',
+    'tools/design-tokens/preview.mjs', 'tools/design-tokens/serve.mjs',
+    'tools/design-tokens/swift.mjs', 'tools/design-tokens/swift.test.mjs',
+    'docs/design-system/preview.html', 'docs/design-system/reference/landing.css',
+    'docs/design-system/reference/legacy-tokens.css',
+    'docs/design-system/reference/legacy-tokens.json',
+    'docs/design-system/reference/review-motion.txt',
+  ];
+  assert.deepEqual(classifyPaths(paths).selected, selected('web', 'macos'));
 });
 
 test('unknown execution paths and invalid paths fail rather than silently skipping', () => {
@@ -205,6 +231,10 @@ test('workflow uses default PR events, selected jobs and an always-running gate'
   assert.match(blocks.harness, /tests: \$\{\{ steps.tests.outcome \}\}/);
   assert.match(blocks.harness, /npm run workflow:test\n\s+node --test tools\/ci\/\*\.test\.mjs/);
   assert.match(blocks.web, /run: npm run format:check:web/);
+  assert.match(blocks.web, /run: npm run tokens:check/);
+  assert.ok(blocks.web.indexOf('run: npm ci') < blocks.web.indexOf('run: npm run tokens:check'));
+  assert.ok(!blocks.harness.includes('run: npm run tokens:check'));
+  assert.ok(!blocks['macos-build'].includes('run: npm run tokens:check'));
   assert.match(blocks['macos-build'], /run: npm run format:check:macos/);
   assert.match(blocks['macos-build'], /run: npm run macos:test/);
   assert.ok(!blocks['macos-build'].includes('run: npm run macos:build'));
