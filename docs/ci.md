@@ -18,7 +18,7 @@ PR 대상 브랜치만 변경해도 자동 재검사하지 않는다. 새 대상
 | --- | --- | --- | --- |
 | `Changes` | Ubuntu 24.04, Node 24 | PR 전체 변경 감지와 대상 선택 | 5분 |
 | `Harness` | Ubuntu 24.04, Node 24, npm 11.3.0 | 선택된 구조 검사 또는 도구 테스트 | 10분 |
-| `Web` | Ubuntu 24.04, Node 24, npm 11.3.0 | `npm ci` 후 `format:check:web`, `lint:web`, `check-types:web`, `build:web` | 10분 |
+| `Web` | Ubuntu 24.04, Node 24, npm 11.3.0 | `npm ci` 후 `tokens:check`, `format:check:web`, `lint:web`, `check-types:web`, `build:web` | 10분 |
 | `macOS Build` | macOS 26 ARM64, Xcode 26.6, Node 24, npm 11.3.0 | `format:check:macos` 후 `macos:test`로 앱 빌드와 테스트 | 20분 |
 | `CI Result` | Ubuntu 24.04, Node 24 | 감지 출력과 선택된 검사 결과 취합 | 5분 |
 
@@ -42,7 +42,8 @@ Git 인자를 배열로 전달하고 NUL 구분 경로를 읽는다. rename 감�
 | `apps/macos` 코드, Xcode 설정과 앱 리소스 | macOS Build |
 | `apps/web` 코드, 설정과 앱 리소스 | Web |
 | 루트 `package-lock.json` | Web |
-| `design-system/`, `tools/design-tokens/` | Web, macOS Build |
+| `design-system/`, `tools/design-tokens/`, 생성된 `TtakTokens.swift` | Web, macOS Build |
+| 생성된 `docs/design-system/tokens.md` | Web |
 | 디자인 토큰 미리보기 HTML과 reference의 비 Markdown 자료 | Web |
 | `tools/macos` | macOS Build, Harness 구조와 도구 테스트 |
 | `tools/ai-workflow`, `tools/branch-review` | Harness 구조와 도구 테스트 |
@@ -69,6 +70,9 @@ Git 인자를 배열로 전달하고 NUL 구분 경로를 읽는다. rename 감�
 `.gitignore`는 기존 구조 검사가 `.tmp/` 제외를 확인하는 입력이므로 단독 변경에도 구조 검사를 실행한다.
 
 각 대상의 선택과 생략 이유는 Actions step summary에 남긴다.
+Web job은 의존성 설치 후 `tokens:check`로 공통 JSON과 CSS, Swift, 목록 및 미리보기의 일관성과 생성 도구 테스트를 검사한다.
+생성된 Swift 파일만 변경되어도 Web을 함께 선택하며, 생성 파일을 수동 수정하고 원본을 갱신하지 않으면 검사가 실패한다.
+토큰 검사는 Prettier 의존성이 필요하므로 의존성을 설치하지 않는 Harness나 macOS job에는 중복 추가하지 않는다.
 
 ## 최종 결과와 병합 판정
 
