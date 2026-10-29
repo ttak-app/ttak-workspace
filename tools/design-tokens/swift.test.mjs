@@ -2,25 +2,21 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { swift } from './swift.mjs';
 
-test('색상 별칭의 RGBA와 논리 크기, 초 단위 모션을 보존한다', () => {
+test('공유 브랜드 색상의 별칭과 RGBA를 보존한다', () => {
   const output = swift({ tokens: {
-    'color.palette.ink': { value: '#191F28' },
-    'color.text.primary': { value: '{color.palette.ink}' },
-    'color.surface.glass': { value: '#FFFFFFED' },
-    'space.24': { value: '24px' },
-    'motion.duration.hover': { value: '150ms' },
+    'color.brand.coral': { type: 'color', value: '#D75D57' },
+    'color.brand.alias': { type: 'color', value: '{color.brand.coral}' },
+    'color.brand.alpha': { type: 'color', value: '#D75D5780' },
   } });
-  assert.match(output, /textPrimary = TtakTokens.color\(0x191F_28FF\)/);
-  assert.match(output, /surfaceGlass = TtakTokens.color\(0xFFFF_FFED\)/);
-  assert.match(output, /value24: CGFloat = 24/);
-  assert.match(output, /hover: Double = 0.15/);
+  assert.match(output, /brandCoral = TtakTokens.color\(0xD75D_57FF\)/);
+  assert.match(output, /brandAlias = TtakTokens.color\(0xD75D_57FF\)/);
+  assert.match(output, /brandAlpha = TtakTokens.color\(0xD75D_5780\)/);
 });
-test('웹의 상대 크기와 효과를 Swift 수치로 잘못 변환하지 않는다', () => {
+test('크기와 CSS 효과는 네이티브 출력에 포함하지 않는다', () => {
   const output = swift({ tokens: {
-    'typography.hero.size': { value: 'clamp(36px, 4.1vw, 62px)' },
-    'radius.circle': { value: '50%' },
-    'gradient.logo': { value: 'linear-gradient(115deg, #fff, #000)' },
+    'space.24': { type: 'dimension', value: '24px' },
+    'gradient.logo': { type: 'gradient', value: 'linear-gradient(115deg, #fff, #000)' },
   } });
-  assert.doesNotMatch(output, /clamp|linear-gradient|50%/);
-  assert.throws(() => swift({ tokens: { 'space.relative': { value: '2rem' } } }), /변환 불가/);
+  assert.doesNotMatch(output, /CGFloat|Spacing|Duration|linear-gradient|24px/);
+  assert.throws(() => swift({ tokens: { 'color.brand.invalid': { type: 'color', value: 'invalid' } } }), /변환 불가/);
 });

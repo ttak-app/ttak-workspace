@@ -14,23 +14,17 @@ const luminance = (hex) => {
   return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
 };
 const pairs = [
-  ['본문', 'color.text.body', 'color.surface.default'],
-  ['주요 텍스트', 'color.text.primary', 'color.surface.default'],
-  ['보조 텍스트', 'color.text.secondary', 'color.surface.default'],
-  ['약한 텍스트', 'color.text.muted', 'color.surface.default'],
-  ['입력 placeholder / 입력 표면의 중간 색상', 'color.text.placeholder', 'color.palette.warm-middle'],
-  ['주요 액션', 'color.text.on-action', 'color.action.primary'],
-  ['브랜드 강조', 'color.brand.strong', 'color.surface.default'],
-  ['성공', 'color.status.success', 'color.surface.default'],
-  ['오류', 'color.status.error', 'color.surface.default'],
-  ['로고 coral 끝점', 'color.logo.coral', 'color.surface.default'],
-  ['로고 orange 끝점', 'color.logo.orange', 'color.surface.default'],
+  ['브랜드 coral', 'color.brand.coral'],
+  ['브랜드 orange', 'color.brand.orange'],
+  ['브랜드 강조', 'color.brand.strong'],
+  ['로고 coral 끝점', 'color.logo.coral'],
+  ['로고 orange 끝점', 'color.logo.orange'],
 ];
 console.log('| 조합 | 전경 | 배경 | 대비율 | 일반 텍스트 4.5:1 |');
 console.log('|---|---|---|---|---|');
-for (const [label, foreground, background] of pairs) {
+for (const [label, foreground] of pairs) {
   const fg = resolve(foreground);
-  const bg = resolve(background);
+  const bg = '#FFFFFF'; // 대비 측정용 배경이며 공통 토큰은 아니다.
   const [light, dark] = [luminance(fg), luminance(bg)].sort((a, b) => b - a);
   const ratio = (light + 0.05) / (dark + 0.05);
   console.log(`| ${label} | ${fg} | ${bg} | ${ratio.toFixed(2)}:1 | ${ratio >= 4.5 ? '충족' : '미달'} |`);
