@@ -490,7 +490,568 @@
       "description": "알파를 포함한 표면 또는 경계선 원시값",
       "source": "landing.css: .input-bar",
       "status": "observed"
+    },
+    "font.family.system": {
+      "type": "fontFamily",
+      "value": "-apple-system, BlinkMacSystemFont, \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+      "description": "별도 웹폰트 로딩 없이 OS와 설치 폰트로 fallback",
+      "source": "landing.css: :root",
+      "status": "observed"
+    },
+    "font.size.9": {
+      "type": "dimension",
+      "value": "9px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.10": {
+      "type": "dimension",
+      "value": "10px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.11": {
+      "type": "dimension",
+      "value": "11px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.12": {
+      "type": "dimension",
+      "value": "12px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.13": {
+      "type": "dimension",
+      "value": "13px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.14": {
+      "type": "dimension",
+      "value": "14px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.15": {
+      "type": "dimension",
+      "value": "15px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.16": {
+      "type": "dimension",
+      "value": "16px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.17": {
+      "type": "dimension",
+      "value": "17px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.18": {
+      "type": "dimension",
+      "value": "18px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.20": {
+      "type": "dimension",
+      "value": "20px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.21": {
+      "type": "dimension",
+      "value": "21px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.22": {
+      "type": "dimension",
+      "value": "22px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.24": {
+      "type": "dimension",
+      "value": "24px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.27": {
+      "type": "dimension",
+      "value": "27px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.30": {
+      "type": "dimension",
+      "value": "30px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.32": {
+      "type": "dimension",
+      "value": "32px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.34": {
+      "type": "dimension",
+      "value": "34px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.37": {
+      "type": "dimension",
+      "value": "37px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.38": {
+      "type": "dimension",
+      "value": "38px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.44": {
+      "type": "dimension",
+      "value": "44px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.46": {
+      "type": "dimension",
+      "value": "46px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.48": {
+      "type": "dimension",
+      "value": "48px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.size.62": {
+      "type": "dimension",
+      "value": "62px",
+      "description": "관찰된 글자 크기",
+      "source": "landing.css: 텍스트 선언과 media query",
+      "status": "observed"
+    },
+    "font.weight.500": {
+      "type": "number",
+      "value": "500",
+      "description": "실제 렌더링 굵기는 폰트 지원 범위에 따라 다름",
+      "source": "landing.css: font-weight",
+      "status": "observed"
+    },
+    "font.weight.600": {
+      "type": "number",
+      "value": "600",
+      "description": "실제 렌더링 굵기는 폰트 지원 범위에 따라 다름",
+      "source": "landing.css: font-weight",
+      "status": "observed"
+    },
+    "font.weight.650": {
+      "type": "number",
+      "value": "650",
+      "description": "실제 렌더링 굵기는 폰트 지원 범위에 따라 다름",
+      "source": "landing.css: font-weight",
+      "status": "observed"
+    },
+    "font.weight.700": {
+      "type": "number",
+      "value": "700",
+      "description": "실제 렌더링 굵기는 폰트 지원 범위에 따라 다름",
+      "source": "landing.css: font-weight",
+      "status": "observed"
+    },
+    "font.weight.750": {
+      "type": "number",
+      "value": "750",
+      "description": "실제 렌더링 굵기는 폰트 지원 범위에 따라 다름",
+      "source": "landing.css: font-weight",
+      "status": "observed"
+    },
+    "font.weight.800": {
+      "type": "number",
+      "value": "800",
+      "description": "실제 렌더링 굵기는 폰트 지원 범위에 따라 다름",
+      "source": "landing.css: font-weight",
+      "status": "observed"
+    },
+    "typography.hero.size": {
+      "type": "dimension",
+      "value": "clamp(36px, 4.1vw, 62px)",
+      "description": "hero 크기",
+      "source": "landing.css: h1 마지막 기본 선언",
+      "status": "observed"
+    },
+    "typography.hero.weight": {
+      "type": "number",
+      "value": "{font.weight.750}",
+      "description": "hero 굵기",
+      "source": "landing.css: h1 마지막 기본 선언",
+      "status": "observed"
+    },
+    "typography.hero.line-height": {
+      "type": "lineHeight",
+      "value": "1.28",
+      "description": "hero 행간",
+      "source": "landing.css: h1 마지막 기본 선언",
+      "status": "observed"
+    },
+    "typography.hero.letter-spacing": {
+      "type": "letterSpacing",
+      "value": "-0.055em",
+      "description": "hero 자간",
+      "source": "landing.css: h1 마지막 기본 선언",
+      "status": "observed"
+    },
+    "typography.description.size": {
+      "type": "dimension",
+      "value": "clamp(13px, 1.1vw, 16px)",
+      "description": "description 크기",
+      "source": "landing.css: .hero-description",
+      "status": "observed"
+    },
+    "typography.description.weight": {
+      "type": "number",
+      "value": "400",
+      "description": "description 굵기",
+      "source": "landing.css: .hero-description",
+      "status": "observed"
+    },
+    "typography.description.line-height": {
+      "type": "lineHeight",
+      "value": "1.9",
+      "description": "description 행간",
+      "source": "landing.css: .hero-description",
+      "status": "observed"
+    },
+    "typography.description.letter-spacing": {
+      "type": "letterSpacing",
+      "value": "-0.45px",
+      "description": "description 자간",
+      "source": "landing.css: .hero-description",
+      "status": "observed"
+    },
+    "typography.section.size": {
+      "type": "dimension",
+      "value": "{font.size.44}",
+      "description": "section 크기",
+      "source": "landing.css: .features-intro h2",
+      "status": "observed"
+    },
+    "typography.section.weight": {
+      "type": "number",
+      "value": "{font.weight.700}",
+      "description": "section 굵기",
+      "source": "landing.css: .features-intro h2",
+      "status": "observed"
+    },
+    "typography.section.line-height": {
+      "type": "lineHeight",
+      "value": "1.4",
+      "description": "section 행간",
+      "source": "landing.css: .features-intro h2",
+      "status": "observed"
+    },
+    "typography.section.letter-spacing": {
+      "type": "letterSpacing",
+      "value": "-1.8px",
+      "description": "section 자간",
+      "source": "landing.css: .features-intro h2",
+      "status": "observed"
+    },
+    "typography.feature-title.size": {
+      "type": "dimension",
+      "value": "{font.size.22}",
+      "description": "feature-title 크기",
+      "source": "landing.css: .product-feature h3",
+      "status": "observed"
+    },
+    "typography.feature-title.weight": {
+      "type": "number",
+      "value": "{font.weight.650}",
+      "description": "feature-title 굵기",
+      "source": "landing.css: .product-feature h3",
+      "status": "observed"
+    },
+    "typography.feature-title.line-height": {
+      "type": "lineHeight",
+      "value": "normal",
+      "description": "feature-title 행간",
+      "source": "landing.css: .product-feature h3",
+      "status": "observed"
+    },
+    "typography.feature-title.letter-spacing": {
+      "type": "letterSpacing",
+      "value": "-0.8px",
+      "description": "feature-title 자간",
+      "source": "landing.css: .product-feature h3",
+      "status": "observed"
+    },
+    "typography.body.size": {
+      "type": "dimension",
+      "value": "{font.size.14}",
+      "description": "body 크기",
+      "source": "landing.css: .product-feature > p",
+      "status": "observed"
+    },
+    "typography.body.weight": {
+      "type": "number",
+      "value": "400",
+      "description": "body 굵기",
+      "source": "landing.css: .product-feature > p",
+      "status": "observed"
+    },
+    "typography.body.line-height": {
+      "type": "lineHeight",
+      "value": "1.9",
+      "description": "body 행간",
+      "source": "landing.css: .product-feature > p",
+      "status": "observed"
+    },
+    "typography.body.letter-spacing": {
+      "type": "letterSpacing",
+      "value": "normal",
+      "description": "body 자간",
+      "source": "landing.css: .product-feature > p",
+      "status": "observed"
+    },
+    "typography.input.size": {
+      "type": "dimension",
+      "value": "{font.size.15}",
+      "description": "input 크기",
+      "source": "landing.css: #schedule-input",
+      "status": "observed"
+    },
+    "typography.input.weight": {
+      "type": "number",
+      "value": "400",
+      "description": "input 굵기",
+      "source": "landing.css: #schedule-input",
+      "status": "observed"
+    },
+    "typography.input.line-height": {
+      "type": "lineHeight",
+      "value": "27px",
+      "description": "input 행간",
+      "source": "landing.css: #schedule-input",
+      "status": "observed"
+    },
+    "typography.input.letter-spacing": {
+      "type": "letterSpacing",
+      "value": "-0.4px",
+      "description": "input 자간",
+      "source": "landing.css: #schedule-input",
+      "status": "observed"
+    },
+    "typography.action.size": {
+      "type": "dimension",
+      "value": "{font.size.14}",
+      "description": "action 크기",
+      "source": "landing.css: .hero-cta",
+      "status": "observed"
+    },
+    "typography.action.weight": {
+      "type": "number",
+      "value": "{font.weight.600}",
+      "description": "action 굵기",
+      "source": "landing.css: .hero-cta",
+      "status": "observed"
+    },
+    "typography.action.line-height": {
+      "type": "lineHeight",
+      "value": "normal",
+      "description": "action 행간",
+      "source": "landing.css: .hero-cta",
+      "status": "observed"
+    },
+    "typography.action.letter-spacing": {
+      "type": "letterSpacing",
+      "value": "normal",
+      "description": "action 자간",
+      "source": "landing.css: .hero-cta",
+      "status": "observed"
+    },
+    "typography.field.size": {
+      "type": "dimension",
+      "value": "{font.size.12}",
+      "description": "field 크기",
+      "source": "landing.css: .result-fields input/select",
+      "status": "observed"
+    },
+    "typography.field.weight": {
+      "type": "number",
+      "value": "400",
+      "description": "field 굵기",
+      "source": "landing.css: .result-fields input/select",
+      "status": "observed"
+    },
+    "typography.field.line-height": {
+      "type": "lineHeight",
+      "value": "normal",
+      "description": "field 행간",
+      "source": "landing.css: .result-fields input/select",
+      "status": "observed"
+    },
+    "typography.field.letter-spacing": {
+      "type": "letterSpacing",
+      "value": "-0.2px",
+      "description": "field 자간",
+      "source": "landing.css: .result-fields input/select",
+      "status": "observed"
+    },
+    "typography.caption.size": {
+      "type": "dimension",
+      "value": "{font.size.11}",
+      "description": "caption 크기",
+      "source": "landing.css: .platform-note",
+      "status": "observed"
+    },
+    "typography.caption.weight": {
+      "type": "number",
+      "value": "400",
+      "description": "caption 굵기",
+      "source": "landing.css: .platform-note",
+      "status": "observed"
+    },
+    "typography.caption.line-height": {
+      "type": "lineHeight",
+      "value": "normal",
+      "description": "caption 행간",
+      "source": "landing.css: .platform-note",
+      "status": "observed"
+    },
+    "typography.caption.letter-spacing": {
+      "type": "letterSpacing",
+      "value": "normal",
+      "description": "caption 자간",
+      "source": "landing.css: .platform-note",
+      "status": "observed"
+    },
+    "typography.notice.size": {
+      "type": "dimension",
+      "value": "{font.size.10}",
+      "description": "notice 크기",
+      "source": "landing.css: .demo-notice",
+      "status": "observed"
+    },
+    "typography.notice.weight": {
+      "type": "number",
+      "value": "400",
+      "description": "notice 굵기",
+      "source": "landing.css: .demo-notice",
+      "status": "observed"
+    },
+    "typography.notice.line-height": {
+      "type": "lineHeight",
+      "value": "1.6",
+      "description": "notice 행간",
+      "source": "landing.css: .demo-notice",
+      "status": "observed"
+    },
+    "typography.notice.letter-spacing": {
+      "type": "letterSpacing",
+      "value": "normal",
+      "description": "notice 자간",
+      "source": "landing.css: .demo-notice",
+      "status": "observed"
+    },
+    "typography.review-title.size": {
+      "type": "dimension",
+      "value": "{font.size.14}",
+      "description": "review-title 크기",
+      "source": "landing.css: .review-heading h2",
+      "status": "observed"
+    },
+    "typography.review-title.weight": {
+      "type": "number",
+      "value": "{font.weight.700}",
+      "description": "review-title 굵기",
+      "source": "landing.css: .review-heading h2",
+      "status": "observed"
+    },
+    "typography.review-title.line-height": {
+      "type": "lineHeight",
+      "value": "1.4",
+      "description": "review-title 행간",
+      "source": "landing.css: .review-heading h2",
+      "status": "observed"
+    },
+    "typography.review-title.letter-spacing": {
+      "type": "letterSpacing",
+      "value": "-0.4px",
+      "description": "review-title 자간",
+      "source": "landing.css: .review-heading h2",
+      "status": "observed"
     }
   },
-  "overrides": []
+  "overrides": [
+    {
+      "media": "(min-width: 761px) and (max-width: 1100px)",
+      "description": "landing.css: 마지막 태블릿 규칙",
+      "values": {
+        "typography.hero.size": "clamp(30px, 4vw, 44px)",
+        "typography.input.size": "{font.size.13}"
+      }
+    },
+    {
+      "media": "(max-width: 760px)",
+      "description": "landing.css: 최종 모바일 규칙. 641–760px와 640px 이하는 추가 차이 있음",
+      "values": {
+        "typography.hero.size": "clamp(34px, 7vw, 48px)",
+        "typography.description.size": "{font.size.13}",
+        "typography.description.letter-spacing": "-0.45px",
+        "typography.section.size": "{font.size.32}",
+        "typography.feature-title.size": "{font.size.20}",
+        "typography.body.size": "{font.size.13}",
+        "typography.input.size": "{font.size.12}",
+        "typography.action.size": "{font.size.12}",
+        "typography.caption.size": "{font.size.10}"
+      }
+    },
+    {
+      "media": "(max-width: 640px)",
+      "description": "landing.css: 기존 640px 규칙에서 살아남은 속성",
+      "values": {
+        "typography.hero.line-height": "1.28",
+        "typography.section.letter-spacing": "-1.3px",
+        "typography.input.line-height": "26px",
+        "typography.notice.size": "{font.size.9}",
+        "typography.notice.line-height": "1.7",
+        "typography.review-title.size": "{font.size.12}"
+      }
+    }
+  ]
 }
