@@ -127,7 +127,7 @@ struct ScheduleComposer: View {
             }
         }
         .animation(
-            reduceMotion ? .easeOut(duration: 0.15) : .easeOut(duration: 0.6),
+            reduceMotion ? .easeOut(duration: 0.15) : .easeOut(duration: 0.4),
             value: attachment != nil
         )
         .frame(maxWidth: 500)
