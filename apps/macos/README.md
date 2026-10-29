@@ -13,6 +13,8 @@
 4. 실행하면 메뉴바에 체크 아이콘이 나타납니다.
 
 메뉴바에서 일정 입력과 미리 알림 등록 경로를 검증할 수 있습니다.
+Debug 앱에서는 입력 화면 하단의 **개발용 컴포넌트 갤러리**로 상태별 UI 샘플을 직접 확인할 수 있습니다.
+실행과 샘플 추가 방법은 [컴포넌트 갤러리 안내](docs/component-gallery.md)를 참고하세요.
 Bundle Identifier `app.ttak.Ttak`은 초기 개발용이며 배포 전에 확정합니다.
 앱 샌드박스와 네트워크 클라이언트, 사용자 선택 파일 읽기 및 캘린더 개인정보 entitlement가 설정되어 있습니다. EventKit의 미리 알림 권한과 실제 저장 동작은 앱에서 별도 검증이 필요합니다.
 미리 알림 접근 목적은 Xcode 설정의 `NSRemindersFullAccessUsageDescription`에 기재되어 있습니다.

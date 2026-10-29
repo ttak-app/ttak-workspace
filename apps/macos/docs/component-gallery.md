@@ -1,0 +1,47 @@
+# 개발용 컴포넌트 갤러리
+
+실제 앱에 사용하는 SwiftUI 표시 요소와 디자인 기준을 확인하는 Debug 전용 창이다. 웹이나 별도 디자인 시스템을 만들지 않는다.
+
+## 실행과 확인
+
+1. Xcode에서 `apps/macos/Ttak.xcodeproj`를 열고 `Ttak` 스킴과 `My Mac`, Debug 구성을 선택해 실행한다.
+2. 메뉴바의 Ttak 체크 아이콘을 누른다.
+3. 입력 화면 아래쪽의 **개발용 컴포넌트 갤러리**를 누른다. 버튼이 보이지 않으면 입력 화면을 아래로 스크롤한다.
+4. 갤러리 왼쪽 목록에서 샘플을 선택한다. 창을 닫아도 같은 버튼으로 다시 열 수 있다.
+
+터미널에서는 저장소 루트에서 다음 명령으로 빌드하고 실행할 수 있다. 갤러리 확인에는 API 키가 필요하지 않다.
+
+```sh
+npm run macos:build
+open .tmp/xcode-derived-data/Build/Products/Debug/Ttak.app
+```
+
+| 샘플 | 확인할 동작 |
+| --- | --- |
+| 브랜드 색상 | TtakTokens의 6개 색상 이름과 스와치 확인 |
+| 글자와 간격 | 시스템 텍스트 계층과 로컬 간격 사용 예시 확인 |
+| 컨트롤 상태 | 기본, 비활성, 진행, 오류 선택. 샘플 버튼의 횟수 증가와 초기화 확인 |
+| 공통 안내 메시지 | 상태를 바꿔 실제 앱과 같은 ScheduleMessageView의 문자열 표시 확인 |
+
+진행 표시는 모의 상태이며 상태 선택을 바꾸면 종료된다. 버튼은 갤러리의 로컬 횟수만 변경한다. 갤러리는 ScheduleInputModel, 모델 분석, OCR, 권한 요청 및 실제 저장을 호출하지 않는다. 메뉴바의 기존 기술 검증 화면에는 실제 서비스 실행 버튼이 있으므로 갤러리 버튼과 구분한다.
+
+글자, 컨트롤과 상태 표현은 Apple 기본 스타일을 사용한다. 갤러리의 간격과 레이아웃 수치는 샘플 배치이며 새 공통 토큰이 아니다. 브랜드 색은 기본 본문과 컨트롤 전체에 적용하지 않는다. 밝고 어두운 시스템 외관에서 텍스트와 색상 표시를 함께 확인한다.
+
+## 샘플 추가 방법
+
+- 갤러리 진입과 Scene: `Ttak/App/TtakApp.swift`, `Ttak/Features/ScheduleInput/ScheduleInputView.swift`
+- 샘플 목록과 로컬 상태: `Ttak/Features/ComponentGallery/ComponentGalleryView.swift`
+- 실제 화면과 공유하는 안내 표시: `Ttak/Features/ScheduleInput/ScheduleMessageView.swift`
+
+1. 후속 이슈에서 실제 앱 컴포넌트를 만든다. 표시와 사용자 액션 전달을 서비스 실행 책임에서 분리한다.
+2. GallerySample에 식별 가능한 항목을 추가하고 sampleContent의 분기를 연결한다.
+3. 같은 실제 View에 합성 데이터와 로컬 상태 및 액션을 전달한다. 샘플용으로 제품 View를 복제하거나 실제 서비스 모델을 생성하지 않는다.
+4. 필요한 기본과 예외 상태를 함께 제공하고 이 문서의 확인 표를 갱신한다.
+
+샘플이 커지면 관련 Preview View를 ComponentGallery 폴더에 분리한다. 새 Swift 파일은 현재 Xcode 프로젝트의 파일 참조와 Sources에도 연결한다. 갤러리 전용 파일은 파일 전체를 `#if DEBUG`로 보호한다. 실제 앱이 사용하는 View는 이 조건에 넣지 않는다.
+
+## 빌드 경계와 검증
+
+갤러리 Scene, 입력 화면 진입점과 갤러리 전용 타입은 `#if DEBUG`로 보호한다. Release에는 포함되지 않는다. 공통 안내 View는 실제 앱도 사용하므로 Release에 남는다.
+
+검증은 Swift 포맷, Debug 및 Release 빌드, 기존 단위 테스트와 실제 창 조작으로 나눈다. 빌드 성공만으로 창 열기, 재진입 및 상태 전환을 검증했다고 하지 않는다. 권한과 미리 알림 실제 저장은 이 이슈의 검증 범위가 아니다.
