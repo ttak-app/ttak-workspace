@@ -50,7 +50,9 @@ struct ScheduleInputView: View {
                 if !attachmentError.isEmpty {
                     Text(attachmentError).font(.caption).foregroundStyle(.red)
                 }
-                Text("날짜 생략은 분석일 기준 오늘, 모호한 시각은 미지정이에요. 실제 알림 설정은 추가하지 않아요.")
+                Text("날짜 생략은 분석일 기준 오늘이에요. 확인할 수 없는 숫자 시각은 다시 입력해야 해요.")
+                    .font(.caption).foregroundStyle(.secondary)
+                Text("분석 시 입력한 텍스트와 이미지에서 인식한 글자, 보조 설명이 Google Gemini로 전송돼요.")
                     .font(.caption).foregroundStyle(.secondary)
                 HStack {
                     Button("분석") { model.startAnalysis() }

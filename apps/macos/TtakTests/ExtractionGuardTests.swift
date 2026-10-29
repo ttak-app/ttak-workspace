@@ -150,7 +150,23 @@ struct ExtractionGuardTests {
         #expect(result.drafts.first?.notes.contains(source) == true)
         #expect(
             ScheduleTitleNormalizer.compactKeywords(action: "개발팀과 민수랑 개발팀 회식")
-                == ["개발팀", "민수", "회식"])
+                == nil)
+    }
+
+    @Test func ambiguousConjunctionsKeepTheFullTitle() throws {
+        for action in ["결과 회의", "성과 회의", "학과 회의", "디자인과 개발 회의", "친구와 저녁 식사"] {
+            #expect(ScheduleTitleNormalizer.compactKeywords(action: action) == nil)
+            #expect(
+                try ScheduleTitleNormalizer.normalize(action: action, parts: [action]) == action)
+        }
+        for (action, parts) in [
+            ("결과 회의", ["결", "회의"]),
+            ("디자인과 개발 회의", ["디자인", "개발 회의"]),
+        ] {
+            #expect(throws: AnalysisFailure.self) {
+                try ScheduleTitleNormalizer.normalize(action: action, parts: parts)
+            }
+        }
     }
 
     @Test func aLeadingNumericClockCannotBecomeTheActionTitle() {
@@ -229,8 +245,19 @@ struct ExtractionGuardTests {
         let source = "9시 또는 10시에 회의"
         let rows = ScheduleExtractionGuard.groundSources([source], source: source)
         let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
-        #expect(result.issues.contains { $0.contains("시작 시각 후보가 여러 개") })
+        #expect(!result.timeConfirmation.isEmpty)
         #expect(result.checks.contains { $0.field == "startTimeText" && $0.status == "rejected" })
+    }
+
+    @Test func messageTimestampDoesNotHideLaterUnparseableScheduleTime() {
+        let source = "내일 발송시간: 13:08이고 밤 1시에 회의"
+        let rows = ScheduleExtractionGuard.groundSources([source], source: source)
+        let result = ScheduleExtractionGuard.validate(rows, source: source, context: guardContext())
+        #expect(result.timeConfirmation.contains { $0.contains("밤 1시") })
+        #expect(!result.timeConfirmation.contains { $0.contains("13:08") })
+        let validSource = "발송시간: 13:08이고 9시에 회의"
+        #expect(ScheduleTimeParser.clock(from: "13:08", source: validSource) == nil)
+        #expect(ScheduleTimeParser.clock(from: "9시", source: validSource)?.hour == 9)
     }
 
     @Test func aTrailingConnectorIsRemovedOnlyBeforeAnotherLocatedSchedule() {
@@ -846,6 +873,63 @@ private actor DiagnosticRecorder {
 }
 
 struct ExtractionRetryTests {
+    @Test(arguments: [
+        "내일 밤 1시에 서버 점검", "내일 저녁 7시에 식사", "모레 아침 9시에 산책",
+        "내일 밤 12시 30분에 백업", "내일 25시에 회의", "내일 9시 60분에 점검",
+        "내일 오후 13시에 회의", "내일 밤 1시부터 3시까지 회의",
+        "내일 9시 또는 밤 1시에 회의",
+    ])
+    func unparseableStartIsHeldWithoutModelRetry(source: String) async {
+        let model = ScriptedModel([ScheduleExtractionGuard.groundSources([source], source: source)])
+        do {
+            _ = try await ScheduleAnalyzer(model: model).analyze(
+                text: source, context: guardContext())
+            Issue.record("해석할 수 없는 시작 시각이 정상 초안으로 반환됨")
+        } catch {
+            guard case AnalysisFailure.timeNeedsConfirmation = error else {
+                Issue.record("시각 확인 필요 오류와 다른 오류가 반환됨: \(error)")
+                return
+            }
+        }
+        #expect(await model.calls == 1)
+    }
+
+    @Test func unparseableClockInOneOfSeveralSchedulesHoldsAllDrafts() async {
+        let source = "내일 9시 회의하고 밤 1시에 서버 점검"
+        let rows = ScheduleExtractionGuard.groundSources(
+            ["내일 9시 회의", "밤 1시에 서버 점검"], source: source)
+        let model = ScriptedModel([rows])
+        do {
+            _ = try await ScheduleAnalyzer(model: model).analyze(
+                text: source, context: guardContext())
+            Issue.record("시각 확인이 필요한 일정이 포함된 결과가 반환됨")
+        } catch {
+            guard case AnalysisFailure.timeNeedsConfirmation(let message) = error else {
+                Issue.record("시각 확인 필요 오류와 다른 오류가 반환됨: \(error)")
+                return
+            }
+            #expect(message.contains("밤 1시"))
+        }
+        #expect(await model.calls == 1)
+    }
+
+    @Test(arguments: [
+        ("내일 회의", ""), ("내일 저녁에 회의", ""),
+        ("내일 오전 9시에 회의", "09:00"), ("내일 밤 12시에 서버 점검", "00:00"),
+        ("내일 오후 1시부터 밤 3시까지 회의", "13:00"),
+        ("내일 18시까지 자료 제출", ""), ("내일 11시부터 1시까지 회의", "11:00"),
+        ("내일 오전 9시에 회의\n메시지 발송 시각: 13:08", "09:00"),
+    ])
+    func validOrEndOnlyTimeDoesNotTriggerConfirmation(source: String, expected: String) async throws
+    {
+        let model = ScriptedModel([ScheduleExtractionGuard.groundSources([source], source: source)])
+        let drafts = try await ScheduleAnalyzer(model: model).analyze(
+            text: source, context: guardContext())
+        #expect(drafts.count == 1)
+        #expect(drafts.first?.timeText == expected)
+        #expect(await model.calls == 1)
+    }
+
     @Test func optInDiagnosticsPreserveTheSingleRepairBoundary() async throws {
         let model = ScriptedModel([
             [candidate("내일 회의", action: "런닝")],

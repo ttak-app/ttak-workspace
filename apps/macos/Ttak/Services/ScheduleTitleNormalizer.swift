@@ -40,6 +40,9 @@ enum ScheduleTitleNormalizer {
         for range in matches(#"(?<!\S)[^\s]+?(?:이랑|랑|와|과)(?=\s|$)"#, in: body) {
             let word = nsBody.substring(with: range)
             if let suffix = ["이랑", "랑", "와", "과"].first(where: word.hasSuffix) {
+                // 와/과 may be part of a noun or connect two subjects, not a person particle.
+                // Keep the full source when grammar alone cannot distinguish those cases.
+                guard suffix != "와", suffix != "과" else { return nil }
                 let stem = String(word.dropLast(suffix.count))
                 guard !stem.isEmpty else { return nil }
                 people.append(stem)
@@ -113,7 +116,7 @@ enum ScheduleTitleNormalizer {
     }
 
     private static let particles: Set<String> = [
-        "이랑", "랑", "와", "과", "에", "에서", "으로", "로", "을", "를", "은", "는", "이", "가",
+        "이랑", "랑", "에", "에서", "으로", "로", "을", "를", "은", "는", "이", "가",
     ]
 
     static func normalize(action: String, parts: [String], location: String? = nil) throws -> String

@@ -92,6 +92,14 @@ enum ScheduleTimeParser {
     static let clockPattern =
         #"(?<![0-9])(오전|오후|아침|저녁|밤)?\s*([0-9]{1,2})(?::([0-9]{2})|시(?:\s*([0-9]{1,2})분)?(?:\s*(반))?)(?![0-9])"#
 
+    static func isMessageTimePrefix(_ prefix: String) -> Bool {
+        let compact = prefix.filter { !$0.isWhitespace }
+        let label =
+            compact.hasSuffix(":") || compact.hasSuffix("：") ? String(compact.dropLast()) : compact
+        return ["발송시각", "전송시각", "메시지시각", "작성시각", "발송시간", "전송시간", "메시지시간", "작성시간"]
+            .contains(where: label.hasSuffix)
+    }
+
     static func clock(from expression: String?, source: String, sourceRange: NSRange? = nil) -> (
         hour: Int, minute: Int, dayOffset: Int
     )? {
@@ -126,7 +134,7 @@ enum ScheduleTimeParser {
         let prefix =
             String(source[..<evidence.lowerBound].suffix(40))
             .components(separatedBy: .newlines).last?.replacingOccurrences(of: " ", with: "") ?? ""
-        guard !["발송시각", "전송시각", "메시지시각", "작성시각"].contains(where: prefix.contains) else {
+        guard !isMessageTimePrefix(prefix) else {
             return nil
         }
         func capture(_ index: Int) -> String? {

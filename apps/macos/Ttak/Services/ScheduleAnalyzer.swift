@@ -11,6 +11,7 @@ enum AnalysisFailure: LocalizedError {
     case emptyResult
     case invalidSelection
     case unverifiedExtraction(String)
+    case timeNeedsConfirmation(String)
 
     var errorDescription: String? {
         switch self {
@@ -19,6 +20,7 @@ enum AnalysisFailure: LocalizedError {
         case .emptyResult: "분석 결과에서 등록할 일정을 찾지 못했어요."
         case .invalidSelection: "선택 범위를 해석하지 못했어요. 보조 설명을 바꿔 다시 분석하세요."
         case .unverifiedExtraction(let reason): "일정 분리 확인 필요: \(reason). 입력을 나눠 다시 분석하거나 표현을 확인하세요."
+        case .timeNeedsConfirmation(let reason): reason
         }
     }
 }
@@ -239,6 +241,10 @@ struct ScheduleAnalyzer: ScheduleAnalyzing {
             }
             let guardStarted = Date()
             result = ScheduleExtractionGuard.validate(candidates, source: text, context: context)
+            if !result.timeConfirmation.isEmpty {
+                throw AnalysisFailure.timeNeedsConfirmation(
+                    result.timeConfirmation.joined(separator: " / "))
+            }
             if let observer {
                 let payload = String(
                     decoding: try JSONEncoder().encode(result.checks), as: UTF8.self)
