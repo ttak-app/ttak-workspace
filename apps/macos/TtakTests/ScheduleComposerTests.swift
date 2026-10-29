@@ -65,7 +65,7 @@ struct ScheduleComposerTests {
         let pasteboard = NSPasteboard.withUniqueName()
         defer { pasteboard.releaseGlobally() }
         #expect(pasteboard.writeObjects([url as NSURL]))
-        let attachment = try #require(ImageAttachmentImport.readPasteboard(pasteboard))
+        let attachment = try #require(try ImageAttachmentImport.readPasteboard(pasteboard))
         #expect(attachment.data == data)
         #expect(attachment.name == url.lastPathComponent)
     }
