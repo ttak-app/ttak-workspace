@@ -42,6 +42,8 @@ Git 인자를 배열로 전달하고 NUL 구분 경로를 읽는다. rename 감�
 | `apps/macos` 코드, Xcode 설정과 앱 리소스 | macOS Build |
 | `apps/web` 코드, 설정과 앱 리소스 | Web |
 | 루트 `package-lock.json` | Web |
+| `design-system/`, `tools/design-tokens/` | Web, macOS Build |
+| 디자인 토큰 미리보기 HTML과 reference의 비 Markdown 자료 | Web |
 | `tools/macos` | macOS Build, Harness 구조와 도구 테스트 |
 | `tools/ai-workflow`, `tools/branch-review` | Harness 구조와 도구 테스트 |
 | `AGENTS.md`, 앱별 루트 `AGENTS.md`, `.agents`, `docs/rules`, `docs/ai-workflow`, `docs/branch-review` | Harness 구조 |
