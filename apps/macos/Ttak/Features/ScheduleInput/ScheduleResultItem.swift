@@ -80,6 +80,7 @@ struct ScheduleResultItem: View {
             .font(.callout)
         }
         .padding(20)
+        .frame(maxWidth: 500)
         .background(
             Color(nsColor: .controlBackgroundColor),
             in: RoundedRectangle(cornerRadius: 24)
