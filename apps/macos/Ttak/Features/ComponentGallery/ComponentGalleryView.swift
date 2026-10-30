@@ -45,6 +45,8 @@
                 messageSample
             case .resultItem:
                 ScheduleResultItemSampleView()
+            case .status:
+                ScheduleStatusSampleView()
             case .composer:
                 ScheduleComposerSampleView()
             }
@@ -157,6 +159,7 @@
         case controls = "컨트롤 상태"
         case message = "공통 안내 메시지"
         case resultItem = "일정 결과 항목과 편집"
+        case status = "진행과 오류 및 접근 안내"
         case composer = "일정 입력과 이미지 첨부"
 
         var id: String { rawValue }

@@ -80,6 +80,7 @@ struct ScheduleResultItem: View {
             .font(.callout)
         }
         .padding(20)
+        .frame(maxWidth: 500)
         .glassEffect(
             .regular.tint(Color(nsColor: .windowBackgroundColor).opacity(0.35)),
             in: RoundedRectangle(cornerRadius: 24)
