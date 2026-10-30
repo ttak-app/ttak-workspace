@@ -43,6 +43,8 @@
                 controlsSample
             case .message:
                 messageSample
+            case .composer:
+                ScheduleComposerSampleView()
             }
         }
 
@@ -152,6 +154,7 @@
         case typography = "글자와 간격"
         case controls = "컨트롤 상태"
         case message = "공통 안내 메시지"
+        case composer = "일정 입력과 이미지 첨부"
 
         var id: String { rawValue }
     }
