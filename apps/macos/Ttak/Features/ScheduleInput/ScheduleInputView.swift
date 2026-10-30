@@ -76,8 +76,17 @@ struct ScheduleInputView: View {
                 Text("등록은 실제 미리 알림을 생성해요. 검증에 사용할 목록을 직접 확인하고 선택하세요.")
                     .font(.caption).foregroundStyle(.secondary)
                 ForEach($model.drafts) { $draft in
-                    draftEditor($draft)
+                    if !draft.isExcluded {
+                        ScheduleResultItem(
+                            draft: $draft, lists: model.lists, calendar: model.analysisCalendar,
+                            onExclude: { id in
+                                if let index = model.drafts.firstIndex(where: { $0.id == id }) {
+                                    model.drafts[index].isExcluded = true
+                                }
+                            }
+                        )
                         .disabled(model.isBusy || model.hasAttemptedSave)
+                    }
                 }
                 if !model.drafts.isEmpty && !model.hasAttemptedSave {
                     HStack {
@@ -116,37 +125,6 @@ struct ScheduleInputView: View {
             isInputFocused = true
             model.refreshAvailability()
         }
-    }
-
-    private func draftEditor(_ draft: Binding<ScheduleDraft>) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Toggle("이 항목 제외", isOn: draft.isExcluded)
-            TextField("제목", text: draft.title)
-            HStack {
-                TextField("yyyy-MM-dd", text: draft.dateText)
-                TextField("HH:mm 또는 빈칸", text: draft.timeText)
-            }
-            if draft.wrappedValue.dateNeedsConfirmation {
-                Button("원문 확인 후 입력한 날짜로 확정") {
-                    draft.wrappedValue.dateNeedsConfirmation = false
-                }
-            }
-            Picker("저장 목록", selection: draft.listID) {
-                Text("직접 선택").tag(String?.none)
-                ForEach(model.lists) { list in Text(list.title).tag(Optional(list.id)) }
-            }
-            TextField("장소와 메모, 종료 정보", text: draft.notes, axis: .vertical)
-                .lineLimit(2...5)
-            if !draft.wrappedValue.isExcluded,
-                let error = draft.wrappedValue.validationMessage(
-                    lists: model.lists, calendar: model.analysisCalendar)
-            {
-                Text(error).font(.caption).foregroundStyle(.red)
-            }
-        }
-        .textFieldStyle(.roundedBorder)
-        .padding(10)
-        .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 8))
     }
 
     private func selectImage() {
