@@ -7,6 +7,35 @@ import UniformTypeIdentifiers
 
 @MainActor
 struct ScheduleComposerTests {
+    @Test("Command V는 이미지 붙여넣기 경로를 직접 호출하고 비활성 입력에서는 소비하지 않는다")
+    func imagePasteShortcut() throws {
+        let editor = ComposerNativeTextView()
+        editor.isEditable = true
+        var pasteCount = 0
+        editor.onPasteImage = { _ in
+            pasteCount += 1
+            return true
+        }
+        let event = try #require(
+            NSEvent.keyEvent(
+                with: .keyDown, location: .zero, modifierFlags: .command,
+                timestamp: 0, windowNumber: 0, context: nil,
+                characters: "v", charactersIgnoringModifiers: "v", isARepeat: false, keyCode: 9))
+        #expect(editor.performKeyEquivalent(with: event))
+        #expect(pasteCount == 1)
+        editor.isEditable = false
+        #expect(!editor.performKeyEquivalent(with: event))
+        #expect(pasteCount == 1)
+    }
+
+    @Test("일반 텍스트 편집기도 스크린샷 PNG와 TIFF 붙여넣기를 허용한다")
+    func screenshotPasteboardTypes() {
+        let editor = ComposerNativeTextView()
+        editor.isRichText = false
+        #expect(editor.readablePasteboardTypes.contains(.png))
+        #expect(editor.readablePasteboardTypes.contains(.tiff))
+    }
+
     @Test("첨부 가능한 PNG, JPEG, HEIC, TIFF는 원본 데이터와 이름을 보존한다")
     func supportedImageFormats() throws {
         let bitmap = try #require(

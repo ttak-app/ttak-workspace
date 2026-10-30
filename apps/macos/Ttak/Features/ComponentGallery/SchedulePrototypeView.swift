@@ -30,6 +30,7 @@
                     canAnalyze: phase == .input || phase == .completed,
                     isAnalyzing: phase == .analyzing,
                     isEnabled: phase == .input || phase == .completed,
+                    showsAttachment: phase != .reviewing && phase != .registering,
                     onAnalyze: { phase = .analyzing }
                 )
                 if phase == .analyzing {
