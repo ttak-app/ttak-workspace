@@ -329,6 +329,7 @@ final class ComposerNativeTextView: NSTextView {
         inputUndoManager.redo()
     }
 
+    var imagePasteboard: NSPasteboard = .general
     var onPasteImage: ((NSPasteboard) -> Bool)?
     var onAnalyze: (() -> Void)?
     var onWidthChange: (() -> Void)?
@@ -345,15 +346,13 @@ final class ComposerNativeTextView: NSTextView {
 
     override func paste(_ sender: Any?) {
         guard isEditable else { return }
-        if onPasteImage?(.general) == true { return }
+        if onPasteImage?(imagePasteboard) == true { return }
         super.paste(sender)
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         let modifiers = event.modifierFlags.intersection([.command, .shift, .option, .control])
-        if modifiers == .command,
-            event.charactersIgnoringModifiers?.lowercased() == "v" || event.keyCode == 9
-        {
+        if modifiers == .command, event.charactersIgnoringModifiers?.lowercased() == "v" {
             guard isEditable else { return false }
             paste(nil)
             return true

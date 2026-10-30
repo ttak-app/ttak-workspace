@@ -1,5 +1,6 @@
 import AppKit
 import ImageIO
+import SwiftUI
 import Testing
 import UniformTypeIdentifiers
 
@@ -26,6 +27,64 @@ struct ScheduleComposerTests {
         editor.isEditable = false
         #expect(!editor.performKeyEquivalent(with: event))
         #expect(pasteCount == 1)
+    }
+
+    @Test("같은 물리 키 위치의 다른 문자는 이미지 붙여넣기를 호출하지 않는다")
+    func nonPasteShortcut() throws {
+        let editor = ComposerNativeTextView()
+        var pasteCount = 0
+        editor.onPasteImage = { _ in
+            pasteCount += 1
+            return true
+        }
+        let event = try #require(
+            NSEvent.keyEvent(
+                with: .keyDown, location: .zero, modifierFlags: .command,
+                timestamp: 0, windowNumber: 0, context: nil,
+                characters: "x", charactersIgnoringModifiers: "x", isARepeat: false, keyCode: 9))
+        _ = editor.performKeyEquivalent(with: event)
+        #expect(pasteCount == 0)
+    }
+
+    @Test("실제 Composer에서 Command V는 PNG를 첨부 상태에 저장하고 텍스트를 보존한다")
+    func composerImagePasteIntegration() throws {
+        let bitmap = try #require(
+            NSBitmapImageRep(
+                bitmapDataPlanes: nil, pixelsWide: 2, pixelsHigh: 2,
+                bitsPerSample: 8, samplesPerPixel: 3, hasAlpha: false,
+                isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0))
+        let png = try #require(bitmap.representation(using: .png, properties: [:]))
+        let pasteboard = NSPasteboard.withUniqueName()
+        defer { pasteboard.releaseGlobally() }
+        pasteboard.setData(png, forType: .png)
+        var text = "기존 입력"
+        var attachment: ImageAttachment?
+        let host = NSHostingView(
+            rootView: ScheduleComposer(
+                text: Binding(get: { text }, set: { text = $0 }),
+                attachment: Binding(get: { attachment }, set: { attachment = $0 }),
+                canAnalyze: true, isAnalyzing: false, isEnabled: true, onAnalyze: {}))
+        host.frame = NSRect(x: 0, y: 0, width: 500, height: 300)
+        host.layoutSubtreeIfNeeded()
+        func findEditor(in view: NSView) -> ComposerNativeTextView? {
+            if let editor = view as? ComposerNativeTextView { return editor }
+            for child in view.subviews {
+                if let editor = findEditor(in: child) { return editor }
+            }
+            return nil
+        }
+        let editor = try #require(findEditor(in: host))
+        editor.imagePasteboard = pasteboard
+        let event = try #require(
+            NSEvent.keyEvent(
+                with: .keyDown, location: .zero, modifierFlags: .command,
+                timestamp: 0, windowNumber: 0, context: nil,
+                characters: "v", charactersIgnoringModifiers: "v", isARepeat: false, keyCode: 9))
+        #expect(editor.performKeyEquivalent(with: event))
+        let pasted = try #require(attachment)
+        #expect(pasted.data == png)
+        #expect(pasted.name == "붙여넣은 이미지")
+        #expect(text == "기존 입력")
     }
 
     @Test("일반 텍스트 편집기도 스크린샷 PNG와 TIFF 붙여넣기를 허용한다")

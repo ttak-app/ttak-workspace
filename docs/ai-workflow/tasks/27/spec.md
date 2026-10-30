@@ -4,7 +4,7 @@
 
 - 이슈: #27 / https://github.com/ttak-app/ttak-workspace/issues/27
 - 브랜치: feat/schedule-result-panel/#27
-- specRevision: 11
+- specRevision: 12
 
 ## 목적
 
@@ -73,3 +73,5 @@
 사용자 요청으로 일정 항목 카드의 Liquid Glass를 시스템 controlBackgroundColor와 얇은 separatorColor 테두리로 바꿔 재질의 그림자를 제거한다. 패널 외곽과 입력 컴포넌트는 변경하지 않는다.
 
 프로토타입에 밝게 및 어둡게 외관 선택기를 추가한다. 기본은 밝게이며 전환 시 입력과 첨부, 편집 결과 및 진행 상태는 유지한다. 시스템 외관은 변경하지 않는다. 기존 light 고정 합의를 이 선택 방식으로 대체한다.
+
+PR 리뷰 반영: Command V는 charactersIgnoringModifiers의 v로만 판별하고 물리 키 위치 조건은 제거한다. 실제 ScheduleComposer를 NSHostingView에 배치하고 격리된 PNG pasteboard를 편집기에 주입해 단축키부터 importer 및 attachment Binding 갱신까지 검증한다. 일반 클립보드는 변경하지 않는다. 다른 문자와 같은 키 코드 조합의 회귀도 검사한다.
