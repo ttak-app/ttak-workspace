@@ -128,7 +128,7 @@ struct ScheduleResultItem: View {
     }
 
     private var timeField: some View {
-        field("시각 (선택)") {
+        field("시간") {
             Button {
                 let parts = ScheduleDateParser.components(
                     date: "2000-01-01", time: draft.timeText, calendar: calendar)
@@ -190,8 +190,8 @@ struct ScheduleResultItem: View {
     }
 
     private var listField: some View {
-        field("미리 알림 목록") {
-            Picker("미리 알림 목록", selection: $draft.listID) {
+        field("목록") {
+            Picker("목록", selection: $draft.listID) {
                 Text("목록 선택").tag(String?.none)
                 if let id = draft.listID, !lists.contains(where: { $0.id == id }) {
                     Text("사용할 수 없는 목록").tag(Optional(id))
