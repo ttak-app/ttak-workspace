@@ -84,10 +84,10 @@ struct ScheduleResultItem: View {
         .frame(maxWidth: 500)
         .background(
             Color(nsColor: .controlBackgroundColor),
-            in: RoundedRectangle(cornerRadius: 24)
+            in: RoundedRectangle(cornerRadius: 20)
         )
         .overlay {
-            RoundedRectangle(cornerRadius: 24)
+            RoundedRectangle(cornerRadius: 20)
                 .strokeBorder(Color(nsColor: .separatorColor).opacity(0.3), lineWidth: 1)
                 .allowsHitTesting(false)
         }
