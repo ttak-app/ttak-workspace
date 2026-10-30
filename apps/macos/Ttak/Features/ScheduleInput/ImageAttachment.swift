@@ -5,18 +5,32 @@ import UniformTypeIdentifiers
 struct ImageAttachment: Equatable {
     static let supportedTypes: [UTType] = [.png, .jpeg, .heic, .tiff]
 
+    let id = UUID()
     let data: Data
     let name: String
+    let preview: CGImage
 
     init?(data: Data, name: String) {
         guard
             let source = CGImageSourceCreateWithData(data as CFData, nil),
             let identifier = CGImageSourceGetType(source),
             Self.supportedTypes.contains(where: { $0.identifier == identifier as String }),
-            let image = NSImage(data: data), image.isValid
+            let preview = CGImageSourceCreateThumbnailAtIndex(
+                source, 0,
+                [
+                    kCGImageSourceCreateThumbnailFromImageAlways: true,
+                    kCGImageSourceCreateThumbnailWithTransform: true,
+                    kCGImageSourceThumbnailMaxPixelSize: 128,
+                    kCGImageSourceShouldCacheImmediately: true,
+                ] as CFDictionary)
         else { return nil }
         self.data = data
         self.name = name
+        self.preview = preview
+    }
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id
     }
 }
 
@@ -37,7 +51,7 @@ enum ImageAttachmentImport {
         let hasAccess = url.startAccessingSecurityScopedResource()
         defer { if hasAccess { url.stopAccessingSecurityScopedResource() } }
         let data: Data
-        do { data = try Data(contentsOf: url, options: .mappedIfSafe) } catch {
+        do { data = try Data(contentsOf: url) } catch {
             throw Failure.unreadable
         }
         guard let attachment = ImageAttachment(data: data, name: url.lastPathComponent) else {
@@ -51,6 +65,8 @@ enum ImageAttachmentImport {
         let types = ImageAttachment.supportedTypes.map {
             NSPasteboard.PasteboardType($0.identifier)
         }
+        // Image representations take precedence over accompanying names or URLs.
+        // Pure text falls through to the native text editor.
         if let type = pasteboard.availableType(from: types) {
             guard let data = pasteboard.data(forType: type) else { throw Failure.unreadable }
             guard let attachment = ImageAttachment(data: data, name: "붙여넣은 이미지") else {
