@@ -27,10 +27,10 @@ struct ScheduleResultItem: View {
                     .accessibilityLabel("\(draft.title) 항목 제외")
             }
             ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: 12) {
-                    dateField.frame(minWidth: 140)
-                    timeField.frame(minWidth: 120)
-                    listField.frame(minWidth: 140)
+                HStack(alignment: .top, spacing: 8) {
+                    dateField.frame(width: 132)
+                    timeField.frame(width: 110)
+                    listField.frame(minWidth: 100, maxWidth: .infinity)
                 }
                 VStack(alignment: .leading, spacing: 12) {
                     dateField
@@ -170,7 +170,9 @@ struct ScheduleResultItem: View {
     private func selectionLabel(_ value: String) -> some View {
         HStack {
             Text(value)
-            Spacer(minLength: 8)
+                .lineLimit(1)
+                .truncationMode(.tail)
+            Spacer(minLength: 4)
             Image(systemName: "chevron.down")
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.secondary)
@@ -195,7 +197,9 @@ struct ScheduleResultItem: View {
             .pickerStyle(.menu)
             .buttonStyle(.plain)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.trailing, 20)
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .padding(.trailing, 16)
             .overlay(alignment: .trailing) {
                 Image(systemName: "chevron.down")
                     .font(.caption.weight(.medium))
@@ -214,7 +218,8 @@ struct ScheduleResultItem: View {
             content()
                 .textFieldStyle(.plain)
                 .frame(maxWidth: .infinity, minHeight: 24, alignment: .leading)
-                .padding(10)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 10)
                 .background(
                     Color(nsColor: .textBackgroundColor).opacity(0.9),
                     in: RoundedRectangle(cornerRadius: 10)
