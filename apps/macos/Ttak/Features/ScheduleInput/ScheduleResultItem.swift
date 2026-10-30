@@ -27,10 +27,10 @@ struct ScheduleResultItem: View {
                     .accessibilityLabel("\(draft.title) 항목 제외")
             }
             ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: 8) {
-                    dateField.frame(width: 132)
-                    timeField.frame(width: 110)
-                    listField.frame(minWidth: 100, maxWidth: .infinity)
+                HStack(alignment: .top, spacing: 6) {
+                    dateField.frame(width: 120)
+                    timeField.frame(width: 94)
+                    listField.frame(minWidth: 90, maxWidth: .infinity)
                 }
                 VStack(alignment: .leading, spacing: 12) {
                     dateField
@@ -79,7 +79,8 @@ struct ScheduleResultItem: View {
             }
             .font(.callout)
         }
-        .padding(20)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 20)
         .frame(maxWidth: 500)
         .background(
             Color(nsColor: .controlBackgroundColor),

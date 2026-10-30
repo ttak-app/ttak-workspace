@@ -7,6 +7,7 @@
         @State private var selectedSample: GallerySample? = .brand
         @State private var sampleState: GalleryState = .normal
         @State private var actionCount = 0
+        @Environment(\.openWindow) private var openWindow
 
         var body: some View {
             NavigationSplitView {
@@ -23,6 +24,7 @@
                             .font(.callout)
                             .foregroundStyle(.secondary)
                         Divider()
+                        Button("기술 검증 화면 열기") { openWindow(id: "technical-validation") }
                         sampleContent
                     }
                     .padding(24)
@@ -45,6 +47,8 @@
                 messageSample
             case .prototype:
                 SchedulePrototypeView()
+            case .flow:
+                ScheduleFlowSampleView()
             case .resultPanel:
                 ScheduleResultPanelSampleView()
             case .resultItem:
@@ -163,6 +167,7 @@
         case controls = "컨트롤 상태"
         case message = "공통 안내 메시지"
         case prototype = "입력부터 등록까지 프로토타입"
+        case flow = "일정 화면 상태 연결"
         case resultPanel = "일정 결과 패널"
         case resultItem = "일정 결과 항목과 편집"
         case status = "진행과 오류 및 접근 안내"
