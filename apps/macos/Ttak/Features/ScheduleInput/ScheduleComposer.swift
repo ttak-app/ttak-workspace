@@ -7,6 +7,7 @@ struct ScheduleComposer: View {
     let canAnalyze: Bool
     let isAnalyzing: Bool
     let isEnabled: Bool
+    var showsAttachment = true
     let onAnalyze: () -> Void
 
     @State private var attachmentError: String?
@@ -88,7 +89,7 @@ struct ScheduleComposer: View {
             }
             .shadow(color: .black.opacity(colorScheme == .dark ? 0.18 : 0.08), radius: 12, y: 5)
 
-            if let attachment {
+            if showsAttachment, let attachment {
                 HStack(spacing: 12) {
                     Image(attachment.preview, scale: 2, label: Text("첨부 이미지 미리보기"))
                         .resizable()
@@ -328,6 +329,7 @@ final class ComposerNativeTextView: NSTextView {
         inputUndoManager.redo()
     }
 
+    var imagePasteboard: NSPasteboard = .general
     var onPasteImage: ((NSPasteboard) -> Bool)?
     var onAnalyze: (() -> Void)?
     var onWidthChange: (() -> Void)?
@@ -338,14 +340,23 @@ final class ComposerNativeTextView: NSTextView {
         if didChangeWidth { onWidthChange?() }
     }
 
+    override var readablePasteboardTypes: [NSPasteboard.PasteboardType] {
+        Array(Set(super.readablePasteboardTypes + [.png, .tiff, .fileURL]))
+    }
+
     override func paste(_ sender: Any?) {
         guard isEditable else { return }
-        if onPasteImage?(.general) == true { return }
+        if onPasteImage?(imagePasteboard) == true { return }
         super.paste(sender)
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         let modifiers = event.modifierFlags.intersection([.command, .shift, .option, .control])
+        if modifiers == .command, event.charactersIgnoringModifiers?.lowercased() == "v" {
+            guard isEditable else { return false }
+            paste(nil)
+            return true
+        }
         if event.charactersIgnoringModifiers?.lowercased() == "z" {
             if modifiers == .command {
                 undo(nil)
