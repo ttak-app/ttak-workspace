@@ -36,7 +36,7 @@
                     excludedIDs = []
                 }
             }
-            .frame(maxWidth: 1000)
+            .frame(maxWidth: 500, alignment: .leading)
             .padding(24)
             .background(
                 LinearGradient(
