@@ -88,9 +88,9 @@ struct ScheduleComposer: View {
             }
             .shadow(color: .black.opacity(colorScheme == .dark ? 0.18 : 0.08), radius: 12, y: 5)
 
-            if let attachment, let image = NSImage(data: attachment.data) {
+            if let attachment {
                 HStack(spacing: 12) {
-                    Image(nsImage: image)
+                    Image(attachment.preview, scale: 2, label: Text("첨부 이미지 미리보기"))
                         .resizable()
                         .scaledToFit()
                         .frame(width: 64, height: 64)
@@ -134,7 +134,7 @@ struct ScheduleComposer: View {
             value: attachment != nil
         )
         .frame(maxWidth: 500)
-        .onChange(of: attachment) { _, _ in
+        .onChange(of: attachment?.id) { _, _ in
             attachmentError = nil
         }
     }
@@ -345,8 +345,8 @@ final class ComposerNativeTextView: NSTextView {
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-        if event.keyCode == 6 {
+        let modifiers = event.modifierFlags.intersection([.command, .shift, .option, .control])
+        if event.charactersIgnoringModifiers?.lowercased() == "z" {
             if modifiers == .command {
                 undo(nil)
                 return true

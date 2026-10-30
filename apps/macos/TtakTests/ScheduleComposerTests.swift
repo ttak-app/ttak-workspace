@@ -131,4 +131,86 @@ struct ScheduleComposerTests {
         #expect(editor.string == "키보드 검증")
     }
 
+    @Test("원본 파일을 덮어쓰거나 지워도 첨부 스냅샷과 미리보기를 유지한다")
+    func fileAttachmentSnapshot() throws {
+        let data = try pngData()
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID()).png")
+        defer { try? FileManager.default.removeItem(at: url) }
+        try data.write(to: url)
+        let attachment = try ImageAttachmentImport.readFile(at: url)
+        try Data("overwritten".utf8).write(to: url)
+        #expect(attachment.data == data)
+        try FileManager.default.removeItem(at: url)
+        #expect(attachment.data == data)
+        #expect(attachment.preview.width > 0)
+        #expect(attachment.preview.height > 0)
+    }
+
+    @Test("미리보기는 128px 이하로 생성되고 값 복사에서 첨부 정체성을 유지한다")
+    func cachedThumbnailAndIdentity() throws {
+        let data = try pngData(width: 512, height: 256)
+        let attachment = try #require(ImageAttachment(data: data, name: "wide.png"))
+        let copy = attachment
+        #expect(attachment.preview.width == 128)
+        #expect(attachment.preview.height == 64)
+        #expect(copy.preview === attachment.preview)
+        #expect(copy == attachment)
+        let replacement = try #require(ImageAttachment(data: data, name: "wide.png"))
+        #expect(replacement.id != attachment.id)
+        #expect(replacement != attachment)
+        #expect(attachment.data == data)
+    }
+
+    @Test("혼합 클립보드에서는 함께 제공된 문자열보다 이미지 표현이 우선한다")
+    func mixedPasteboardPrefersImage() throws {
+        let data = try pngData()
+        for text in ["poster.png", "https://example.com/poster.png", "내일 오후 3시 회의"] {
+            let pasteboard = NSPasteboard.withUniqueName()
+            defer { pasteboard.releaseGlobally() }
+            #expect(pasteboard.setString(text, forType: .string))
+            #expect(pasteboard.setData(data, forType: .png))
+            let attachment = try #require(try ImageAttachmentImport.readPasteboard(pasteboard))
+            #expect(attachment.data == data)
+        }
+    }
+
+    @Test("비QWERTY 배열의 Z 문자로 실행 취소하고 QWERTY Z 위치의 W는 소비하지 않는다")
+    func undoFollowsKeyboardCharacter() throws {
+        let editor = ComposerNativeTextView()
+        editor.allowsUndo = true
+        editor.insertText("배열 검증", replacementRange: NSRange(location: NSNotFound, length: 0))
+        let closeEvent = try #require(
+            NSEvent.keyEvent(
+                with: .keyDown, location: .zero, modifierFlags: .command,
+                timestamp: 0, windowNumber: 0, context: nil, characters: "w",
+                charactersIgnoringModifiers: "w", isARepeat: false, keyCode: 6))
+        #expect(!editor.performKeyEquivalent(with: closeEvent))
+        #expect(editor.string == "배열 검증")
+        let undoEvent = try #require(
+            NSEvent.keyEvent(
+                with: .keyDown, location: .zero, modifierFlags: [.command, .capsLock],
+                timestamp: 0, windowNumber: 0, context: nil, characters: "Z",
+                charactersIgnoringModifiers: "Z", isARepeat: false, keyCode: 13))
+        #expect(editor.performKeyEquivalent(with: undoEvent))
+        #expect(editor.string.isEmpty)
+        let redoEvent = try #require(
+            NSEvent.keyEvent(
+                with: .keyDown, location: .zero, modifierFlags: [.command, .shift],
+                timestamp: 0, windowNumber: 0, context: nil, characters: "Z",
+                charactersIgnoringModifiers: "z", isARepeat: false, keyCode: 13))
+        #expect(editor.performKeyEquivalent(with: redoEvent))
+        #expect(editor.string == "배열 검증")
+    }
+
+    private func pngData(width: Int = 32, height: Int = 16) throws -> Data {
+        let bitmap = try #require(
+            NSBitmapImageRep(
+                bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height,
+                bitsPerSample: 8, samplesPerPixel: 3, hasAlpha: false,
+                isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0))
+        let pixels = try #require(bitmap.bitmapData)
+        pixels.initialize(repeating: 0x88, count: bitmap.bytesPerRow * height)
+        return try #require(bitmap.representation(using: .png, properties: [:]))
+    }
+
 }
