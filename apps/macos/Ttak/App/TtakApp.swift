@@ -72,15 +72,16 @@ struct TtakApp: App {
             host.resizePanel()
             panel.makeKeyAndOrderFront(nil)
             globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-                Task { @MainActor in self?.closePanel() }
+                Task { @MainActor in
+                    guard NSApp.modalWindow == nil else { return }
+                    self?.closePanel()
+                }
             }
             localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .keyDown]) { [weak self, weak panel] event in
                 if event.type == .keyDown && event.keyCode == 53 {
+                    guard NSApp.modalWindow == nil, event.window === panel else { return event }
                     self?.closePanel()
                     return nil
-                }
-                if event.type != .keyDown && event.window !== panel && event.window !== buttonWindow {
-                    self?.closePanel()
                 }
                 return event
             }
