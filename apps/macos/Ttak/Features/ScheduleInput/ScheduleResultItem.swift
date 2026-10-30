@@ -79,8 +79,8 @@ struct ScheduleResultItem: View {
             }
             .font(.callout)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 20)
+        .padding(.horizontal, 15)
+        .padding(.vertical, 25)
         .frame(maxWidth: 500)
         .background(
             Color(nsColor: .controlBackgroundColor),

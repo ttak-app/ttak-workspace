@@ -51,7 +51,7 @@ struct ScheduleResultPanel: View {
                 .disabled(!canRegister)
             }
         }
-        .padding(20)
+        .padding(15)
         .frame(maxWidth: 500, alignment: .leading)
         .glassEffect(
             .regular.tint(Color(nsColor: .windowBackgroundColor).opacity(0.35)),

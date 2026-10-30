@@ -15,14 +15,6 @@ struct ScheduleFlowView: View {
                 showsAttachment: model.phase != .reviewing,
                 onAnalyze: model.startAnalysis
             )
-            if model.phase == .analyzing {
-                ScheduleStatusView(
-                    kind: .progress,
-                    title: "일정을 분석하고 있어요",
-                    message: "입력을 확인하고 있어요.",
-                    action: .init(title: "취소", perform: model.cancelAnalysis)
-                )
-            }
             if model.phase == .empty {
                 ScheduleStatusView(
                     kind: .information,
