@@ -256,9 +256,7 @@ private struct ComposerTextEditor: NSViewRepresentable {
         guard let editor = scroll.documentView as? ComposerNativeTextView else { return }
         context.coordinator.parent = self
         if editor.string != text && !editor.hasMarkedText() {
-            // Parent-driven replacement starts a new editing history for this input.
-            editor.undoManager?.removeAllActions(withTarget: editor)
-            editor.string = text
+            editor.replaceTextFromParent(text)
         }
         editor.isEditable = isEnabled
         editor.textColor = isEnabled ? .labelColor : .disabledControlTextColor
@@ -310,7 +308,26 @@ private struct ComposerTextEditor: NSViewRepresentable {
     }
 }
 
-private final class ComposerNativeTextView: NSTextView {
+final class ComposerNativeTextView: NSTextView {
+    private let inputUndoManager = UndoManager()
+
+    override var undoManager: UndoManager? { inputUndoManager }
+
+    func replaceTextFromParent(_ text: String) {
+        inputUndoManager.removeAllActions()
+        string = text
+    }
+
+    @objc func undo(_ sender: Any?) {
+        guard isEditable, inputUndoManager.canUndo else { return }
+        inputUndoManager.undo()
+    }
+
+    @objc func redo(_ sender: Any?) {
+        guard isEditable, inputUndoManager.canRedo else { return }
+        inputUndoManager.redo()
+    }
+
     var onPasteImage: ((NSPasteboard) -> Bool)?
     var onAnalyze: (() -> Void)?
     var onWidthChange: (() -> Void)?
@@ -329,6 +346,16 @@ private final class ComposerNativeTextView: NSTextView {
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        if event.keyCode == 6 {
+            if modifiers == .command {
+                undo(nil)
+                return true
+            }
+            if modifiers == [.command, .shift] {
+                redo(nil)
+                return true
+            }
+        }
         if modifiers == .command && (event.keyCode == 36 || event.keyCode == 76) {
             onAnalyze?()
             return true
