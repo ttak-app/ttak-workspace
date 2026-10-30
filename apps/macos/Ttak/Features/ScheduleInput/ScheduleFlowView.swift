@@ -5,7 +5,7 @@ struct ScheduleFlowView: View {
     @Bindable var model: ScheduleFlowModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 10) {
             ScheduleComposer(
                 text: $model.text,
                 attachment: $model.attachment,
@@ -85,7 +85,9 @@ struct ScheduleFlowView: View {
                 }
                 ScheduleFlowView(model: model)
             }
-            .padding(menuBar ? 20 : 0)
+            .padding(.horizontal, menuBar ? 20 : 0)
+            .padding(.top, menuBar ? 10 : 0)
+            .padding(.bottom, menuBar ? 20 : 0)
         }
     }
 #endif
