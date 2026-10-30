@@ -80,10 +80,15 @@ struct ScheduleResultItem: View {
             .font(.callout)
         }
         .padding(20)
-        .glassEffect(
-            .regular.tint(Color(nsColor: .windowBackgroundColor).opacity(0.35)),
+        .background(
+            Color(nsColor: .controlBackgroundColor),
             in: RoundedRectangle(cornerRadius: 24)
         )
+        .overlay {
+            RoundedRectangle(cornerRadius: 24)
+                .strokeBorder(Color(nsColor: .separatorColor).opacity(0.3), lineWidth: 1)
+                .allowsHitTesting(false)
+        }
     }
 
     private var hasValidDate: Bool {

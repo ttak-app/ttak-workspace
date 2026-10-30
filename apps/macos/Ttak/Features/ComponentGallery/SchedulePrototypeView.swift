@@ -6,6 +6,7 @@
             case input, analyzing, reviewing, registering, completed
         }
 
+        @State private var previewColorScheme: ColorScheme = .light
         @State private var text = ""
         @State private var attachment: ImageAttachment?
         @State private var drafts: [ScheduleDraft] = []
@@ -18,6 +19,11 @@
 
         var body: some View {
             VStack(alignment: .leading, spacing: 20) {
+                Picker("배경 외관", selection: $previewColorScheme) {
+                    Text("밝게").tag(ColorScheme.light)
+                    Text("어둡게").tag(ColorScheme.dark)
+                }
+                .pickerStyle(.segmented)
                 Text("모의 프로토타입: 입력과 관계없이 합성 일정 2개를 표시하며 실제 분석과 저장은 실행하지 않아요.")
                     .font(.callout)
                 Button("예시 입력 채우기") {
@@ -66,10 +72,12 @@
             .frame(maxWidth: 500, alignment: .leading)
             .padding(24)
             .background(
-                Color(nsColor: .windowBackgroundColor),
+                previewColorScheme == .dark
+                    ? Color(.sRGB, red: 0.12, green: 0.13, blue: 0.15)
+                    : Color(.sRGB, red: 0.98, green: 0.98, blue: 0.98),
                 in: RoundedRectangle(cornerRadius: 20)
             )
-            .environment(\.colorScheme, .light)
+            .environment(\.colorScheme, previewColorScheme)
             .task(id: phase) {
                 if phase == .completed {
                     do {

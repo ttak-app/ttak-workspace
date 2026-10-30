@@ -210,7 +210,6 @@ private struct ComposerTextEditor: NSViewRepresentable {
     @Binding var height: CGFloat
     let isEnabled: Bool
     let onPasteImage: (NSPasteboard) -> Bool
-    var showsAttachment = true
     let onAnalyze: () -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
