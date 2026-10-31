@@ -13,6 +13,7 @@ struct ScheduleResultItem: View {
     @State private var selectedDate = Date()
     @State private var selectedHour = 0
     @State private var selectedMinute = 0
+    @State private var notesHeight: CGFloat = 61
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -65,16 +66,7 @@ struct ScheduleResultItem: View {
                 }
             }
             DisclosureGroup("메모", isExpanded: $isNotesExpanded) {
-                TextField("메모를 입력하세요", text: $draft.notes, axis: .vertical)
-                    .lineLimit(3...8)
-                    .textFieldStyle(.plain)
-                    .accessibilityLabel("메모")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
-                    .background(
-                        Color(nsColor: .textBackgroundColor).opacity(0.9),
-                        in: RoundedRectangle(cornerRadius: 10)
-                    )
+                notesEditor
                     .padding(.top, 8)
             }
             .font(.callout)
@@ -125,6 +117,39 @@ struct ScheduleResultItem: View {
                 .padding(16)
             }
         }
+    }
+
+    /// Shows three lines of notes and scrolls beyond that, like the Calendar notes field.
+    private var notesEditor: some View {
+        ZStack(alignment: .topLeading) {
+            TextEditor(text: $draft.notes)
+                .scrollContentBackground(.hidden)
+                .accessibilityLabel("메모")
+            if draft.notes.isEmpty {
+                Text("메모를 입력하세요")
+                    .foregroundStyle(.tertiary)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 8)
+                    .allowsHitTesting(false)
+            }
+        }
+        .frame(height: notesHeight)
+        .background {
+            Text("1\n2\n3")
+                .padding(.vertical, 8)
+                .hidden()
+                .onGeometryChange(for: CGFloat.self) {
+                    $0.size.height
+                } action: {
+                    notesHeight = $0
+                }
+        }
+        .padding(.horizontal, 7)
+        .padding(.vertical, 4)
+        .background(
+            Color(nsColor: .textBackgroundColor).opacity(0.9),
+            in: RoundedRectangle(cornerRadius: 10)
+        )
     }
 
     private var timeField: some View {
