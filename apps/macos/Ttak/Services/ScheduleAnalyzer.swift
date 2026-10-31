@@ -7,6 +7,11 @@ protocol ScheduleAnalyzing: Sendable {
 
 enum AnalysisFailure: LocalizedError {
     case unavailable(String)
+    case missingAPIKey
+    case network
+    case server(Int)
+    case invalidResponse
+    case timedOut
     case unsupportedLanguage
     case emptyResult
     case invalidSelection
@@ -16,6 +21,11 @@ enum AnalysisFailure: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unavailable(let reason): "모델 사용 불가: \(reason)"
+        case .missingAPIKey: "Gemini API 키가 설정되지 않았어요. GEMINI_API_KEY 환경 변수를 확인해 주세요."
+        case .network: "네트워크에 연결하지 못했어요. 연결을 확인한 뒤 다시 시도해 주세요."
+        case .server(let statusCode): "Gemini 서버 요청에 실패했어요 (HTTP \(statusCode)). 잠시 후 다시 시도해 주세요."
+        case .invalidResponse: "Gemini 응답을 해석하지 못했어요. 다시 분석해 주세요."
+        case .timedOut: "분석 시간이 초과됐어요. 다시 시도해 주세요."
         case .unsupportedLanguage: "현재 시스템 모델이 한국어를 지원하지 않아요."
         case .emptyResult: "분석 결과에서 등록할 일정을 찾지 못했어요."
         case .invalidSelection: "선택 범위를 해석하지 못했어요. 보조 설명을 바꿔 다시 분석하세요."
@@ -172,7 +182,7 @@ struct GeminiScheduleModel: ScheduleModelServing {
         -> Data
     {
         guard let apiKey, !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            throw AnalysisFailure.unavailable("Gemini API 키를 설정하세요")
+            throw AnalysisFailure.missingAPIKey
         }
         let url = URL(
             string:
@@ -190,18 +200,28 @@ struct GeminiScheduleModel: ScheduleModelServing {
                 "responseMimeType": "application/json", "responseJsonSchema": schema,
             ],
         ])
-        let (data, response) = try await transport(request)
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await transport(request)
+        } catch let error as URLError where error.code == .cancelled {
+            throw CancellationError()
+        } catch let error as URLError where error.code == .timedOut {
+            throw AnalysisFailure.timedOut
+        } catch is URLError {
+            throw AnalysisFailure.network
+        }
         try Task.checkCancellation()
         guard let http = response as? HTTPURLResponse else {
-            throw AnalysisFailure.unavailable("Gemini 응답을 확인하지 못했어요")
+            throw AnalysisFailure.invalidResponse
         }
         guard (200..<300).contains(http.statusCode) else {
-            throw AnalysisFailure.unavailable("Gemini API 요청 실패 (HTTP \(http.statusCode))")
+            throw AnalysisFailure.server(http.statusCode)
         }
-        let envelope = try JSONDecoder().decode(GeminiResponse.self, from: data)
-        guard let candidate = envelope.candidates?.first, candidate.finishReason == "STOP",
+        guard let envelope = try? JSONDecoder().decode(GeminiResponse.self, from: data),
+            let candidate = envelope.candidates?.first, candidate.finishReason == "STOP",
             let text = candidate.content.parts.compactMap(\.text).first
-        else { throw AnalysisFailure.unavailable("Gemini 응답이 없거나 완료되지 않았어요") }
+        else { throw AnalysisFailure.invalidResponse }
         return Data(text.utf8)
     }
 }
