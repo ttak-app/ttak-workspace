@@ -13,6 +13,7 @@ struct ScheduleResultItem: View {
     @State private var selectedDate = Date()
     @State private var selectedHour = 0
     @State private var selectedMinute = 0
+    @State private var notesHeight: CGFloat = 61
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -27,10 +28,10 @@ struct ScheduleResultItem: View {
                     .accessibilityLabel("\(draft.title) 항목 제외")
             }
             ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: 8) {
-                    dateField.frame(width: 132)
-                    timeField.frame(width: 110)
-                    listField.frame(minWidth: 100, maxWidth: .infinity)
+                HStack(alignment: .top, spacing: 6) {
+                    dateField.frame(width: 120)
+                    timeField.frame(width: 94)
+                    listField.frame(minWidth: 90, maxWidth: .infinity)
                 }
                 VStack(alignment: .leading, spacing: 12) {
                     dateField
@@ -65,28 +66,20 @@ struct ScheduleResultItem: View {
                 }
             }
             DisclosureGroup("메모", isExpanded: $isNotesExpanded) {
-                TextField("메모를 입력하세요", text: $draft.notes, axis: .vertical)
-                    .lineLimit(3...8)
-                    .textFieldStyle(.plain)
-                    .accessibilityLabel("메모")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
-                    .background(
-                        Color(nsColor: .textBackgroundColor).opacity(0.9),
-                        in: RoundedRectangle(cornerRadius: 10)
-                    )
+                notesEditor
                     .padding(.top, 8)
             }
             .font(.callout)
         }
-        .padding(20)
+        .padding(.horizontal, 15)
+        .padding(.vertical, 25)
         .frame(maxWidth: 500)
         .background(
             Color(nsColor: .controlBackgroundColor),
-            in: RoundedRectangle(cornerRadius: 24)
+            in: RoundedRectangle(cornerRadius: 20)
         )
         .overlay {
-            RoundedRectangle(cornerRadius: 24)
+            RoundedRectangle(cornerRadius: 20)
                 .strokeBorder(Color(nsColor: .separatorColor).opacity(0.3), lineWidth: 1)
                 .allowsHitTesting(false)
         }
@@ -126,8 +119,41 @@ struct ScheduleResultItem: View {
         }
     }
 
+    /// Shows three lines of notes and scrolls beyond that, like the Calendar notes field.
+    private var notesEditor: some View {
+        ZStack(alignment: .topLeading) {
+            TextEditor(text: $draft.notes)
+                .scrollContentBackground(.hidden)
+                .accessibilityLabel("메모")
+            if draft.notes.isEmpty {
+                Text("메모를 입력하세요")
+                    .foregroundStyle(.tertiary)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 8)
+                    .allowsHitTesting(false)
+            }
+        }
+        .frame(height: notesHeight)
+        .background {
+            Text("1\n2\n3")
+                .padding(.vertical, 8)
+                .hidden()
+                .onGeometryChange(for: CGFloat.self) {
+                    $0.size.height
+                } action: {
+                    notesHeight = $0
+                }
+        }
+        .padding(.horizontal, 7)
+        .padding(.vertical, 4)
+        .background(
+            Color(nsColor: .textBackgroundColor).opacity(0.9),
+            in: RoundedRectangle(cornerRadius: 10)
+        )
+    }
+
     private var timeField: some View {
-        field("시각 (선택)") {
+        field("시간") {
             Button {
                 let parts = ScheduleDateParser.components(
                     date: "2000-01-01", time: draft.timeText, calendar: calendar)
@@ -189,8 +215,8 @@ struct ScheduleResultItem: View {
     }
 
     private var listField: some View {
-        field("미리 알림 목록") {
-            Picker("미리 알림 목록", selection: $draft.listID) {
+        field("목록") {
+            Picker("목록", selection: $draft.listID) {
                 Text("목록 선택").tag(String?.none)
                 if let id = draft.listID, !lists.contains(where: { $0.id == id }) {
                     Text("사용할 수 없는 목록").tag(Optional(id))

@@ -64,7 +64,10 @@ struct ScheduleStatusView: View {
         }
         .fixedSize(horizontal: false, vertical: true)
         .padding(16)
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
+        .glassEffect(
+            .regular.tint(Color(nsColor: .windowBackgroundColor).opacity(0.5)),
+            in: RoundedRectangle(cornerRadius: 12)
+        )
         .frame(maxWidth: 500)
         .accessibilityElement(children: .contain)
     }

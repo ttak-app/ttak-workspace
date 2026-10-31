@@ -8,6 +8,19 @@ struct ScheduleResultPanel: View {
     let onCancel: () -> Void
     let onRegister: ([ScheduleDraft]) -> Void
 
+    private static let visibleCardCount = 3
+    private static let cardSpacing: CGFloat = 20
+
+    @State private var cardHeights: [UUID: CGFloat] = [:]
+
+    /// Limits the list to the height of its first cards so longer results scroll.
+    private var listMaxHeight: CGFloat? {
+        let heights = includedDrafts.prefix(Self.visibleCardCount).compactMap { cardHeights[$0.id] }
+        guard !heights.isEmpty, heights.count == min(includedDrafts.count, Self.visibleCardCount)
+        else { return nil }
+        return heights.reduce(0, +) + Self.cardSpacing * CGFloat(heights.count - 1)
+    }
+
     private var includedDrafts: [ScheduleDraft] {
         drafts.filter { !$0.isExcluded }
     }
@@ -29,13 +42,25 @@ struct ScheduleResultPanel: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, minHeight: 80, alignment: .center)
             } else {
-                ForEach($drafts) { $draft in
-                    if !draft.isExcluded {
-                        ScheduleResultItem(
-                            draft: $draft, lists: lists, calendar: calendar,
-                            onExclude: exclude)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: Self.cardSpacing) {
+                        ForEach($drafts) { $draft in
+                            if !draft.isExcluded {
+                                ScheduleResultItem(
+                                    draft: $draft, lists: lists, calendar: calendar,
+                                    onExclude: exclude
+                                )
+                                .onGeometryChange(for: CGFloat.self) {
+                                    $0.size.height
+                                } action: {
+                                    cardHeights[draft.id] = $0
+                                }
+                            }
+                        }
                     }
                 }
+                .scrollBounceBehavior(.basedOnSize)
+                .frame(maxHeight: listMaxHeight)
             }
             HStack {
                 Button("취소", action: onCancel)
@@ -51,7 +76,7 @@ struct ScheduleResultPanel: View {
                 .disabled(!canRegister)
             }
         }
-        .padding(20)
+        .padding(15)
         .frame(maxWidth: 500, alignment: .leading)
         .glassEffect(
             .regular.tint(Color(nsColor: .windowBackgroundColor).opacity(0.35)),
