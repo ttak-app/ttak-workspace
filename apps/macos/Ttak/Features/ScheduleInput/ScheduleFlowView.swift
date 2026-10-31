@@ -62,13 +62,17 @@ struct ScheduleFlowView: View {
         static func makeModel() -> ScheduleFlowModel {
             ScheduleFlowModel(
                 lists: [ReminderList(id: "sample-dev", title: "샘플 목록")],
-                analyze: { _ in
+                analyze: { input in
                     try await Task.sleep(for: .milliseconds(800))
                     let date = ScheduleDateParser.dateText(
                         Calendar.current.startOfDay(for: Date()), calendar: .current)
-                    return [
-                        ScheduleDraft(title: "샘플 일정", dateText: date, listID: "sample-dev")
-                    ]
+                    // One sample per non-empty input line so long result lists can be checked.
+                    let lineCount = input.text.split(whereSeparator: \.isNewline).filter {
+                        !$0.trimmingCharacters(in: .whitespaces).isEmpty
+                    }.count
+                    return (1...max(1, min(lineCount, 10))).map {
+                        ScheduleDraft(title: "샘플 일정 \($0)", dateText: date, listID: "sample-dev")
+                    }
                 },
                 register: { _ in }
             )
