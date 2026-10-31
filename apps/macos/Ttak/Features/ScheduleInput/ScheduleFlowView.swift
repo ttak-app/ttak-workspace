@@ -48,6 +48,12 @@ struct ScheduleFlowView: View {
 }
 
 #if DEBUG
+    private enum SampleAnalysisError: LocalizedError {
+        case failed
+
+        var errorDescription: String? { "개발용 샘플 오류입니다. 실제 분석은 실행되지 않았어요." }
+    }
+
     /// A temporary entry point for exercising the flow without external services.
     struct ScheduleFlowSampleView: View {
         @State private var model: ScheduleFlowModel
@@ -64,6 +70,9 @@ struct ScheduleFlowView: View {
                 lists: [ReminderList(id: "sample-dev", title: "샘플 목록")],
                 analyze: { input in
                     try await Task.sleep(for: .milliseconds(800))
+                    // Keywords let the empty and failure states be exercised without services.
+                    if input.text.contains("빈결과") { return [] }
+                    if input.text.contains("오류") { throw SampleAnalysisError.failed }
                     let date = ScheduleDateParser.dateText(
                         Calendar.current.startOfDay(for: Date()), calendar: .current)
                     // One sample per non-empty input line so long result lists can be checked.
