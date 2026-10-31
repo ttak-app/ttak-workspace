@@ -79,8 +79,10 @@ struct TtakApp: App {
                 .leftMouseDown, .rightMouseDown,
             ]) { [weak self] _ in
                 Task { @MainActor in
-                    guard NSApp.modalWindow == nil else { return }
-                    self?.closePanel()
+                    guard NSApp.modalWindow == nil, let self else { return }
+                    // The icon click is closed by togglePanel; closing here would reopen it.
+                    guard !self.isStatusItemClick() else { return }
+                    self.closePanel()
                 }
             }
             localMonitor = NSEvent.addLocalMonitorForEvents(matching: [
@@ -93,6 +95,12 @@ struct TtakApp: App {
                 }
                 return event
             }
+        }
+
+        private func isStatusItemClick() -> Bool {
+            guard let button = statusItem?.button, let window = button.window else { return false }
+            let iconRect = window.convertToScreen(button.convert(button.bounds, to: nil))
+            return iconRect.contains(NSEvent.mouseLocation)
         }
 
         private func closePanel() {
