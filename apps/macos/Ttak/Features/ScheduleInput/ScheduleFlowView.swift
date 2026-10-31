@@ -48,13 +48,7 @@ struct ScheduleFlowView: View {
 }
 
 #if DEBUG
-    private enum SampleAnalysisError: LocalizedError {
-        case failed
-
-        var errorDescription: String? { "개발용 샘플 오류입니다. 실제 분석은 실행되지 않았어요." }
-    }
-
-    /// A temporary entry point for exercising the flow without external services.
+    /// A temporary entry point for exercising the flow with real analysis and no saving.
     struct ScheduleFlowSampleView: View {
         @State private var model: ScheduleFlowModel
         private let menuBar: Bool
@@ -66,21 +60,17 @@ struct ScheduleFlowView: View {
         }
 
         static func makeModel() -> ScheduleFlowModel {
-            ScheduleFlowModel(
-                lists: [ReminderList(id: "sample-dev", title: "샘플 목록")],
+            let sampleListID = "sample-dev"
+            let lists = [ReminderList(id: sampleListID, title: "샘플 목록")]
+            let analyzer = ScheduleFlowAnalyzer(lists: lists)
+            return ScheduleFlowModel(
+                lists: lists,
                 analyze: { input in
-                    try await Task.sleep(for: .milliseconds(800))
-                    // Keywords let the empty and failure states be exercised without services.
-                    if input.text.contains("빈결과") { return [] }
-                    if input.text.contains("오류") { throw SampleAnalysisError.failed }
-                    let date = ScheduleDateParser.dateText(
-                        Calendar.current.startOfDay(for: Date()), calendar: .current)
-                    // One sample per non-empty input line so long result lists can be checked.
-                    let lineCount = input.text.split(whereSeparator: \.isNewline).filter {
-                        !$0.trimmingCharacters(in: .whitespaces).isEmpty
-                    }.count
-                    return (1...max(1, min(lineCount, 10))).map {
-                        ScheduleDraft(title: "샘플 일정 \($0)", dateText: date, listID: "sample-dev")
+                    // Reminder lists are not connected yet, so the sample list is preselected.
+                    try await analyzer.analyze(input).map {
+                        var draft = $0
+                        draft.listID = sampleListID
+                        return draft
                     }
                 },
                 register: { _ in }
@@ -95,7 +85,7 @@ struct ScheduleFlowView: View {
         private var content: some View {
             VStack(alignment: .leading, spacing: 20) {
                 if !menuBar {
-                    Text("개발용 모의 화면입니다. 입력과 관계없이 샘플 일정을 사용하며 실제 분석과 저장은 실행하지 않아요.")
+                    Text("개발용 화면입니다. 입력을 Gemini로 분석하며 미리 알림 저장은 실행하지 않아요.")
                         .font(.callout)
                 }
                 ScheduleFlowView(model: model)

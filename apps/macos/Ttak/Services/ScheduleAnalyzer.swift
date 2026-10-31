@@ -21,7 +21,7 @@ enum AnalysisFailure: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unavailable(let reason): "모델 사용 불가: \(reason)"
-        case .missingAPIKey: "Gemini API 키가 설정되지 않았어요. .env의 GEMINI_API_KEY를 확인해 주세요."
+        case .missingAPIKey: "Gemini API 키가 설정되지 않았어요. GEMINI_API_KEY 환경 변수를 확인해 주세요."
         case .network: "네트워크에 연결하지 못했어요. 연결을 확인한 뒤 다시 시도해 주세요."
         case .server(let statusCode): "Gemini 서버 요청에 실패했어요 (HTTP \(statusCode)). 잠시 후 다시 시도해 주세요."
         case .invalidResponse: "Gemini 응답을 해석하지 못했어요. 다시 분석해 주세요."
