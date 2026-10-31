@@ -43,7 +43,8 @@ struct TtakApp: App {
 
         func applicationDidFinishLaunching(_ notification: Notification) {
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-            item.button?.image = NSImage(systemSymbolName: "checkmark.circle", accessibilityDescription: "Ttak")
+            item.button?.image = NSImage(
+                systemSymbolName: "checkmark.circle", accessibilityDescription: "Ttak")
             item.button?.target = self
             item.button?.action = #selector(togglePanel)
             statusItem = item
@@ -71,13 +72,17 @@ struct TtakApp: App {
             host.topCenter = NSPoint(x: buttonRect.midX, y: buttonRect.minY)
             host.resizePanel()
             panel.makeKeyAndOrderFront(nil)
-            globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+            globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [
+                .leftMouseDown, .rightMouseDown,
+            ]) { [weak self] _ in
                 Task { @MainActor in
                     guard NSApp.modalWindow == nil else { return }
                     self?.closePanel()
                 }
             }
-            localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .keyDown]) { [weak self, weak panel] event in
+            localMonitor = NSEvent.addLocalMonitorForEvents(matching: [
+                .leftMouseDown, .rightMouseDown, .keyDown,
+            ]) { [weak self, weak panel] event in
                 if event.type == .keyDown && event.keyCode == 53 {
                     guard NSApp.modalWindow == nil, event.window === panel else { return event }
                     self?.closePanel()
@@ -90,8 +95,14 @@ struct TtakApp: App {
         private func closePanel() {
             panel?.orderOut(nil)
             panel = nil
-            if let globalMonitor { NSEvent.removeMonitor(globalMonitor); self.globalMonitor = nil }
-            if let localMonitor { NSEvent.removeMonitor(localMonitor); self.localMonitor = nil }
+            if let globalMonitor {
+                NSEvent.removeMonitor(globalMonitor)
+                self.globalMonitor = nil
+            }
+            if let localMonitor {
+                NSEvent.removeMonitor(localMonitor)
+                self.localMonitor = nil
+            }
         }
     }
 
@@ -121,7 +132,8 @@ struct TtakApp: App {
             let screen = NSScreen.screens.first { $0.frame.contains(topCenter) } ?? NSScreen.main
             let visibleFrame = screen?.visibleFrame ?? .zero
             let desiredX = topCenter.x - width / 2
-            let x = visibleFrame.isEmpty
+            let x =
+                visibleFrame.isEmpty
                 ? desiredX : max(visibleFrame.minX, min(desiredX, visibleFrame.maxX - width))
             let frame = NSRect(x: x, y: topCenter.y - height, width: width, height: height)
             guard panel.frame != frame else { return }
@@ -129,4 +141,3 @@ struct TtakApp: App {
         }
     }
 #endif
-

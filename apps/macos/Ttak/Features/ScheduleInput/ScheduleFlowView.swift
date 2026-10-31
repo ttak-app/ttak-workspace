@@ -74,7 +74,7 @@ struct ScheduleFlowView: View {
 
         var body: some View {
             content
-            .frame(width: menuBar ? 440 : nil)
+                .frame(width: menuBar ? 440 : nil)
         }
 
         private var content: some View {
