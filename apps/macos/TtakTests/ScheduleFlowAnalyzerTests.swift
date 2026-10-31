@@ -179,6 +179,15 @@ struct GeminiFailureClassificationTests {
         #expect(await extractError(cancelled) is CancellationError)
     }
 
+    @Test("전송 계층의 시간 초과는 네트워크 오류가 아니라 시간 초과로 분류한다")
+    func classifiesTransportTimeout() async {
+        let model = GeminiScheduleModel(
+            apiKey: "test-key", transport: { _ in throw URLError(.timedOut) })
+        #expect(
+            await extractError(model)?.localizedDescription
+                == AnalysisFailure.timedOut.errorDescription)
+    }
+
     @Test("2xx가 아닌 응답은 상태 코드를 담은 서버 오류로 분류한다")
     func classifiesServerError() async {
         let model = GeminiScheduleModel(

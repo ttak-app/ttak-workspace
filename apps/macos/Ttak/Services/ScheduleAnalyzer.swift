@@ -206,6 +206,8 @@ struct GeminiScheduleModel: ScheduleModelServing {
             (data, response) = try await transport(request)
         } catch let error as URLError where error.code == .cancelled {
             throw CancellationError()
+        } catch let error as URLError where error.code == .timedOut {
+            throw AnalysisFailure.timedOut
         } catch is URLError {
             throw AnalysisFailure.network
         }
