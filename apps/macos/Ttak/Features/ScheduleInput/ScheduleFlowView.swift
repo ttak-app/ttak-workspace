@@ -44,7 +44,6 @@ struct ScheduleFlowView: View {
             }
         }
         .frame(maxWidth: 500, alignment: .leading)
-        .onDisappear { model.cancelAnalysis() }
     }
 }
 
@@ -54,21 +53,24 @@ struct ScheduleFlowView: View {
         @State private var model: ScheduleFlowModel
         private let menuBar: Bool
 
-        init(menuBar: Bool = false) {
+        /// The owner of a long-lived panel passes its own model so state survives the panel closing.
+        init(menuBar: Bool = false, model: ScheduleFlowModel = ScheduleFlowSampleView.makeModel()) {
             self.menuBar = menuBar
-            _model = State(
-                initialValue: ScheduleFlowModel(
-                    lists: [ReminderList(id: "sample-dev", title: "샘플 목록")],
-                    analyze: { _ in
-                        try await Task.sleep(for: .milliseconds(800))
-                        let date = ScheduleDateParser.dateText(
-                            Calendar.current.startOfDay(for: Date()), calendar: .current)
-                        return [
-                            ScheduleDraft(title: "샘플 일정", dateText: date, listID: "sample-dev")
-                        ]
-                    },
-                    register: { _ in }
-                )
+            _model = State(initialValue: model)
+        }
+
+        static func makeModel() -> ScheduleFlowModel {
+            ScheduleFlowModel(
+                lists: [ReminderList(id: "sample-dev", title: "샘플 목록")],
+                analyze: { _ in
+                    try await Task.sleep(for: .milliseconds(800))
+                    let date = ScheduleDateParser.dateText(
+                        Calendar.current.startOfDay(for: Date()), calendar: .current)
+                    return [
+                        ScheduleDraft(title: "샘플 일정", dateText: date, listID: "sample-dev")
+                    ]
+                },
+                register: { _ in }
             )
         }
 

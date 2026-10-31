@@ -40,6 +40,8 @@ struct TtakApp: App {
         private var panel: NSPanel?
         private var globalMonitor: Any?
         private var localMonitor: Any?
+        /// Owned here so input and results survive the panel being closed and reopened.
+        private let flowModel = ScheduleFlowSampleView.makeModel()
 
         func applicationDidFinishLaunching(_ notification: Notification) {
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -64,7 +66,8 @@ struct TtakApp: App {
             panel.hasShadow = false
             panel.level = .popUpMenu
             panel.isReleasedWhenClosed = false
-            let host = ResizingHostingView(rootView: ScheduleFlowSampleView(menuBar: true))
+            let host = ResizingHostingView(
+                rootView: ScheduleFlowSampleView(menuBar: true, model: flowModel))
             host.panel = panel
             panel.contentView = host
             self.panel = panel
