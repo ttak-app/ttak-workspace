@@ -15,6 +15,12 @@ private final class FlowAnalysisStub {
 }
 
 @MainActor
+private final class AnalysisProbe {
+    var isStarted = false
+    var isCancelled = false
+}
+
+@MainActor
 struct ScheduleFlowModelTests {
     private let lists = [ReminderList(id: "work", title: "업무")]
 
@@ -111,5 +117,29 @@ struct ScheduleFlowModelTests {
         #expect(model.text == "원래 입력")
         #expect(model.attachment == attachment)
         #expect(model.drafts.isEmpty)
+    }
+
+    @Test("모델이 해제되면 진행 중인 분석 task를 취소한다")
+    func deinitCancelsRunningAnalysis() async {
+        let probe = AnalysisProbe()
+        var model: ScheduleFlowModel? = ScheduleFlowModel(
+            lists: lists,
+            analyze: { _ in
+                probe.isStarted = true
+                do {
+                    try await Task.sleep(for: .seconds(30))
+                } catch {
+                    probe.isCancelled = true
+                    throw error
+                }
+                return []
+            },
+            register: { _ in })
+        model?.text = "입력"
+        model?.startAnalysis()
+        await waitUntil { probe.isStarted }
+        model = nil
+        await waitUntil { probe.isCancelled }
+        #expect(probe.isCancelled)
     }
 }

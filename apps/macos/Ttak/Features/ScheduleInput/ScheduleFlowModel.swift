@@ -45,6 +45,10 @@ final class ScheduleFlowModel {
         self.register = register
     }
 
+    isolated deinit {
+        analysisTask?.cancel()
+    }
+
     var canAnalyze: Bool {
         switch phase {
         case .input, .empty, .failure:
